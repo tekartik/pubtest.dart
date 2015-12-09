@@ -46,6 +46,8 @@ void defineTests() {
       if (!Platform.isWindows) {
         expect(result.exitCode, 0);
       }
+
+      expect(result.stdout.contains("All tests passed"), isTrue);
     });
 
     test('failure', () async {

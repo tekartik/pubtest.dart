@@ -4,7 +4,7 @@ Helper to run pub run
 
 ## rpubtest command
 
-    rpubtest
+    pubtest
 
 Recursively run all test in all packages found. Packages are tested simultaneously (number can be configured using the -j option)
 default is to test on vm platform, you can define multiple platforms in an env variable

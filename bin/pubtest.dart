@@ -90,7 +90,7 @@ Future main(List<String> arguments) async {
       abbr: 'd',
       help: 'Do not run test, simple show packages to be tested',
       negatable: false);
-  parser.addFlag("version", help: 'Display the version', negatable: false);
+  parser.addFlag("version", help: 'Display the script version', negatable: false);
   parser.addOption(_CONCURRENCY,
       abbr: 'j',
       help: 'Number of concurrent tests in the same package tested',
