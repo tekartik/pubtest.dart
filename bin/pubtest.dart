@@ -151,7 +151,7 @@ Future main(List<String> arguments) async {
 
   List<String> platforms;
   if (_argsResult.wasParsed(_PLATFORM)) {
-    platforms = _argsResult[_PLATFORM];
+    platforms = _argsResult[_PLATFORM] as List<String>;
   } else {
     // Allow platforms in env variable
     String envPlatforms = Platform.environment["PUBTEST_PLATFORMS"];
