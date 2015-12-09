@@ -1,6 +1,8 @@
 # pubtest.dart
 
-Helper to run pub run
+Helper to run pub test
+
+[![Build Status](https://travis-ci.org/tekartik/pubtest.dart.svg?branch=master)](https://travis-ci.org/tekartik/pubtest.dart)
 
 ## rpubtest command
 
