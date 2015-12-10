@@ -28,6 +28,8 @@ const String _NAME = 'name';
 const String _reporterOption = "reporter";
 const String _reporterOptionAbbr = "r";
 
+bool _debug = false;
+
 const List<String> allPlatforms = const [
   "vm",
   "dartium",
@@ -150,8 +152,15 @@ Future main(List<String> arguments) async {
     await emptyOrCreateDirSync(pkg.path);
     await cloneFiles(dependency.package.path, pkg.path);
 
-    await runCmd(pkg.getCmd(offline: true)..connectStderr = true);
-
+    ProcessCmd cmd = pkg.getCmd(offline: true);
+    if (_debug) {
+      print('on: ${cmd.workingDirectory}');
+      print('before: $cmd');
+    }
+    await runCmd(cmd..connectStderr = true..connectStdout);
+    if (_debug) {
+      print('after: $cmd');
+    }
     // if no file is given make sure the test/folder exists
     if (files == null) {
       // no tests found
@@ -168,13 +177,22 @@ Future main(List<String> arguments) async {
         if (files != null) {
           args.addAll(files);
         }
-        ProcessResult result = await runCmd(pkg.testCmd(args,
+        ProcessCmd cmd = pkg.testCmd(args,
             concurrency: poolSize,
             reporter: reporter,
             platforms: platforms,
-            name: name)
-          ..connectStderr = true
-          ..connectStdout = true);
+            name: name
+        );
+        if (_debug) {
+          print('on: ${cmd.workingDirectory}');
+          print('before: $cmd');
+        }
+
+        ProcessResult result = await runCmd(cmd..connectStderr = true
+..connectStdout = true);
+        if (_debug) {
+          print('after: $cmd');
+        }
         if (result.exitCode != 0) {
           stderr.writeln('test error in ${pkg}');
           if (exitCode == 0) {

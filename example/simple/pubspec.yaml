@@ -1,0 +1,8 @@
+name: pubtest_example_simple
+dependencies:
+  pubtest_example_simple_dependency:
+    path: ../simple_dependency
+dev_dependencies:
+  pubtest:
+    git: git://github.com/tekartik/pubtest.dart
+

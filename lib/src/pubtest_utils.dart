@@ -10,6 +10,12 @@ class DependencyTestPackage extends TestPackage {
 class TestPackage {
   PubPackage package;
   TestPackage(this.package);
+
+  int get hashCode => package.hashCode;
+
+  bool operator==(o) {
+    return o is TestPackage && o.package == package;
+  }
 }
 
 class TestList {

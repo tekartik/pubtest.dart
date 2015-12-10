@@ -25,19 +25,21 @@ String get pubTestDependenciesDartScript {
 
 void defineTests() {
   //useVMConfiguration();
-  group('pubtest', () {
+  group('pubtestdependencies', () {
     test('version', () async {
       ProcessResult result =
           await runCmd(dartCmd([pubTestDependenciesDartScript, '--version']));
-      expect(result.stdout, contains("pubtest"));
+      expect(result.stdout, contains("pubtestdependencies"));
       expect(new Version.parse(result.stdout.split(' ').last), version);
     });
 
-    test('our dependencies', () async {
+    test('simple_dependencies', () async {
+      PubPackage exampleSimplePkg = new PubPackage(join(_pubPackageRoot, 'example', 'simple'));
+      await runCmd(exampleSimplePkg.getCmd(offline: true));
       ProcessResult result =
           await runCmd(dartCmd([pubTestDependenciesDartScript])
-            ..connectStderr = false
-            ..connectStdout = false);
+            ..connectStderr = true
+            ..connectStdout = true..workingDirectory = exampleSimplePkg.path);
 
       // on 1.13, current windows is failing
       if (!Platform.isWindows) {
@@ -45,6 +47,6 @@ void defineTests() {
       }
 
       expect(result.stdout.contains("All tests passed"), isTrue);
-    }, timeout: new Timeout(new Duration(minutes: 5)));
+    });//, timeout: new Timeout(new Duration(minutes: 5)));
   });
 }
