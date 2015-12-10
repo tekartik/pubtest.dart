@@ -2,6 +2,11 @@ name: pubtest
 author: Alexandre Roux <alex@tekartik.com>
 version: 0.0.1
 dependencies:
+  args: any
+  path: any
+  pool: any
+  pub_semver: any
+  process_run: any
   tekartik_pub:
     git: git://github.com/tekartik/tekartik_pub.dart
 dev_dependencies:
@@ -10,7 +15,7 @@ dev_dependencies:
 dependency_overrides:
 #  tekartik_pub:
 #    path: /media/ssd/devx/git/github.com/tekartik/tekartik_pub.dart
-  process_run:
-    git: git://github.com/tekartik/process_run.dart
+#  process_run:
+#    git: git://github.com/tekartik/process_run.dart
 executables:
   pubtest:
