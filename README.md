@@ -4,7 +4,7 @@ Helper to run pub test
 
 [![Build Status](https://travis-ci.org/tekartik/pubtest.dart.svg?branch=master)](https://travis-ci.org/tekartik/pubtest.dart)
 
-## rpubtest command
+## pubtest command
 
     pubtest
 
@@ -37,6 +37,12 @@ Global options:
 -p, --platform              The platform(s) on which to run the tests.
                             [vm (default), dartium, content-shell, chrome, phantomjs, firefox, safari, ie]
 ````
+
+## pubtestdependencies
+
+Experimental. Execute all declared dependencies test
+
+    pubtestdependencies
 
 ## Activation
 

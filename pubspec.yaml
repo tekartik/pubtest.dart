@@ -9,8 +9,9 @@ dev_dependencies:
   test: any
 dependency_overrides:
 #  tekartik_pub:
-#    path: /media/ssd/devx/git/github.com/tekartik/tekartik_pub.dart
-  process_run:
-    git: git://github.com/tekartik/process_run.dart
+#   path: /media/ssd/devx/git/github.com/tekartik/tekartik_pub.dart
+#  process_run:
+#    git: git://github.com/tekartik/process_run.dart
 executables:
   pubtest:
+  pubtestdependencies:

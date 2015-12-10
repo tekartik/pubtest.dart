@@ -12,7 +12,9 @@ import 'package:process_run/cmd_run.dart';
 import 'package:tekartik_pub/src/rpubpath.dart';
 import 'package:pubtest/src/pubtest_version.dart';
 import 'package:pubtest/src/pubtest_utils.dart';
+import 'package:pubtest/src/file_clone.dart';
 import 'package:pool/pool.dart';
+import 'package:tekartik_pub/pubspec.dart';
 
 String get currentScriptName => basenameWithoutExtension(Platform.script.path);
 
@@ -133,12 +135,23 @@ Future main(List<String> arguments) async {
     }
   }
 
-  TestList list = new TestList();
+  //PubTest pubTest = new PubTest();
+  NewTestList list = new NewTestList();
 
   int poolSize = int.parse(_argsResult[_CONCURRENCY]);
   int packagePoolSize = int.parse(_argsResult[_PACKAGE_CONCURRENCY]);
 
-  Future _handleProject(PubPackage pkg, [List<String> files]) async {
+  Future _handleProject(DependencyTestPackage dependency,
+      [List<String> files]) async {
+    // Clone the project
+    PubPackage pkg = new PubPackage(
+        join(dependency.parent.path, 'build', 'test', dependency.package.name));
+
+    await emptyOrCreateDirSync(pkg.path);
+    await cloneFiles(dependency.package.path, pkg.path);
+
+    await runCmd(pkg.getCmd(offline: true)..connectStderr = true);
+
     // if no file is given make sure the test/folder exists
     if (files == null) {
       // no tests found
@@ -146,8 +159,9 @@ Future main(List<String> arguments) async {
         return;
       }
     }
+    print('test on ${pkg.path}${files != null ? " ${files}": ""}');
     if (dryRun) {
-      print('test on ${pkg.path}${files != null ? " ${files}": ""}');
+      //print('test on ${pkg.path}${files != null ? " ${files}": ""}');
     } else {
       try {
         List<String> args = [];
@@ -177,40 +191,42 @@ Future main(List<String> arguments) async {
 
   Pool packagePool = new Pool(packagePoolSize);
 
+  _parseDirectory(String packageDir) async {
+    //print(packageDir);
+    PubPackage parent = new PubPackage(packageDir);
+    Iterable<String> dependencies =
+        await extractPubspecDependencies(packageDir);
+    //Map dotPackagesYaml = await getDotPackagesYaml(mainPackage.path);
+    for (String dependency in dependencies) {
+      PubPackage pkg = await extractPackage(dependency, packageDir);
+      if (yamlHasAnyDependencies(getPackageYamlSync(pkg.path), ['test'])) {
+        // add whole package
+        list.add(new DependencyTestPackage(parent, pkg));
+      }
+    }
+  }
   // Handle pub sub path
   for (String dirOrFile in dirsOrFiles) {
     if (FileSystemEntity.isDirectorySync(dirOrFile)) {
       dirs.add(dirOrFile);
     }
-    if (!isPubPackageRootSync(dirOrFile)) {
-      String packageDir;
-      try {
-        packageDir = getPubPackageRootSync(dirOrFile);
-      } catch (_) {}
-      if (packageDir != null) {
-        // if it is the test dir, assume testing the package instead
 
-        if (yamlHasAnyDependencies(getPackageYamlSync(packageDir), ['test'])) {
-          dirOrFile = relative(dirOrFile, from: packageDir);
-          PubPackage pkg = new PubPackage(packageDir);
-          if (dirOrFile == "test") {
-            // add whole package
-            list.add(pkg);
-          } else {
-            list.add(pkg, dirOrFile);
-          }
-        }
-      }
+    String packageDir = getPubPackageRootSync(dirOrFile);
+    if (packageDir != null) {
+      await _parseDirectory(packageDir);
     }
   }
 
   // Also Handle recursive projects
-  await recursivePubPath(dirs, dependencies: ['test']).listen((String path) {
-    list.add(new PubPackage(path));
+  List<Future> futures = [];
+  await recursivePubPath(dirs, dependencies: ['pubtest']).listen((String path) {
+    //list.add(new PubPackage(path));
+    futures.add(_parseDirectory(path));
   }).asFuture();
+  await Future.wait(futures);
 
   //print(list.packages);
-  for (PubPackage pkg in list.packages) {
+  for (TestPackage pkg in list.packages) {
     await packagePool.withResource(() async {
       await _handleProject(pkg, list.getTests(pkg));
     });
