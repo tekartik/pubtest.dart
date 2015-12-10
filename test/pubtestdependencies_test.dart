@@ -37,7 +37,7 @@ void defineTests() {
       PubPackage exampleSimplePkg = new PubPackage(join(_pubPackageRoot, 'example', 'simple'));
       await runCmd(exampleSimplePkg.getCmd(offline: true));
       ProcessResult result =
-          await runCmd(dartCmd([pubTestDependenciesDartScript])
+          await runCmd(dartCmd([pubTestDependenciesDartScript, '-p', 'vm'])
             ..connectStderr = true
             ..connectStdout = true..workingDirectory = exampleSimplePkg.path);
 
