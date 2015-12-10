@@ -34,12 +34,14 @@ void defineTests() {
     });
 
     test('simple_dependencies', () async {
-      PubPackage exampleSimplePkg = new PubPackage(join(_pubPackageRoot, 'example', 'simple'));
+      PubPackage exampleSimplePkg =
+          new PubPackage(join(_pubPackageRoot, 'example', 'simple'));
       await runCmd(exampleSimplePkg.getCmd(offline: true));
       ProcessResult result =
           await runCmd(dartCmd([pubTestDependenciesDartScript, '-p', 'vm'])
             ..connectStderr = true
-            ..connectStdout = true..workingDirectory = exampleSimplePkg.path);
+            ..connectStdout = true
+            ..workingDirectory = exampleSimplePkg.path);
 
       // on 1.13, current windows is failing
       if (!Platform.isWindows) {
@@ -47,6 +49,6 @@ void defineTests() {
       }
 
       expect(result.stdout.contains("All tests passed"), isTrue);
-    });//, timeout: new Timeout(new Duration(minutes: 5)));
+    }); //, timeout: new Timeout(new Duration(minutes: 5)));
   });
 }

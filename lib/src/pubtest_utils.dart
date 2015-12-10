@@ -13,7 +13,7 @@ class TestPackage {
 
   int get hashCode => package.hashCode;
 
-  bool operator==(o) {
+  bool operator ==(o) {
     return o is TestPackage && o.package == package;
   }
 }

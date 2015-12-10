@@ -39,8 +39,8 @@ void defineTests() {
     });
 
     test('success', () async {
-      ProcessResult result = await runCmd(
-          dartCmd([pubTestDartScript, 'test/data/success_test_.dart']));
+      ProcessResult result = await runCmd(dartCmd(
+          [pubTestDartScript, '-p', 'vm', 'test/data/success_test_.dart']));
 
       // on 1.13, current windows is failing
       if (!Platform.isWindows) {
@@ -53,6 +53,8 @@ void defineTests() {
     test('failure', () async {
       ProcessResult result = await runCmd(dartCmd([
         pubTestDartScript,
+        '-p',
+        'vm',
         'test/data/fail_test_.dart'
       ])); // ..connectStderr=true..connectStdout=true);
 

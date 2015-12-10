@@ -157,7 +157,9 @@ Future main(List<String> arguments) async {
       print('on: ${cmd.workingDirectory}');
       print('before: $cmd');
     }
-    await runCmd(cmd..connectStderr = true..connectStdout);
+    await runCmd(cmd
+      ..connectStderr = true
+      ..connectStdout);
     if (_debug) {
       print('after: $cmd');
     }
@@ -181,15 +183,15 @@ Future main(List<String> arguments) async {
             concurrency: poolSize,
             reporter: reporter,
             platforms: platforms,
-            name: name
-        );
+            name: name);
         if (_debug) {
           print('on: ${cmd.workingDirectory}');
           print('before: $cmd');
         }
 
-        ProcessResult result = await runCmd(cmd..connectStderr = true
-..connectStdout = true);
+        ProcessResult result = await runCmd(cmd
+          ..connectStderr = true
+          ..connectStdout = true);
         if (_debug) {
           print('after: $cmd');
         }
