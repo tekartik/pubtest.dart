@@ -45,6 +45,6 @@ void defineTests() {
       }
 
       expect(result.stdout.contains("All tests passed"), isTrue);
-    });
+    }, timeout: new Timeout(new Duration(minutes: 5)));
   });
 }
