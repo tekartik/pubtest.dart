@@ -166,12 +166,57 @@ Future<int> _linkOrCopyFilesInDirIfNewer(String input, String output,
 }
 
 /**
- * Helper to copy recursively a source to a destination
+ * Parameter are directory path
  */
-Future<int> cloneFiles(String src, String dst) {
+Future<int> _copyFilesIfNewer(String input, String output,
+    {bool recursive: true, bool followLinks: false, List<String> but}) {
+  int count = 0;
+  Completer completer = new Completer();
+  List<Future> futures = new List();
+  new Directory(input)
+      .list(recursive: recursive, followLinks: followLinks)
+      .listen((FileSystemEntity fse) {
+    //print("# ${fse.path}");
+    if (FileSystemEntity.isFileSync(fse.path)) {
+      //TODO share code
+      bool ignore = false;
+      if (but != null) {
+        if (but.contains(basename(fse.path))) {
+          ignore = true;
+        }
+      }
+
+      if (!ignore) {
+        String relativePath = relative(fse.path, from: input);
+        futures.add(_copyFileIfNewer(fse.path, join(output, relativePath))
+            .then((int copied) {
+          count += copied;
+        }));
+      }
+    }
+  }, onDone: () {
+    Future.wait(futures).then((_) => completer.complete(count));
+  });
+
+  return completer.future as Future<int>;
+}
+
+/**
+ * Helper to copy recursively a source to a destination
+ *
+ * Default is to link files one by one
+ * if [copy] is true, files are copied
+ */
+Future<int> cloneFiles(String src, String dst, {List<String> but, bool copy}) {
   return (FileSystemEntity.isDirectory(src).then((bool isDir) {
     if (isDir) {
-      return _linkOrCopyFilesInDirIfNewer(src, dst, recursive: true);
+      if (copy == true) {
+        return _copyFilesIfNewer(
+            src, dst, recursive: true, but: but);
+      } else {
+        return _linkOrCopyFilesInDirIfNewer(
+            src, dst, recursive: true, but: but);
+      }
     } else {
       return FileSystemEntity.isFile(src).then((bool isFile) {
         if (isFile) {

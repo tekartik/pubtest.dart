@@ -153,7 +153,7 @@ Future main(List<String> arguments) async {
         join(dependency.parent.path, 'build', 'test', dependency.package.name));
 
     await emptyOrCreateDirSync(pkg.path);
-    await cloneFiles(dependency.package.path, pkg.path);
+    await cloneFiles(dependency.package.path, pkg.path, but: ['packages', '.packages', '.pub', 'pubspec.lock', 'build'], copy: true);
 
     ProcessCmd cmd = pkg.getCmd(offline: getOffline);
     if (_debug) {
