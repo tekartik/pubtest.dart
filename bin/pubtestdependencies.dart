@@ -71,6 +71,8 @@ Future main(List<String> arguments) async {
       defaultsTo: '10');
   parser.addOption(_NAME,
       abbr: 'n', help: 'A substring of the name of the test to run');
+  parser.addFlag("get-offline",
+      help: 'Get dependencies in offline mode', negatable: false);
   parser.addOption(_PLATFORM,
       abbr: 'p',
       help: 'The platform(s) on which to run the tests.',
@@ -140,6 +142,7 @@ Future main(List<String> arguments) async {
   //PubTest pubTest = new PubTest();
   NewTestList list = new NewTestList();
 
+  bool getOffline = _argsResult['get-offline'];
   int poolSize = int.parse(_argsResult[_CONCURRENCY]);
   int packagePoolSize = int.parse(_argsResult[_PACKAGE_CONCURRENCY]);
 
@@ -152,7 +155,7 @@ Future main(List<String> arguments) async {
     await emptyOrCreateDirSync(pkg.path);
     await cloneFiles(dependency.package.path, pkg.path);
 
-    ProcessCmd cmd = pkg.getCmd(offline: true);
+    ProcessCmd cmd = pkg.getCmd(offline: getOffline);
     if (_debug) {
       print('on: ${cmd.workingDirectory}');
       print('before: $cmd');
