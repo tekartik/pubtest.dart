@@ -1,0 +1,10 @@
+name: pubtest_example_simple_failed
+dependencies:
+  pubtest_example_simple_failed_dependency:
+    path: ../simple_failed_dependency
+dev_dependencies:
+  test: any
+  dev_test: any
+  pubtest:
+    path: ../..
+

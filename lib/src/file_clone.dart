@@ -211,11 +211,10 @@ Future<int> cloneFiles(String src, String dst, {List<String> but, bool copy}) {
   return (FileSystemEntity.isDirectory(src).then((bool isDir) {
     if (isDir) {
       if (copy == true) {
-        return _copyFilesIfNewer(
-            src, dst, recursive: true, but: but);
+        return _copyFilesIfNewer(src, dst, recursive: true, but: but);
       } else {
-        return _linkOrCopyFilesInDirIfNewer(
-            src, dst, recursive: true, but: but);
+        return _linkOrCopyFilesInDirIfNewer(src, dst,
+            recursive: true, but: but);
       }
     } else {
       return FileSystemEntity.isFile(src).then((bool isFile) {

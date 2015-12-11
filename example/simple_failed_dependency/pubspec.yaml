@@ -1,0 +1,4 @@
+name: pubtest_example_simple_failed_dependency
+dependencies:
+dev_dependencies:
+  test: any

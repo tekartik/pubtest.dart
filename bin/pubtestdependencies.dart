@@ -146,6 +146,7 @@ Future main(List<String> arguments) async {
   int poolSize = int.parse(_argsResult[_CONCURRENCY]);
   int packagePoolSize = int.parse(_argsResult[_PACKAGE_CONCURRENCY]);
 
+  List<PubPackage> errors = [];
   Future _handleProject(DependencyTestPackage dependency,
       [List<String> files]) async {
     // Clone the project
@@ -153,7 +154,9 @@ Future main(List<String> arguments) async {
         join(dependency.parent.path, 'build', 'test', dependency.package.name));
 
     await emptyOrCreateDirSync(pkg.path);
-    await cloneFiles(dependency.package.path, pkg.path, but: ['packages', '.packages', '.pub', 'pubspec.lock', 'build'], copy: true);
+    await cloneFiles(dependency.package.path, pkg.path,
+        but: ['packages', '.packages', '.pub', 'pubspec.lock', 'build'],
+        copy: true);
 
     ProcessCmd cmd = pkg.getCmd(offline: getOffline);
     if (_debug) {
@@ -199,6 +202,7 @@ Future main(List<String> arguments) async {
           print('after: $cmd');
         }
         if (result.exitCode != 0) {
+          errors.add(pkg);
           stderr.writeln('test error in ${pkg}');
           if (exitCode == 0) {
             exitCode = result.exitCode;
@@ -255,5 +259,9 @@ Future main(List<String> arguments) async {
     });
   }
 
+  if (exitCode != 0) {
+    stderr.writeln('errors in packages: ${errors}');
+    stderr.flush();
+  }
   exit(exitCode);
 }

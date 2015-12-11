@@ -41,7 +41,7 @@ void defineTests() {
           await runCmd(dartCmd([pubTestDependenciesDartScript, '--get-offline'])
             // p', 'vm'])
             ..connectStderr = true
-            ..connectStdout = true
+            ..connectStdout = false
             ..workingDirectory = exampleSimplePkg.path);
 
       // on 1.13, current windows is failing
@@ -50,6 +50,28 @@ void defineTests() {
       }
 
       expect(result.stdout.contains("All tests passed"), isTrue);
+    }); //, timeout: new Timeout(new Duration(minutes: 5)));
+
+    test('simple_failed_dependencies', () async {
+      PubPackage exampleSimplePkg =
+          new PubPackage(join(_pubPackageRoot, 'example', 'simple_failed'));
+      await runCmd(exampleSimplePkg.getCmd(offline: true));
+      ProcessResult result =
+          await runCmd(dartCmd([pubTestDependenciesDartScript, '--get-offline'])
+            // p', 'vm'])
+            ..connectStderr = false
+            ..connectStdout = false
+            ..workingDirectory = exampleSimplePkg.path);
+
+      // on 1.13, current windows is failing
+      if (!Platform.isWindows) {
+        expect(result.exitCode, 1);
+      }
+
+      expect(result.stdout.contains("All tests passed"), isFalse);
+      expect(result.stderr.contains("rrors in packages"), isTrue);
+      expect(result.stderr.contains("pubtest_example_simple_failed_dependency"),
+          isTrue);
     }); //, timeout: new Timeout(new Duration(minutes: 5)));
   });
 }
