@@ -12,9 +12,10 @@ import 'package:process_run/cmd_run.dart';
 import 'package:tekartik_pub/src/rpubpath.dart';
 import 'package:pubtest/src/pubtest_version.dart';
 import 'package:pubtest/src/pubtest_utils.dart';
-import 'package:pubtest/src/file_clone.dart';
 import 'package:pool/pool.dart';
 import 'package:tekartik_pub/pubspec.dart';
+import 'package:fs_shim/fs_io.dart' as fs;
+import 'package:fs_shim/utils/copy.dart';
 
 String get currentScriptName => basenameWithoutExtension(Platform.script.path);
 
@@ -153,10 +154,31 @@ Future main(List<String> arguments) async {
     PubPackage pkg = new PubPackage(
         join(dependency.parent.path, 'build', 'test', dependency.package.name));
 
-    await emptyOrCreateDirSync(pkg.path);
+    //await emptyOrCreateDirSync(pkg.path);
+
+    fs.Directory dst = fs.ioFileSystem.newDirectory(pkg.path);
+    try {
+      await dst.delete(recursive: true);
+    } catch (_) {}
+    try {
+      await dst.create(recursive: true);
+    } catch (_) {}
+    /*
     await cloneFiles(dependency.package.path, pkg.path,
         but: ['packages', '.packages', '.pub', 'pubspec.lock', 'build'],
         copy: true);
+        */
+    await copyFileSystemEntity(
+        fs.ioFileSystem.newDirectory(dependency.package.path), dst,
+        options: new CopyOptions(
+            recursive: true,
+            exclude: [
+              'packages',
+              '.packages',
+              '.pub',
+              'pubspec.lock',
+              'build'
+            ]));
 
     ProcessCmd cmd = pkg.getCmd(offline: getOffline);
     if (_debug) {

@@ -10,6 +10,8 @@ dependencies:
   yaml: any
   tekartik_pub:
     git: git://github.com/tekartik/tekartik_pub.dart
+  fs_shim:
+    git: git://github.com/tekartik/fs_shim.dart
 dev_dependencies:
   dev_test: any
   test: any
