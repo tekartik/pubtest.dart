@@ -1,14 +1,14 @@
 library pubtest.src.pubtest_utils;
 
-import 'package:tekartik_pub/pub.dart';
+import 'package:tekartik_pub/pub_fs_io.dart';
 
 class DependencyTestPackage extends TestPackage {
-  PubPackage parent;
-  DependencyTestPackage(this.parent, PubPackage package) : super(package);
+  IoFsPubPackage parent;
+  DependencyTestPackage(this.parent, IoFsPubPackage package) : super(package);
 }
 
 class TestPackage {
-  PubPackage package;
+  FsPubPackage package;
   TestPackage(this.package);
 
   int get hashCode => package.hashCode;
@@ -20,8 +20,8 @@ class TestPackage {
 
 class TestList {
   // empty list means all!
-  Map<PubPackage, List<String>> all = {};
-  add(PubPackage pkg, [String test]) {
+  Map<FsPubPackage, List<String>> all = {};
+  add(FsPubPackage pkg, [String test]) {
     //print("$pkg $test");
     if (all.containsKey(pkg)) {
       List<String> tests = all[pkg];
@@ -44,9 +44,9 @@ class TestList {
     }
   }
 
-  Iterable<PubPackage> get packages => all.keys;
+  Iterable<FsPubPackage> get packages => all.keys;
 
-  List<String> getTests(PubPackage pkg) {
+  List<String> getTests(FsPubPackage pkg) {
     return all[pkg];
   }
 
@@ -136,4 +136,16 @@ class PubTest {
     }
   }
   */
+}
+
+
+Iterable<String> pubspecYamlGetTestDependenciesPackageName(Map yaml) {
+  if (yaml.containsKey('test_dependencies')) {
+    Iterable<String> list = yaml['test_dependencies'] as Iterable<String>;
+    if (list == null) {
+      list = [];
+    }
+    return list;
+  }
+  return null;
 }

@@ -1,34 +1,31 @@
 @TestOn("vm")
 library tekartik_pub.test.pub_test;
 
-import 'package:path/path.dart';
 import 'package:process_run/cmd_run.dart';
 import 'package:dev_test/test.dart';
-import 'package:tekartik_pub/pub.dart';
-import 'package:tekartik_pub/script.dart';
+import 'package:tekartik_pub/pub_fs_io.dart';
 import 'package:tekartik_pub/pubspec.dart';
 import 'package:pubtest/src/pubtest_version.dart';
 import 'package:pub_semver/pub_semver.dart';
-import 'dart:io';
+import 'package:fs_shim_test/test_io.dart';
 
 class TestScript extends Script {}
 
-String get testScriptPath => getScriptPath(TestScript);
+Directory get pkgDir => new File(getScriptPath(TestScript)).parent.parent;
 
-void main() => defineTests();
-
-String get _pubPackageRoot => getPubPackageRootSync(testScriptPath);
+void main() => defineTests(newIoFileSystemContext(join(pkgDir.path, 'test', 'out')));
 
 String get pubTestDartScript {
-  PubPackage pkg = new PubPackage(_pubPackageRoot);
-  return join(pkg.path, 'bin', 'pubtest.dart');
+  return join(pkgDir.path, 'bin', 'pubtest.dart');
 }
 
-void defineTests() {
+void defineTests(FileSystemTestContext ctx) {
   //useVMConfiguration();
+  IoFsPubPackage pkg = new IoFsPubPackage(pkgDir);
   group('pubtest', () {
     test('src.version', () async {
-      expect(version, await extractPubspecYamlVersion(_pubPackageRoot));
+      Map yaml = await pkg.getPubspecYaml();
+      expect(version, await pubspecYamlGetVersion(yaml));
     });
 
     test('version', () async {
@@ -62,5 +59,66 @@ void defineTests() {
         expect(result.exitCode, 1);
       }
     });
+
+    group('example', () {
+      solo_test('subdir', () async {
+        Directory top = await ctx.prepare();
+
+        Directory successDir = childDirectory(top, 'success');
+
+        IoFsPubPackage exampleSuccessDir = new IoFsPubPackage(childDirectory(pkgDir,join('example', 'success')));
+        IoFsPubPackage pkg = await exampleSuccessDir.clone(successDir);
+
+        // Filter test having "success" in the data dir
+        ProcessResult result = await pkg.runCmd(dartCmd(
+            [
+              pubTestDartScript,
+              '-p',
+              'vm',
+              '${pkg.dir.path}',
+              '-n',
+              'success',
+              '-r',
+              'json',
+              '--get-offline'
+            ]));
+
+        // on 1.13, current windows is failing
+        if (!Platform.isWindows) {
+          expect(result.exitCode, 0);
+        }
+        expect(pubRunTestJsonProcessResultIsSuccess(result), isTrue);
+        expect(pubRunTestJsonProcessResultSuccessCount(result), 1);
+        expect(pubRunTestJsonProcessResultFailureCount(result), 0);
+
+        // run one level above
+        result = await pkg.devRunCmd(dartCmd(
+            [
+              pubTestDartScript,
+              '-p',
+              'vm',
+              '${top.path}',
+              '-n',
+              'success',
+              '-r',
+              'json',
+              '--get-offline',
+              //'--dry-run', // dry run
+            ]));
+
+        //print(result.stdout);
+        //print(result.stderr);
+        // on 1.13, current windows is failing
+        if (!Platform.isWindows) {
+          expect(result.exitCode, 0);
+        }
+        expect(pubRunTestJsonProcessResultIsSuccess(result), isTrue);
+        //expect(pubRunTestJsonProcessResultSuccessCount(result), 1);
+        //expect(pubRunTestJsonProcessResultFailureCount(result), 0);
+      });
+
+    });
+
+      // expect
   });
 }

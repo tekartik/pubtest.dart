@@ -3,19 +3,20 @@ library pubtest.bin.pubtest;
 
 // Pull recursively
 
-import 'dart:io';
+import 'package:fs_shim/fs_io.dart';
 import 'dart:async';
 import 'package:path/path.dart';
 import 'package:args/args.dart';
-import 'package:tekartik_pub/pub.dart';
+import 'package:tekartik_pub/pub_fs_io.dart';
 import 'package:process_run/cmd_run.dart';
-import 'package:tekartik_pub/src/rpubpath.dart';
+import 'package:tekartik_pub/src/rpubpath_fs.dart';
 import 'package:pubtest/src/pubtest_version.dart';
 import 'package:pubtest/src/pubtest_utils.dart';
 import 'package:pool/pool.dart';
 import 'package:tekartik_pub/pubspec.dart';
 import 'package:fs_shim/fs_io.dart' as fs;
 import 'package:fs_shim/utils/copy.dart';
+import 'pubtest.dart';
 
 String get currentScriptName => basenameWithoutExtension(Platform.script.path);
 
@@ -31,17 +32,6 @@ const String _reporterOptionAbbr = "r";
 
 bool _debug = false;
 
-const List<String> allPlatforms = const [
-  "vm",
-  "dartium",
-  "content-shell",
-  "chrome",
-  "phantomjs",
-  "firefox",
-  "safari",
-  "ie"
-];
-
 ///
 /// Recursively update (pull) git folders
 ///
@@ -50,6 +40,7 @@ Future main(List<String> arguments) async {
   int exitCode = 0;
 
   ArgParser parser = new ArgParser(allowTrailingOptions: true);
+  /*
   parser.addFlag(_HELP, abbr: 'h', help: 'Usage help', negatable: false);
   //parser.addOption(_LOG, abbr: 'l', help: 'Log level (fine, debug, info...)');
   parser.addOption(_reporterOption,
@@ -79,7 +70,8 @@ Future main(List<String> arguments) async {
       help: 'The platform(s) on which to run the tests.',
       allowed: allPlatforms,
       defaultsTo: 'vm',
-      allowMultiple: true);
+      allowMultiple: true);*/
+  addArgs(parser);
   ArgResults _argsResult = parser.parse(arguments);
 
   bool help = _argsResult[_HELP];
@@ -107,11 +99,7 @@ Future main(List<String> arguments) async {
   }
   */
   bool dryRun = _argsResult[_DRY_RUN];
-  TestReporter reporter;
-  String reporterString = _argsResult[_reporterOption];
-  if (reporterString != null) {
-    reporter = testReporterFromString(reporterString);
-  }
+  String reporter = _argsResult[_reporterOption];
 
   String name = _argsResult[_NAME];
 
@@ -120,7 +108,7 @@ Future main(List<String> arguments) async {
   if (dirsOrFiles.isEmpty) {
     dirsOrFiles = [Directory.current.path];
   }
-  List<String> dirs = [];
+  List<Directory> dirs = [];
 
   List<String> platforms;
   if (_argsResult.wasParsed(_PLATFORM)) {
@@ -147,16 +135,15 @@ Future main(List<String> arguments) async {
   int poolSize = int.parse(_argsResult[_CONCURRENCY]);
   int packagePoolSize = int.parse(_argsResult[_PACKAGE_CONCURRENCY]);
 
-  List<PubPackage> errors = [];
+  List<IoFsPubPackage> errors = [];
   Future _handleProject(DependencyTestPackage dependency,
       [List<String> files]) async {
     // Clone the project
-    PubPackage pkg = new PubPackage(
-        join(dependency.parent.path, 'build', 'test', dependency.package.name));
 
     //await emptyOrCreateDirSync(pkg.path);
 
-    fs.Directory dst = fs.ioFileSystem.newDirectory(pkg.path);
+    Directory dst = new Directory(join(dependency.parent.dir.path, 'build', 'test', dependency.package.name));
+    /*
     try {
       await dst.delete(recursive: true);
     } catch (_) {}
@@ -179,26 +166,20 @@ Future main(List<String> arguments) async {
               'pubspec.lock',
               'build'
             ]));
+    */
 
-    ProcessCmd cmd = pkg.getCmd(offline: getOffline);
-    if (_debug) {
-      print('on: ${cmd.workingDirectory}');
-      print('before: $cmd');
-    }
-    await runCmd(cmd
-      ..connectStderr = true
-      ..connectStdout);
-    if (_debug) {
-      print('after: $cmd');
-    }
+    IoFsPubPackage pkg = await dependency.package.clone(dst);
+
+    await pkg.runPub(pubGetArgs(offline: getOffline));
+
     // if no file is given make sure the test/folder exists
     if (files == null) {
       // no tests found
-      if (!(await FileSystemEntity.isDirectory(join(pkg.path, "test")))) {
+      if (!(await FileSystemEntity.isDirectory(join(pkg.dir.path, "test")))) {
         return;
       }
     }
-    print('test on ${pkg.path}${files != null ? " ${files}": ""}');
+    print('test on ${pkg}${files != null ? " ${files}": ""}');
     if (dryRun) {
       //print('test on ${pkg.path}${files != null ? " ${files}": ""}');
     } else {
@@ -207,22 +188,14 @@ Future main(List<String> arguments) async {
         if (files != null) {
           args.addAll(files);
         }
-        ProcessCmd cmd = pkg.testCmd(args,
+
+        ProcessResult result = await pkg.runPub(pubRunTestArgs(args: args,
             concurrency: poolSize,
             reporter: reporter,
             platforms: platforms,
-            name: name);
-        if (_debug) {
-          print('on: ${cmd.workingDirectory}');
-          print('before: $cmd');
-        }
-
-        ProcessResult result = await runCmd(cmd
-          ..connectStderr = true
-          ..connectStdout = true);
-        if (_debug) {
-          print('after: $cmd');
-        }
+            name: name),
+          connectStderr : true,
+          connectStdout: true);
         if (result.exitCode != 0) {
           errors.add(pkg);
           stderr.writeln('test error in ${pkg}');
@@ -240,27 +213,37 @@ Future main(List<String> arguments) async {
 
   Pool packagePool = new Pool(packagePoolSize);
 
-  _parseDirectory(String packageDir) async {
+  Future _parseDirectory(Directory packageDir) async {
     //print(packageDir);
-    PubPackage parent = new PubPackage(packageDir);
-    Iterable<String> dependencies =
-        await extractPubspecDependencies(packageDir);
+    IoFsPubPackage parent = new IoFsPubPackage(packageDir);
+
+    // get the test_dependencies first
+    Iterable<String> dependencies = pubspecYamlGetTestDependenciesPackageName(await parent.getPubspecYaml());
+
+    if (dependencies == null) {
+      dependencies =
+      await parent.extractPubspecDependencies();
+    }
+
     //Map dotPackagesYaml = await getDotPackagesYaml(mainPackage.path);
-    for (String dependency in dependencies) {
-      PubPackage pkg = await extractPackage(dependency, packageDir);
-      if (yamlHasAnyDependencies(getPackageYamlSync(pkg.path), ['test'])) {
-        // add whole package
-        list.add(new DependencyTestPackage(parent, pkg));
+    if (dependencies != null) {
+      for (String dependency in dependencies) {
+        IoFsPubPackage pkg = await parent.extractPackage(dependency);
+        if (pubspecYamlHasAnyDependencies(
+            await pkg.getPubspecYaml(), ['test'])) {
+          // add whole package
+          list.add(new DependencyTestPackage(parent, pkg));
+        }
       }
     }
   }
   // Handle pub sub path
   for (String dirOrFile in dirsOrFiles) {
-    if (FileSystemEntity.isDirectorySync(dirOrFile)) {
-      dirs.add(dirOrFile);
+    if (await FileSystemEntity.isDirectory(dirOrFile)) {
+      dirs.add(new Directory(dirOrFile));
     }
 
-    String packageDir = getPubPackageRootSync(dirOrFile);
+    Directory packageDir = await getPubPackageDir(new Link(dirOrFile));
     if (packageDir != null) {
       await _parseDirectory(packageDir);
     }
@@ -268,10 +251,11 @@ Future main(List<String> arguments) async {
 
   // Also Handle recursive projects
   List<Future> futures = [];
-  await recursivePubPath(dirs, dependencies: ['pubtest']).listen((String path) {
-    //list.add(new PubPackage(path));
-    futures.add(_parseDirectory(path));
-  }).asFuture();
+
+  void _add(fs.Directory dir) {
+    futures.add(_parseDirectory(dir));
+  }
+  await recursivePubDir(dirs, dependencies: ['pubtest']).listen(_add).asFuture();
   await Future.wait(futures);
 
   //print(list.packages);

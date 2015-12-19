@@ -5,6 +5,5 @@ dependencies:
 dev_dependencies:
   test: any
   dev_test: any
-  pubtest:
-    path: ../..
+
 

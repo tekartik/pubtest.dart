@@ -18,3 +18,5 @@ pubspec.lock
 .idea/
 
 # modules copied
+# generated
+test/out/

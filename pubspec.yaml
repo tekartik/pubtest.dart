@@ -14,10 +14,14 @@ dependencies:
 dev_dependencies:
   dev_test: any
   test: any
+  fs_shim_test:
+    git: git://github.com/tekartik/fs_shim_test.dart
 test_dependencies: []
 dependency_overrides:
-#  tekartik_pub:
-#    path: /media/ssd/devx/git/github.com/tekartik/tekartik_pub.dart
+  tekartik_pub:
+    path: /media/ssd/devx/git/github.com/tekartik/tekartik_pub.dart
+#  fs_shim:
+#    git: git://github.com/tekartik/fs_shim.dart
 #  process_run:
 #    git: git://github.com/tekartik/process_run.dart
 executables:
