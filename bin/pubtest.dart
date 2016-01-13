@@ -7,9 +7,10 @@ import 'dart:async';
 import 'package:path/path.dart';
 import 'package:args/args.dart';
 import 'package:tekartik_pub/pub_fs_io.dart';
+
 import 'package:tekartik_pub/pub_fs.dart';
 import 'package:fs_shim/utils/entity.dart';
-import 'package:process_run/cmd_run.dart';
+import 'package:fs_shim/fs.dart' as fs;
 import 'package:tekartik_pub/src/rpubpath_fs.dart';
 import 'package:pubtest/src/pubtest_version.dart';
 import 'package:pubtest/src/pubtest_utils.dart';
@@ -70,6 +71,7 @@ void addArgs(ArgParser parser) {
   parser.addFlag("get-offline",
       help: 'Get dependencies first in offline mode', negatable: false);
 }
+
 ///
 /// Recursively update (pull) git folders
 ///
@@ -78,9 +80,8 @@ Future main(List<String> arguments) async {
   int exitCode = 0;
 
   ArgParser parser = new ArgParser(allowTrailingOptions: true);
-
-  parser.addFlag("get",
-      help: 'Get dependencies first', negatable: false);
+  addArgs(parser);
+  parser.addFlag("get", help: 'Get dependencies first', negatable: false);
   ArgResults _argsResult = parser.parse(arguments);
 
   bool help = _argsResult[_HELP];
@@ -161,7 +162,8 @@ Future main(List<String> arguments) async {
           args.addAll(files);
         }
         if (getBefore || getBeforeOffline) {
-          await pkg.runPub(pubGetArgs(offline: getBeforeOffline), connectStderr: true,connectStdout: true);
+          await pkg.runPub(pubGetArgs(offline: getBeforeOffline),
+              connectStderr: true, connectStdout: true);
         }
         ProcessResult result = await pkg.runPub(
             pubRunTestArgs(
@@ -170,7 +172,8 @@ Future main(List<String> arguments) async {
                 reporter: reporter,
                 platforms: platforms,
                 name: name),
-            connectStderr: true,connectStdout: true);
+            connectStderr: true,
+            connectStdout: true);
         if (result.exitCode != 0) {
           stderr.writeln('test error in ${pkg}');
           if (exitCode == 0) {
@@ -224,7 +227,8 @@ Future main(List<String> arguments) async {
   }
 
   // Also Handle recursive projects
-  await recursivePubDir(dirs, dependencies: ['test']).listen((Directory dir) {
+  await recursivePubDir(dirs, dependencies: ['test'])
+      .listen((fs.Directory dir) {
     list.add(new IoFsPubPackage(dir));
   }).asFuture();
 

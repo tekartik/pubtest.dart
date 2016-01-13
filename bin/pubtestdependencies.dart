@@ -8,14 +8,11 @@ import 'dart:async';
 import 'package:path/path.dart';
 import 'package:args/args.dart';
 import 'package:tekartik_pub/pub_fs_io.dart';
-import 'package:process_run/cmd_run.dart';
 import 'package:tekartik_pub/src/rpubpath_fs.dart';
 import 'package:pubtest/src/pubtest_version.dart';
 import 'package:pubtest/src/pubtest_utils.dart';
 import 'package:pool/pool.dart';
-import 'package:tekartik_pub/pubspec.dart';
-import 'package:fs_shim/fs_io.dart' as fs;
-import 'package:fs_shim/utils/copy.dart';
+import 'package:fs_shim/fs.dart' as fs;
 import 'pubtest.dart';
 
 String get currentScriptName => basenameWithoutExtension(Platform.script.path);
@@ -142,7 +139,8 @@ Future main(List<String> arguments) async {
 
     //await emptyOrCreateDirSync(pkg.path);
 
-    Directory dst = new Directory(join(dependency.parent.dir.path, 'build', 'test', dependency.package.name));
+    Directory dst = new Directory(join(
+        dependency.parent.dir.path, 'build', 'test', dependency.package.name));
     /*
     try {
       await dst.delete(recursive: true);
@@ -189,13 +187,15 @@ Future main(List<String> arguments) async {
           args.addAll(files);
         }
 
-        ProcessResult result = await pkg.runPub(pubRunTestArgs(args: args,
-            concurrency: poolSize,
-            reporter: reporter,
-            platforms: platforms,
-            name: name),
-          connectStderr : true,
-          connectStdout: true);
+        ProcessResult result = await pkg.runPub(
+            pubRunTestArgs(
+                args: args,
+                concurrency: poolSize,
+                reporter: reporter,
+                platforms: platforms,
+                name: name),
+            connectStderr: true,
+            connectStdout: true);
         if (result.exitCode != 0) {
           errors.add(pkg);
           stderr.writeln('test error in ${pkg}');
@@ -218,11 +218,11 @@ Future main(List<String> arguments) async {
     IoFsPubPackage parent = new IoFsPubPackage(packageDir);
 
     // get the test_dependencies first
-    Iterable<String> dependencies = pubspecYamlGetTestDependenciesPackageName(await parent.getPubspecYaml());
+    Iterable<String> dependencies = pubspecYamlGetTestDependenciesPackageName(
+        await parent.getPubspecYaml());
 
     if (dependencies == null) {
-      dependencies =
-      await parent.extractPubspecDependencies();
+      dependencies = await parent.extractPubspecDependencies();
     }
 
     //Map dotPackagesYaml = await getDotPackagesYaml(mainPackage.path);
@@ -255,7 +255,9 @@ Future main(List<String> arguments) async {
   void _add(fs.Directory dir) {
     futures.add(_parseDirectory(dir));
   }
-  await recursivePubDir(dirs, dependencies: ['pubtest']).listen(_add).asFuture();
+  await recursivePubDir(dirs, dependencies: ['pubtest'])
+      .listen(_add)
+      .asFuture();
   await Future.wait(futures);
 
   //print(list.packages);

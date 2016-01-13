@@ -20,3 +20,4 @@ pubspec.lock
 # modules copied
 # generated
 test/out/
+test_out/

@@ -4,7 +4,6 @@ library tekartik_pub.test.pub_test;
 import 'package:process_run/cmd_run.dart';
 import 'package:dev_test/test.dart';
 import 'package:tekartik_pub/pub_fs_io.dart';
-import 'package:tekartik_pub/pubspec.dart';
 import 'package:pubtest/src/pubtest_version.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:fs_shim_test/test_io.dart';
@@ -13,7 +12,8 @@ class TestScript extends Script {}
 
 Directory get pkgDir => new File(getScriptPath(TestScript)).parent.parent;
 
-void main() => defineTests(newIoFileSystemContext(join(pkgDir.path, 'test', 'out')));
+void main() =>
+    defineTests(newIoFileSystemContext(join(pkgDir.path, 'test_out')));
 
 String get pubTestDartScript {
   return join(pkgDir.path, 'bin', 'pubtest.dart');
@@ -61,27 +61,27 @@ void defineTests(FileSystemTestContext ctx) {
     });
 
     group('example', () {
-      solo_test('subdir', () async {
+      test('subdir', () async {
         Directory top = await ctx.prepare();
 
         Directory successDir = childDirectory(top, 'success');
 
-        IoFsPubPackage exampleSuccessDir = new IoFsPubPackage(childDirectory(pkgDir,join('example', 'success')));
+        IoFsPubPackage exampleSuccessDir = new IoFsPubPackage(
+            childDirectory(pkgDir, join('example', 'success')));
         IoFsPubPackage pkg = await exampleSuccessDir.clone(successDir);
 
         // Filter test having "success" in the data dir
-        ProcessResult result = await pkg.runCmd(dartCmd(
-            [
-              pubTestDartScript,
-              '-p',
-              'vm',
-              '${pkg.dir.path}',
-              '-n',
-              'success',
-              '-r',
-              'json',
-              '--get-offline'
-            ]));
+        ProcessResult result = await pkg.runCmd(dartCmd([
+          pubTestDartScript,
+          '-p',
+          'vm',
+          '${pkg.dir.path}',
+          '-n',
+          'success',
+          '-r',
+          'json',
+          '--get-offline'
+        ]));
 
         // on 1.13, current windows is failing
         if (!Platform.isWindows) {
@@ -92,19 +92,18 @@ void defineTests(FileSystemTestContext ctx) {
         expect(pubRunTestJsonProcessResultFailureCount(result), 0);
 
         // run one level above
-        result = await pkg.devRunCmd(dartCmd(
-            [
-              pubTestDartScript,
-              '-p',
-              'vm',
-              '${top.path}',
-              '-n',
-              'success',
-              '-r',
-              'json',
-              '--get-offline',
-              //'--dry-run', // dry run
-            ]));
+        result = await pkg.runCmd(dartCmd([
+          pubTestDartScript,
+          '-p',
+          'vm',
+          '${top.path}',
+          '-n',
+          'success',
+          '-r',
+          'json',
+          '--get-offline',
+          //'--dry-run', // dry run
+        ]));
 
         //print(result.stdout);
         //print(result.stderr);
@@ -116,9 +115,8 @@ void defineTests(FileSystemTestContext ctx) {
         //expect(pubRunTestJsonProcessResultSuccessCount(result), 1);
         //expect(pubRunTestJsonProcessResultFailureCount(result), 0);
       });
-
     });
 
-      // expect
+    // expect
   });
 }
