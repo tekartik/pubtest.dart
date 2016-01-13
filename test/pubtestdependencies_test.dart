@@ -57,7 +57,7 @@ void defineTests(FileSystemTestContext ctx) {
       //expect(result.stdout.contains("All tests passed"), isTrue);
       expect(pubRunTestJsonProcessResultIsSuccess(result), isTrue,
           reason: result.toString());
-      expect(pubRunTestJsonProcessResultSuccessCount(result), 4,
+      expect(pubRunTestJsonProcessResultSuccessCount(result), 2,
           reason: result.stdout.toString());
       expect(pubRunTestJsonProcessResultFailureCount(result), 0,
           reason: result.stdout.toString());

@@ -8,11 +8,9 @@ import 'dart:async';
 import 'package:path/path.dart';
 import 'package:args/args.dart';
 import 'package:tekartik_pub/pub_fs_io.dart';
-import 'package:tekartik_pub/src/rpubpath_fs.dart';
 import 'package:pubtest/src/pubtest_version.dart';
 import 'package:pubtest/src/pubtest_utils.dart';
 import 'package:pool/pool.dart';
-import 'package:fs_shim/fs.dart' as fs;
 import 'pubtest.dart';
 
 String get currentScriptName => basenameWithoutExtension(Platform.script.path);
@@ -216,7 +214,7 @@ Future main(List<String> arguments) async {
   Pool packagePool = new Pool(packagePoolSize);
 
   Future _parseDirectory(Directory packageDir) async {
-    //print(packageDir);
+    //print("#parsing $packageDir");
     IoFsPubPackage parent = new IoFsPubPackage(packageDir);
 
     // get the test_dependencies first
@@ -251,18 +249,22 @@ Future main(List<String> arguments) async {
     }
   }
 
+  /*
   // Also Handle recursive projects
   List<Future> futures = [];
-
+  int w;
+  print('#1 ${list.packages}');
   void _add(fs.Directory dir) {
+    print('adding $dir'); int warn;
     futures.add(_parseDirectory(dir));
   }
   await recursivePubDir(dirs, dependencies: ['pubtest'])
       .listen(_add)
       .asFuture();
   await Future.wait(futures);
-
-  //print(list.packages);
+int _w2;
+*/
+  //print('#2 ${list.packages}');
   for (TestPackage pkg in list.packages) {
     await packagePool.withResource(() async {
       await _handleProject(pkg, list.getTests(pkg));

@@ -91,6 +91,10 @@ class NewTestList {
 
   @override
   String toString() => all.toString();
+
+  bool operator ==(o) {
+    return o is FsPubPackage && o.dir.path == o.dir.path;
+  }
 }
 
 class PubTest {
