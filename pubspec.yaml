@@ -1,6 +1,6 @@
 name: pubtest
 author: Alexandre Roux <alex@tekartik.com>
-version: 0.0.1
+version: 0.1.0
 dependencies:
   args: any
   path: any

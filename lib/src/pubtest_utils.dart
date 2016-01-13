@@ -16,6 +16,9 @@ class TestPackage {
   bool operator ==(o) {
     return o is TestPackage && o.package == package;
   }
+
+  @override
+  String toString() => package.toString();
 }
 
 class TestList {

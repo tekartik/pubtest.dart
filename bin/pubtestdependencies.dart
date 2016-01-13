@@ -139,6 +139,7 @@ Future main(List<String> arguments) async {
 
     //await emptyOrCreateDirSync(pkg.path);
 
+
     Directory dst = new Directory(join(
         dependency.parent.dir.path, 'build', 'test', dependency.package.name));
     /*
@@ -166,6 +167,8 @@ Future main(List<String> arguments) async {
             ]));
     */
 
+    //print(dependency);
+    //print(dst);
     IoFsPubPackage pkg = await dependency.package.clone(dst);
 
     await pkg.runPub(pubGetArgs(offline: getOffline));
