@@ -58,9 +58,9 @@ void defineTests(FileSystemTestContext ctx) {
       expect(pubRunTestJsonProcessResultIsSuccess(result), isTrue,
           reason: result.toString());
       expect(pubRunTestJsonProcessResultSuccessCount(result), 4,
-          reason: result.toString());
+          reason: result.stdout.toString());
       expect(pubRunTestJsonProcessResultFailureCount(result), 0,
-          reason: result.toString());
+          reason: result.stdout.toString());
     }); //, timeout: new Timeout(new Duration(minutes: 5)));
 
     test('simple_failed_dependencies', () async {
