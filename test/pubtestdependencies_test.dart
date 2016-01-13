@@ -44,7 +44,7 @@ void defineTests(FileSystemTestContext ctx) {
       await pkg.runPub(pubGetArgs(offline: true),
           connectStderr: true, connectStdout: false);
       ProcessResult result = await pkg.runCmd(dartCmd(
-          [pubTestDependenciesDartScript, '--get-offline', '-r', 'json'])
+          [pubTestDependenciesDartScript, '--get-offline', '-r', 'json', '-p', 'vm'])
         // p', 'vm'])
         ..connectStderr = true
         ..connectStdout = false);
@@ -57,7 +57,7 @@ void defineTests(FileSystemTestContext ctx) {
       //expect(result.stdout.contains("All tests passed"), isTrue);
       expect(pubRunTestJsonProcessResultIsSuccess(result), isTrue,
           reason: result.toString());
-      expect(pubRunTestJsonProcessResultSuccessCount(result), 2,
+      expect(pubRunTestJsonProcessResultSuccessCount(result), 1,
           reason: result.stdout.toString());
       expect(pubRunTestJsonProcessResultFailureCount(result), 0,
           reason: result.stdout.toString());
@@ -77,7 +77,7 @@ void defineTests(FileSystemTestContext ctx) {
       await pkg.runPub(pubGetArgs(offline: true),
           connectStderr: true, connectStdout: false);
       ProcessResult result = await pkg.runCmd(dartCmd(
-          [pubTestDependenciesDartScript, '--get-offline', '-r', 'json'])
+          [pubTestDependenciesDartScript, '--get-offline', '-r', 'json', '-p', 'vm'])
         // p', 'vm'])
         ..connectStderr = true
         ..connectStdout = false);

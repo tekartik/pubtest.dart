@@ -179,7 +179,7 @@ Future main(List<String> arguments) async {
     }
     print('test on ${pkg}${files != null ? " ${files}": ""}');
     if (dryRun) {
-      //print('test on ${pkg.path}${files != null ? " ${files}": ""}');
+      //print('test on ${pkg}${files != null ? " ${files}": ""}');
     } else {
       try {
         List<String> args = [];
@@ -214,7 +214,7 @@ Future main(List<String> arguments) async {
   Pool packagePool = new Pool(packagePoolSize);
 
   Future _parseDirectory(Directory packageDir) async {
-    //print("#parsing $packageDir");
+    //int w; print("#parsing $packageDir");
     IoFsPubPackage parent = new IoFsPubPackage(packageDir);
 
     // get the test_dependencies first
@@ -264,7 +264,7 @@ Future main(List<String> arguments) async {
   await Future.wait(futures);
 int _w2;
 */
-  //print('#2 ${list.packages}');
+  //int _w2; print('#2 ${list.packages}');
   for (TestPackage pkg in list.packages) {
     await packagePool.withResource(() async {
       await _handleProject(pkg, list.getTests(pkg));
