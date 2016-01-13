@@ -139,7 +139,6 @@ Future main(List<String> arguments) async {
 
     //await emptyOrCreateDirSync(pkg.path);
 
-
     Directory dst = new Directory(join(
         dependency.parent.dir.path, 'build', 'test', dependency.package.name));
     /*

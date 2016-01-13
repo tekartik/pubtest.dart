@@ -21,13 +21,7 @@ String get pubTestDartScript {
 
 void defineTests(FileSystemTestContext ctx) {
   //useVMConfiguration();
-  IoFsPubPackage pkg = new IoFsPubPackage(pkgDir);
   group('pubtest', () {
-    test('src.version', () async {
-      Map yaml = await pkg.getPubspecYaml();
-      expect(version, await pubspecYamlGetVersion(yaml));
-    });
-
     test('version', () async {
       ProcessResult result =
           await runCmd(dartCmd([pubTestDartScript, '--version']));
