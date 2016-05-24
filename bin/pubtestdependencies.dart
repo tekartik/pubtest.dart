@@ -229,6 +229,7 @@ Future main(List<String> arguments) async {
     if (dependencies != null) {
       for (String dependency in dependencies) {
         IoFsPubPackage pkg = await parent.extractPackage(dependency);
+        //print(parent);
         if (pubspecYamlHasAnyDependencies(
             await pkg.getPubspecYaml(), ['test'])) {
           // add whole package

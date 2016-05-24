@@ -74,16 +74,18 @@ void defineTests(FileSystemTestContext ctx) {
           'success',
           '-r',
           'json',
-          '--get-offline'
+          // '--get-offline' - this is causin an error
+          '--get'
         ]));
 
         // on 1.13, current windows is failing
         if (!Platform.isWindows) {
           expect(result.exitCode, 0);
         }
-        expect(pubRunTestJsonProcessResultIsSuccess(result), isTrue);
-        expect(pubRunTestJsonProcessResultSuccessCount(result), 1);
-        expect(pubRunTestJsonProcessResultFailureCount(result), 0);
+        //print(result.stdout);
+        expect(pubRunTestJsonIsSuccess(result.stdout), isTrue);
+        expect(pubRunTestJsonSuccessCount(result.stdout), 1);
+        expect(pubRunTestJsonFailureCount(result.stdout), 0);
 
         // run one level above
         result = await pkg.runCmd(dartCmd([
@@ -95,7 +97,7 @@ void defineTests(FileSystemTestContext ctx) {
           'success',
           '-r',
           'json',
-          '--get-offline',
+          '--get',
           //'--dry-run', // dry run
         ]));
 
@@ -105,7 +107,7 @@ void defineTests(FileSystemTestContext ctx) {
         if (!Platform.isWindows) {
           expect(result.exitCode, 0);
         }
-        expect(pubRunTestJsonProcessResultIsSuccess(result), isTrue);
+        expect(pubRunTestJsonIsSuccess(result.stdout), isTrue);
         //expect(pubRunTestJsonProcessResultSuccessCount(result), 1);
         //expect(pubRunTestJsonProcessResultFailureCount(result), 0);
       });

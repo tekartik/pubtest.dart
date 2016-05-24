@@ -41,10 +41,14 @@ void defineTests(FileSystemTestContext ctx) {
       Directory dstDependency = childDirectory(top, 'simple_dependency');
       IoFsPubPackage pkg = await exampleSimplePkg.clone(dst);
       await exampleSimpleDependencyPkg.clone(dstDependency);
-      await pkg.runPub(pubGetArgs(offline: true),
+      await pkg.runPub(pubGetArgs(/*offline: true*/),
           connectStderr: true, connectStdout: false);
-      ProcessResult result = await pkg.runCmd(dartCmd(
-          [pubTestDependenciesDartScript, '--get-offline', '-r', 'json', '-p', 'vm'])
+      ProcessResult result = await pkg.runCmd(dartCmd([
+        pubTestDependenciesDartScript, /*'--get',*/ '-r',
+        'json',
+        '-p',
+        'vm'
+      ]) // --get-offline failed using 1.16
         // p', 'vm'])
         ..connectStderr = true
         ..connectStdout = false);
@@ -55,11 +59,11 @@ void defineTests(FileSystemTestContext ctx) {
       }
 
       //expect(result.stdout.contains("All tests passed"), isTrue);
-      expect(pubRunTestJsonProcessResultIsSuccess(result), isTrue,
+      expect(pubRunTestJsonIsSuccess(result.stdout), isTrue,
           reason: result.toString());
-      expect(pubRunTestJsonProcessResultSuccessCount(result), 1,
+      expect(pubRunTestJsonSuccessCount(result.stdout), 1,
           reason: result.stdout.toString());
-      expect(pubRunTestJsonProcessResultFailureCount(result), 0,
+      expect(pubRunTestJsonFailureCount(result.stdout), 0,
           reason: result.stdout.toString());
     }); //, timeout: new Timeout(new Duration(minutes: 5)));
 
@@ -74,13 +78,14 @@ void defineTests(FileSystemTestContext ctx) {
       Directory dstDependency = childDirectory(top, 'simple_failed_dependency');
       IoFsPubPackage pkg = await exampleSimplePkg.clone(dst);
       await exampleSimpleDependencyPkg.clone(dstDependency);
-      await pkg.runPub(pubGetArgs(offline: true),
+      await pkg.runPub(pubGetArgs(/*offline: true*/),
           connectStderr: true, connectStdout: false);
-      ProcessResult result = await pkg.runCmd(dartCmd(
-          [pubTestDependenciesDartScript, '--get-offline', '-r', 'json', '-p', 'vm'])
-        // p', 'vm'])
-        ..connectStderr = true
-        ..connectStdout = false);
+      ProcessResult result = await pkg.runCmd(
+          dartCmd([pubTestDependenciesDartScript, '-r', 'json', '-p', 'vm'])
+            // '--get-offline' failed on sdk 1.16
+            // p', 'vm'])
+            ..connectStderr = true
+            ..connectStdout = false);
 
       // on 1.13, current windows is failing
       if (!Platform.isWindows) {
@@ -88,7 +93,7 @@ void defineTests(FileSystemTestContext ctx) {
       }
 
       //expect(result.stdout.contains("All tests passed"), isTrue);
-      expect(pubRunTestJsonProcessResultIsSuccess(result), isFalse);
+      expect(pubRunTestJsonIsSuccess(result.stdout), isFalse);
       /*
       expect(pubRunTestJsonProcessResultSuccessCount(result), );
       expect(pubRunTestJsonProcessResultFailureCount(result), 0);
