@@ -57,9 +57,7 @@ void addArgs(ArgParser parser) {
       help: 'Number of concurrent tests in the same package tested',
       defaultsTo: '10');
   parser.addOption(_PACKAGE_CONCURRENCY,
-      abbr: 'k',
-      help: 'Number of concurrent packages tested',
-      defaultsTo: '10');
+      abbr: 'k', help: 'Number of concurrent packages tested', defaultsTo: '1');
   parser.addOption(_NAME,
       abbr: 'n', help: 'A substring of the name of the test to run');
   parser.addOption(_PLATFORM,
