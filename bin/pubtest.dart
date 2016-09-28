@@ -6,15 +6,13 @@ library pubtest.bin.pubtest;
 import 'dart:async';
 import 'package:path/path.dart';
 import 'package:args/args.dart';
-import 'package:tekartik_pub/pub_fs_io.dart';
-
-import 'package:tekartik_pub/pub_fs.dart';
-import 'package:fs_shim/utils/entity.dart';
-import 'package:fs_shim/fs.dart' as fs;
-import 'package:tekartik_pub/src/rpubpath_fs.dart';
+import 'package:fs_shim/utils/io/entity.dart';
+import 'package:tekartik_pub/io.dart';
 import 'package:pubtest/src/pubtest_version.dart';
 import 'package:pubtest/src/pubtest_utils.dart';
 import 'package:pool/pool.dart';
+import 'dart:io';
+import 'package:process_run/cmd_run.dart';
 
 String get currentScriptName => basenameWithoutExtension(Platform.script.path);
 
@@ -118,7 +116,7 @@ Future main(List<String> arguments) async {
   if (dirsOrFiles.isEmpty) {
     dirsOrFiles = [Directory.current.path];
   }
-  List<Directory> dirs = [];
+  List<String> dirs = [];
 
   List<String> platforms;
   if (_argsResult.wasParsed(_PLATFORM)) {
@@ -143,11 +141,11 @@ Future main(List<String> arguments) async {
   int poolSize = int.parse(_argsResult[_CONCURRENCY]);
   int packagePoolSize = int.parse(_argsResult[_PACKAGE_CONCURRENCY]);
 
-  Future _handleProject(IoFsPubPackage pkg, [List<String> files]) async {
+  Future _handleProject(PubPackage pkg, [List<String> files]) async {
     // if no file is given make sure the test/folder exists
     if (files == null) {
       // no tests found
-      if (!(await pkg.fs.isDirectory(childDirectory(pkg.dir, "test").path))) {
+      if (!(await FileSystemEntity.isDirectory(childDirectory(pkg.dir, "test").path))) {
         return;
       }
     }
@@ -160,18 +158,16 @@ Future main(List<String> arguments) async {
           args.addAll(files);
         }
         if (getBefore || getBeforeOffline) {
-          await pkg.runPub(pubGetArgs(offline: getBeforeOffline),
-              connectStderr: true, connectStdout: true);
+          await runCmd(pkg.pubCmd(pubGetArgs(offline: getBeforeOffline)), verbose: true);
         }
-        ProcessResult result = await pkg.runPub(
+        ProcessResult result = await runCmd(pkg.pubCmd(
             pubRunTestArgs(
                 args: args,
                 concurrency: poolSize,
                 reporter: reporter,
                 platforms: platforms,
-                name: name),
-            connectStderr: true,
-            connectStdout: true);
+                name: name)),
+            verbose: true);
         if (result.exitCode != 0) {
           stderr.writeln('test error in ${pkg}');
           if (exitCode == 0) {
@@ -192,28 +188,27 @@ Future main(List<String> arguments) async {
   for (String dirOrFile in dirsOrFiles) {
     Directory dir;
     if (await FileSystemEntity.isDirectory(dirOrFile)) {
-      dir = new Directory(dirOrFile);
-      dirs.add(dir);
+      dirs.add(dirOrFile);
 
       // Pkg dir, no need to look higher
-      if (await isPubPackageDir(dir)) {
+      if (await isPubPackageRoot(dirOrFile)) {
         continue;
       }
     } else {
       dir = new File(dirOrFile).parent;
     }
 
-    Directory packageDir;
+    String packageDir;
     try {
-      packageDir = await getPubPackageDir(dir);
+      packageDir = await getPubPackageRoot(dir.path);
     } catch (_) {}
     if (packageDir != null) {
       // if it is the test dir, assume testing the package instead
 
       if (pubspecYamlHasAnyDependencies(
           await getPubspecYaml(packageDir), ['test'])) {
-        dirOrFile = relative(dirOrFile, from: packageDir.path);
-        IoFsPubPackage pkg = new IoFsPubPackage(packageDir);
+        dirOrFile = relative(dirOrFile, from: packageDir);
+        PubPackage pkg = new PubPackage(packageDir);
         if (dirOrFile == "test") {
           // add whole package
           list.add(pkg);
@@ -225,13 +220,13 @@ Future main(List<String> arguments) async {
   }
 
   // Also Handle recursive projects
-  await recursivePubDir(dirs, dependencies: ['test'])
-      .listen((fs.Directory dir) {
-    list.add(new IoFsPubPackage(dir));
+  await recursivePubPath(dirs, dependencies: ['test'])
+      .listen((String dir) {
+    list.add(new PubPackage(dir));
   }).asFuture();
 
   //print(list.packages);
-  for (FsPubPackage pkg in list.packages) {
+  for (PubPackage pkg in list.packages) {
     await packagePool.withResource(() async {
       await _handleProject(pkg, list.getTests(pkg));
     });

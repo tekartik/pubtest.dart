@@ -1,16 +1,16 @@
 name: pubtest
 author: Alexandre Roux <alex@tekartik.com>
-version: 0.1.1
+version: 0.1.2
 dependencies:
   args: any
   path: any
   pool: any
   pub_semver: any
-  process_run: any
+  process_run: '>=0.5.0'
   yaml: any
   tekartik_pub:
     git: git://github.com/tekartik/tekartik_pub.dart
-  fs_shim: any
+  fs_shim: '>=0.6.3'
 dev_dependencies:
   dev_test: any
   test: any

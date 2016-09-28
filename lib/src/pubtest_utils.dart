@@ -1,14 +1,14 @@
 library pubtest.src.pubtest_utils;
 
-import 'package:tekartik_pub/pub_fs_io.dart';
+import 'package:tekartik_pub/io.dart';
 
 class DependencyTestPackage extends TestPackage {
-  IoFsPubPackage parent;
-  DependencyTestPackage(this.parent, IoFsPubPackage package) : super(package);
+  PubPackage parent;
+  DependencyTestPackage(this.parent, PubPackage package) : super(package);
 }
 
 class TestPackage {
-  FsPubPackage package;
+  PubPackage package;
   TestPackage(this.package);
 
   int get hashCode => package.hashCode;
@@ -23,8 +23,8 @@ class TestPackage {
 
 class TestList {
   // empty list means all!
-  Map<FsPubPackage, List<String>> all = {};
-  add(FsPubPackage pkg, [String test]) {
+  Map<PubPackage, List<String>> all = {};
+  add(PubPackage pkg, [String test]) {
     //print("$pkg $test");
     if (all.containsKey(pkg)) {
       List<String> tests = all[pkg];
@@ -47,9 +47,9 @@ class TestList {
     }
   }
 
-  Iterable<FsPubPackage> get packages => all.keys;
+  Iterable<PubPackage> get packages => all.keys;
 
-  List<String> getTests(FsPubPackage pkg) {
+  List<String> getTests(PubPackage pkg) {
     return all[pkg];
   }
 
@@ -93,7 +93,7 @@ class NewTestList {
   String toString() => all.toString();
 
   bool operator ==(o) {
-    return o is FsPubPackage && o.dir.path == o.dir.path;
+    return o is PubPackage && o.dir.path == o.dir.path;
   }
 }
 

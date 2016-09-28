@@ -3,17 +3,17 @@ library tekartik_pub.test.pub_test;
 
 import 'package:process_run/cmd_run.dart';
 import 'package:dev_test/test.dart';
-import 'package:tekartik_pub/pub_fs_io.dart';
+import 'package:tekartik_pub/io.dart';
 import 'package:pubtest/src/pubtest_version.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:fs_shim_test/test_io.dart';
-
+import 'dart:io' as io;
 class TestScript extends Script {}
 
 Directory get pkgDir => new File(getScriptPath(TestScript)).parent.parent;
 
 void main() =>
-    defineTests(newIoFileSystemContext(join(pkgDir.path, 'test_out')));
+    defineTests(newIoFileSystemContext(io.Directory.systemTemp.createTempSync('pubtest_test_').path));
 
 String get pubTestDartScript {
   return join(pkgDir.path, 'bin', 'pubtest.dart');
@@ -60,12 +60,12 @@ void defineTests(FileSystemTestContext ctx) {
 
         Directory successDir = childDirectory(top, 'success');
 
-        IoFsPubPackage exampleSuccessDir = new IoFsPubPackage(
-            childDirectory(pkgDir, join('example', 'success')));
-        IoFsPubPackage pkg = await exampleSuccessDir.clone(successDir);
+        PubPackage exampleSuccessDir = new PubPackage(
+            childDirectory(pkgDir, join('example', 'success')).path);
+        PubPackage pkg = await exampleSuccessDir.clone(successDir.path);
 
         // Filter test having "success" in the data dir
-        ProcessResult result = await pkg.runCmd(dartCmd([
+        ProcessResult result = await runCmd(pkg.dartCmd([
           pubTestDartScript,
           '-p',
           'vm',
@@ -88,7 +88,7 @@ void defineTests(FileSystemTestContext ctx) {
         expect(pubRunTestJsonFailureCount(result.stdout), 0);
 
         // run one level above
-        result = await pkg.runCmd(dartCmd([
+        result = await runCmd(pkg.dartCmd([
           pubTestDartScript,
           '-p',
           'vm',

@@ -7,11 +7,12 @@ import 'package:fs_shim/fs_io.dart';
 import 'dart:async';
 import 'package:path/path.dart';
 import 'package:args/args.dart';
-import 'package:tekartik_pub/pub_fs_io.dart';
+import 'package:tekartik_pub/io.dart';
 import 'package:pubtest/src/pubtest_version.dart';
 import 'package:pubtest/src/pubtest_utils.dart';
 import 'package:pool/pool.dart';
 import 'pubtest.dart';
+import 'package:process_run/cmd_run.dart';
 
 String get currentScriptName => basenameWithoutExtension(Platform.script.path);
 
@@ -130,15 +131,15 @@ Future main(List<String> arguments) async {
   int poolSize = int.parse(_argsResult[_CONCURRENCY]);
   int packagePoolSize = int.parse(_argsResult[_PACKAGE_CONCURRENCY]);
 
-  List<IoFsPubPackage> errors = [];
+  List<PubPackage> errors = [];
   Future _handleProject(DependencyTestPackage dependency,
       [List<String> files]) async {
     // Clone the project
 
     //await emptyOrCreateDirSync(pkg.path);
 
-    Directory dst = new Directory(join(
-        dependency.parent.dir.path, 'build', 'test', dependency.package.name));
+    String dst = join(
+        dependency.parent.dir.path, 'build', 'test', dependency.package.name);
     /*
     try {
       await dst.delete(recursive: true);
@@ -166,9 +167,9 @@ Future main(List<String> arguments) async {
 
     //print(dependency);
     //print(dst);
-    IoFsPubPackage pkg = await dependency.package.clone(dst);
+    PubPackage pkg = await dependency.package.clone(dst);
 
-    await pkg.runPub(pubGetArgs(offline: getOffline));
+    await runCmd(pkg.pubCmd(pubGetArgs(offline: getOffline)));
 
     // if no file is given make sure the test/folder exists
     if (files == null) {
@@ -187,15 +188,13 @@ Future main(List<String> arguments) async {
           args.addAll(files);
         }
 
-        ProcessResult result = await pkg.runPub(
+        ProcessResult result = await runCmd(pkg.pubCmd(
             pubRunTestArgs(
                 args: args,
                 concurrency: poolSize,
                 reporter: reporter,
                 platforms: platforms,
-                name: name),
-            connectStderr: true,
-            connectStdout: true);
+                name: name)), verbose: true);
         if (result.exitCode != 0) {
           errors.add(pkg);
           stderr.writeln('test error in ${pkg}');
@@ -213,9 +212,9 @@ Future main(List<String> arguments) async {
 
   Pool packagePool = new Pool(packagePoolSize);
 
-  Future _parseDirectory(Directory packageDir) async {
+  Future _parseDirectory(String packageDir) async {
     //int w; print("#parsing $packageDir");
-    IoFsPubPackage parent = new IoFsPubPackage(packageDir);
+    PubPackage parent = new PubPackage(packageDir);
 
     // get the test_dependencies first
     Iterable<String> dependencies = pubspecYamlGetTestDependenciesPackageName(
@@ -228,7 +227,7 @@ Future main(List<String> arguments) async {
     //Map dotPackagesYaml = await getDotPackagesYaml(mainPackage.path);
     if (dependencies != null) {
       for (String dependency in dependencies) {
-        IoFsPubPackage pkg = await parent.extractPackage(dependency);
+        PubPackage pkg = await parent.extractPackage(dependency);
         //print(parent);
         if (pubspecYamlHasAnyDependencies(
             await pkg.getPubspecYaml(), ['test'])) {
@@ -244,7 +243,7 @@ Future main(List<String> arguments) async {
       dirs.add(new Directory(dirOrFile));
     }
 
-    Directory packageDir = await getPubPackageDir(new Link(dirOrFile));
+    String packageDir = await getPubPackageRoot(dirOrFile);
     if (packageDir != null) {
       await _parseDirectory(packageDir);
     }
