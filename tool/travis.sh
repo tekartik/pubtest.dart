@@ -3,5 +3,10 @@
 # Fast fail the script on failures.
 set -e
 
-pub run test -p firefox
+dartanalyzer --fatal-warnings \
+  bin/pubtest.dart \
+  bin/pubtestdependencies.dart \
+
+pub run test -p vm
+pub run test -p chrome
 pub run test -p firefox

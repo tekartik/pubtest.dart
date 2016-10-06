@@ -16,6 +16,9 @@ dev_dependencies:
   test: any
   fs_shim_test:
     git: git://github.com/tekartik/fs_shim_test.dart
+  chrome_travis:
+    git: git://github.com/tekartik/chrome_travis.dart
+    version: '>=0.1.3'
 test_dependencies: []
 dependency_overrides:
 #  tekartik_pub:
