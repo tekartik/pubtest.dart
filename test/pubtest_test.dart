@@ -1,19 +1,24 @@
 @TestOn("vm")
 library tekartik_pub.test.pub_test;
 
-import 'package:process_run/cmd_run.dart';
-import 'package:dev_test/test.dart';
-import 'package:tekartik_pub/io.dart';
-import 'package:pubtest/src/pubtest_version.dart';
-import 'package:pub_semver/pub_semver.dart';
-import 'package:fs_shim_test/test_io.dart';
 import 'dart:io' as io;
+
+import 'package:dev_test/test.dart';
+import 'package:fs_shim_test/test_io.dart';
+import 'package:process_run/cmd_run.dart';
+import 'package:pub_semver/pub_semver.dart';
+import 'package:pubtest/src/pubtest_version.dart';
+import 'package:tekartik_pub/io.dart';
+
 class TestScript extends Script {}
 
 Directory get pkgDir => new File(getScriptPath(TestScript)).parent.parent;
 
 void main() =>
-    defineTests(newIoFileSystemContext(io.Directory.systemTemp.createTempSync('pubtest_test_').path));
+    defineTests(newIoFileSystemContext(
+        io.Directory.systemTemp
+            .createTempSync('pubtest_test_')
+            .path));
 
 String get pubTestDartScript {
   return join(pkgDir.path, 'bin', 'pubtest.dart');
@@ -48,7 +53,6 @@ void defineTests(FileSystemTestContext ctx) {
         'vm',
         'test/data/fail_test_.dart'
       ])); // ..connectStderr=true..connectStdout=true);
-
       if (!Platform.isWindows) {
         expect(result.exitCode, 1);
       }

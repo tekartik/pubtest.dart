@@ -2,17 +2,16 @@
 library pubtest.bin.pubtest;
 
 // Pull recursively
-
-import 'package:fs_shim/fs_io.dart';
 import 'dart:async';
-import 'package:path/path.dart';
+
 import 'package:args/args.dart';
-import 'package:tekartik_pub/io.dart';
-import 'package:pubtest/src/pubtest_version.dart';
-import 'package:pubtest/src/pubtest_utils.dart';
+import 'package:path/path.dart';
 import 'package:pool/pool.dart';
+import 'package:pubtest/src/pubtest_utils.dart';
+import 'package:pubtest/src/pubtest_version.dart';
+import 'package:tekartik_pub/io.dart';
+
 import 'pubtest.dart';
-import 'package:process_run/cmd_run.dart';
 
 String get currentScriptName => basenameWithoutExtension(Platform.script.path);
 
@@ -20,7 +19,7 @@ const String _HELP = 'help';
 //const String _LOG = 'log';
 const String _DRY_RUN = 'dry-run';
 const String _CONCURRENCY = 'concurrency';
-const String _PACKAGE_CONCURRENCY = 'packageConcurrency';
+const String packageConcurrencyOptionName = 'packageConcurrency';
 const String _PLATFORM = 'platform';
 const String _NAME = 'name';
 const String _reporterOption = "reporter";
@@ -32,45 +31,11 @@ bool _debug = false;
 /// Recursively update (pull) git folders
 ///
 Future main(List<String> arguments) async {
-  //setupQuickLogging();
-  int exitCode = 0;
-
   ArgParser parser = new ArgParser(allowTrailingOptions: true);
-  /*
-  parser.addFlag(_HELP, abbr: 'h', help: 'Usage help', negatable: false);
-  //parser.addOption(_LOG, abbr: 'l', help: 'Log level (fine, debug, info...)');
-  parser.addOption(_reporterOption,
-      abbr: _reporterOptionAbbr,
-      help: 'test result output',
-      allowed: testReporterStrings);
-  parser.addFlag(_DRY_RUN,
-      abbr: 'd',
-      help: 'Do not run test, simple show packages to be tested',
-      negatable: false);
-  parser.addFlag("version",
-      help: 'Display the script version', negatable: false);
-  parser.addOption(_CONCURRENCY,
-      abbr: 'j',
-      help: 'Number of concurrent tests in the same package tested',
-      defaultsTo: '10');
-  parser.addOption(_PACKAGE_CONCURRENCY,
-      abbr: 'k',
-      help: 'Number of concurrent packages tested',
-      defaultsTo: '10');
-  parser.addOption(_NAME,
-      abbr: 'n', help: 'A substring of the name of the test to run');
-  parser.addFlag("get-offline",
-      help: 'Get dependencies in offline mode', negatable: false);
-  parser.addOption(_PLATFORM,
-      abbr: 'p',
-      help: 'The platform(s) on which to run the tests.',
-      allowed: allPlatforms,
-      defaultsTo: 'vm',
-      allowMultiple: true);*/
   addArgs(parser);
-  ArgResults _argsResult = parser.parse(arguments);
+  ArgResults argResults = parser.parse(arguments);
 
-  bool help = _argsResult[_HELP];
+  bool help = argResults[_HELP];
   if (help) {
     stdout.writeln(
         "Call 'pub run test' recursively (default from current directory)");
@@ -83,7 +48,7 @@ Future main(List<String> arguments) async {
     return;
   }
 
-  if (_argsResult['version']) {
+  if (argResults['version']) {
     stdout.write('${currentScriptName} ${version}');
     return;
   }
@@ -94,42 +59,21 @@ Future main(List<String> arguments) async {
     Logger.root.info('Log level ${Logger.root.level}');
   }
   */
-  bool dryRun = _argsResult[_DRY_RUN];
-  String reporter = _argsResult[_reporterOption];
 
-  String name = _argsResult[_NAME];
+  CommonTestOptions testOptions =
+  new CommonTestOptions.fromArgResults(argResults);
 
   // get dirs in parameters, default to current
-  List<String> dirsOrFiles = new List.from(_argsResult.rest);
+  List<String> dirsOrFiles = new List.from(argResults.rest);
   if (dirsOrFiles.isEmpty) {
     dirsOrFiles = [Directory.current.path];
   }
   List<Directory> dirs = [];
 
-  List<String> platforms;
-  if (_argsResult.wasParsed(_PLATFORM)) {
-    platforms = _argsResult[_PLATFORM] as List<String>;
-  } else {
-    // Allow platforms in env variable
-    String envPlatforms = Platform.environment["PUBTEST_PLATFORMS"];
-    if (envPlatforms != null) {
-      stdout.writeln("Using platforms: ${envPlatforms}");
-      platforms = envPlatforms.split(",");
-    }
-    // compatiblity with previous rpubtest
-    envPlatforms = Platform.environment["TEKARTIK_RPUBTEST_PLATFORMS"];
-    if (envPlatforms != null) {
-      stdout.writeln("Using platforms: ${envPlatforms}");
-      platforms = envPlatforms.split(",");
-    }
-  }
-
   //PubTest pubTest = new PubTest();
   NewTestList list = new NewTestList();
 
-  bool getOffline = _argsResult['get-offline'];
-  int poolSize = int.parse(_argsResult[_CONCURRENCY]);
-  int packagePoolSize = int.parse(_argsResult[_PACKAGE_CONCURRENCY]);
+  int packagePoolSize = int.parse(argResults[packageConcurrencyOptionName]);
 
   List<PubPackage> errors = [];
   Future _handleProject(DependencyTestPackage dependency,
@@ -140,36 +84,22 @@ Future main(List<String> arguments) async {
 
     String dst = join(
         dependency.parent.dir.path, 'build', 'test', dependency.package.name);
-    /*
-    try {
-      await dst.delete(recursive: true);
-    } catch (_) {}
-    try {
-      await dst.create(recursive: true);
-    } catch (_) {}
-    /*
-    await cloneFiles(dependency.package.path, pkg.path,
-        but: ['packages', '.packages', '.pub', 'pubspec.lock', 'build'],
-        copy: true);
-        */
-    await copyFileSystemEntity(
-        fs.ioFileSystem.newDirectory(dependency.package.path), dst,
-        options: new CopyOptions(
-            recursive: true,
-            exclude: [
-              'packages',
-              '.packages',
-              '.pub',
-              'pubspec.lock',
-              'build'
-            ]));
-    */
 
     //print(dependency);
     //print(dst);
     PubPackage pkg = await dependency.package.clone(dst);
 
-    await runCmd(pkg.pubCmd(pubGetArgs(offline: getOffline)));
+    print(
+        '[pubtestdependencies] test on ${pkg}${files != null
+            ? " ${files}"
+            : ""}');
+
+    // fix options - get needed
+    testOptions.getBefore = true;
+    await testPackage(pkg, testOptions, files);
+
+    /*
+    await runCmd(pkg.pubCmd(pubGetArgs(offline: testOptions.getBeforeOffline)));
 
     // if no file is given make sure the test/folder exists
     if (files == null) {
@@ -179,7 +109,7 @@ Future main(List<String> arguments) async {
       }
     }
     print('test on ${pkg}${files != null ? " ${files}": ""}');
-    if (dryRun) {
+    if (testOptions.dryRun) {
       //print('test on ${pkg}${files != null ? " ${files}": ""}');
     } else {
       try {
@@ -188,13 +118,14 @@ Future main(List<String> arguments) async {
           args.addAll(files);
         }
 
-        ProcessResult result = await runCmd(pkg.pubCmd(
-            pubRunTestArgs(
+        ProcessResult result = await runCmd(
+            pkg.pubCmd(pubRunTestArgs(
                 args: args,
-                concurrency: poolSize,
-                reporter: reporter,
+                concurrency: testOptions.poolSize,
+                reporter: testOptions.reporter,
                 platforms: platforms,
-                name: name)), verbose: true);
+                name: testOptions.name)),
+            verbose: true);
         if (result.exitCode != 0) {
           errors.add(pkg);
           stderr.writeln('test error in ${pkg}');
@@ -208,6 +139,7 @@ Future main(List<String> arguments) async {
         throw e;
       }
     }
+    */
   }
 
   Pool packagePool = new Pool(packagePoolSize);
@@ -237,6 +169,7 @@ Future main(List<String> arguments) async {
       }
     }
   }
+
   // Handle pub sub path
   for (String dirOrFile in dirsOrFiles) {
     if (await FileSystemEntity.isDirectory(dirOrFile)) {
@@ -275,5 +208,4 @@ int _w2;
     stderr.writeln('errors in packages: ${errors}');
     stderr.flush();
   }
-  exit(exitCode);
 }

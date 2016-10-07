@@ -8,7 +8,9 @@ Helper to run pub test
 
     pubtest
 
-Recursively run all test in all packages found. Packages are tested simultaneously (number can be configured using the -j option)
+Allow testing all tests in one or multiple packages.
+
+By default, Recursively run all test in all packages found. Packages are tested simultaneously (number can be configured using the -j option)
 default is to test on vm platform, you can define multiple platforms in an env variable
 
     export PUBTEST_PLATFORMS=content-shell,vm
@@ -44,6 +46,13 @@ Experimental. Execute all declared dependencies test
 
     pubtestdependencies
 
+## pubtestpackage
+
+You can directly test a package even if you don't have it yet.
+To specify a git packages to run your tests on:
+
+    pubtestpackage -sgit git://github.com/tekartik/tekartik_common_utils.dart
+    
 ## Activation
 
 ### From git repository
