@@ -81,7 +81,8 @@ Future main(List<String> arguments) async {
     GitProject git = new GitProject(srcGit, path: dir);
 
     // Cloning
-    await runCmd(git.cloneCmd(progress: true), verbose: testOptions.verbose);
+    await runCmd(
+        git.cloneCmd(progress: true, depth: 1), verbose: testOptions.verbose);
 
     // Pkg dir, no need to look higher
     if (!await isPubPackageRoot(dir)) {

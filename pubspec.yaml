@@ -1,6 +1,6 @@
 name: pubtest
 author: Alexandre Roux <alex@tekartik.com>
-version: 0.2.0
+version: 0.2.1
 dependencies:
   args: any
   path: any
@@ -12,6 +12,7 @@ dependencies:
     git: git://github.com/tekartik/tekartik_pub.dart
   tekartik_sc:
     git: git://github.com/tekartik/tekartik_sc.dart
+    version: '>=0.2.2'
   tekartik_io_utils:
     git: git://github.com/tekartik/tekartik_io_utils.dart
   fs_shim: '>=0.6.3'
