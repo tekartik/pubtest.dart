@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.2
+
+* Allow filtering packages in pubtestdependencies
+
 ## 0.2.0
 
 * add pubtestpackage

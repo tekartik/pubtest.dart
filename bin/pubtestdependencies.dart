@@ -19,7 +19,7 @@ const String _HELP = 'help';
 //const String _LOG = 'log';
 const String _DRY_RUN = 'dry-run';
 const String _CONCURRENCY = 'concurrency';
-const String packageConcurrencyOptionName = 'packageConcurrency';
+const String packageOptionName = 'packageName';
 const String _PLATFORM = 'platform';
 const String _NAME = 'name';
 const String _reporterOption = "reporter";
@@ -33,6 +33,10 @@ bool _debug = false;
 Future main(List<String> arguments) async {
   ArgParser parser = new ArgParser(allowTrailingOptions: true);
   addArgs(parser);
+  parser.addOption(packageOptionName,
+      abbr: 'f',
+      help: 'Filter dependencies by package name',
+      allowMultiple: true);
   ArgResults argResults = parser.parse(arguments);
 
   bool help = argResults[_HELP];
@@ -63,6 +67,8 @@ Future main(List<String> arguments) async {
   CommonTestOptions testOptions =
   new CommonTestOptions.fromArgResults(argResults);
 
+  List<String> packageNames = argResults[packageOptionName];
+
   // get dirs in parameters, default to current
   List<String> dirsOrFiles = new List.from(argResults.rest);
   if (dirsOrFiles.isEmpty) {
@@ -78,6 +84,11 @@ Future main(List<String> arguments) async {
   List<PubPackage> errors = [];
   Future _handleProject(DependencyTestPackage dependency,
       [List<String> files]) async {
+    if (packageNames?.isNotEmpty == true) {
+      if (!packageNames.contains(dependency.package.name)) {
+        return;
+      }
+    }
     // Clone the project
 
     //await emptyOrCreateDirSync(pkg.path);
@@ -97,49 +108,6 @@ Future main(List<String> arguments) async {
     // fix options - get needed
     testOptions.getBefore = true;
     await testPackage(pkg, testOptions, files);
-
-    /*
-    await runCmd(pkg.pubCmd(pubGetArgs(offline: testOptions.getBeforeOffline)));
-
-    // if no file is given make sure the test/folder exists
-    if (files == null) {
-      // no tests found
-      if (!(await FileSystemEntity.isDirectory(join(pkg.dir.path, "test")))) {
-        return;
-      }
-    }
-    print('test on ${pkg}${files != null ? " ${files}": ""}');
-    if (testOptions.dryRun) {
-      //print('test on ${pkg}${files != null ? " ${files}": ""}');
-    } else {
-      try {
-        List<String> args = [];
-        if (files != null) {
-          args.addAll(files);
-        }
-
-        ProcessResult result = await runCmd(
-            pkg.pubCmd(pubRunTestArgs(
-                args: args,
-                concurrency: testOptions.poolSize,
-                reporter: testOptions.reporter,
-                platforms: platforms,
-                name: testOptions.name)),
-            verbose: true);
-        if (result.exitCode != 0) {
-          errors.add(pkg);
-          stderr.writeln('test error in ${pkg}');
-          if (exitCode == 0) {
-            exitCode = result.exitCode;
-          }
-        }
-      } catch (e) {
-        stderr.writeln('error thrown in ${pkg}');
-        stderr.flush();
-        throw e;
-      }
-    }
-    */
   }
 
   Pool packagePool = new Pool(packagePoolSize);

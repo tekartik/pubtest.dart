@@ -95,7 +95,7 @@ void addArgs(ArgParser parser) {
       negatable: false);
   parser.addFlag("version",
       help: 'Display the script version', negatable: false);
-  parser.addFlag("verbose", abbr: 'v', help: 'Verboser mode', negatable: false);
+  parser.addFlag("verbose", abbr: 'v', help: 'Verbose mode', negatable: false);
   parser.addOption(concurrencyOptionName,
       abbr: 'j',
       help: 'Number of concurrent tests in the same package tested',
