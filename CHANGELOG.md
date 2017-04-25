@@ -1,7 +1,8 @@
 # Changelog
 
-## 0.2.2
+## 0.2.3
 
+* Force upgrade in pubtestdependencies
 * Allow filtering packages in pubtestdependencies
 
 ## 0.2.0

@@ -60,6 +60,7 @@ class CommonTestOptions {
 
   // set by upper class
   bool getBefore;
+  bool upgradeBefore;
 
   CommonTestOptions.fromArgResults(ArgResults argResults) {
     dryRun = argResults[dryRunOptionName];
@@ -249,9 +250,17 @@ Future testPackage(PubPackage pkg, CommonTestOptions testOptions,
       args.addAll(files);
     }
 
-    if (testOptions.getBefore || testOptions.getBeforeOffline) {
+    if (testOptions.upgradeBefore == true) {
       ProcessCmd cmd =
-      pkg.pubCmd(pubGetArgs(offline: testOptions.getBeforeOffline));
+          pkg.pubCmd(pubUpgradeArgs());
+      if (testOptions.dryRun) {
+        print('\$ $cmd');
+      } else {
+        await runCmd(cmd, verbose: testOptions.verbose);
+      }
+    } else if (testOptions.getBefore || testOptions.getBeforeOffline) {
+      ProcessCmd cmd =
+          pkg.pubCmd(pubGetArgs(offline: testOptions.getBeforeOffline));
       if (testOptions.dryRun) {
         print('\$ $cmd');
       } else {
@@ -269,7 +278,7 @@ Future testPackage(PubPackage pkg, CommonTestOptions testOptions,
       print('\$ $testCmd');
     } else {
       ProcessResult result =
-      await runCmd(testCmd, stdout: stdout, stderr: stderr);
+          await runCmd(testCmd, stdout: stdout, stderr: stderr);
       if (result.exitCode != 0) {
         stderr.writeln('test error in ${pkg}');
         if (exitCode == 0) {

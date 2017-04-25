@@ -106,7 +106,7 @@ Future main(List<String> arguments) async {
             : ""}');
 
     // fix options - get needed
-    testOptions.getBefore = true;
+    testOptions.upgradeBefore = true;
     await testPackage(pkg, testOptions, files);
   }
 
