@@ -16,8 +16,10 @@ pubspec.lock
 
 # Webstorm
 .idea/
+**/build/
 
 # modules copied
 # generated
 test/out/
 test_out/
+/build/

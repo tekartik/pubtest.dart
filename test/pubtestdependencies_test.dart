@@ -15,11 +15,8 @@ class TestScript extends Script {}
 
 String get pkgDir => new File(getScriptPath(TestScript)).parent.parent.path;
 
-void main() =>
-    defineTests(newIoFileSystemContext(
-        io.Directory.systemTemp
-            .createTempSync('pubtestdependencies_test_')
-            .path));
+void main() => defineTests(newIoFileSystemContext(
+    io.Directory.systemTemp.createTempSync('pubtestdependencies_test_').path));
 
 String get pubTestDependenciesDartScript {
   return join(pkgDir, 'bin', 'pubtestdependencies.dart');
@@ -30,19 +27,17 @@ void defineTests(FileSystemTestContext ctx) {
   group('pubtestdependencies', () {
     test('version', () async {
       ProcessResult result =
-      await runCmd(dartCmd([pubTestDependenciesDartScript, '--version']));
+          await runCmd(dartCmd([pubTestDependenciesDartScript, '--version']));
       expect(result.stdout, contains("pubtestdependencies"));
-      expect(new Version.parse(result.stdout
-          .split(' ')
-          .last), version);
+      expect(new Version.parse(result.stdout.split(' ').last), version);
     });
 
     test('simple_dependencies', () async {
       String top = (await ctx.prepare()).path;
       PubPackage exampleSimplePkg =
-      new PubPackage(join(pkgDir, 'example', 'simple'));
+          new PubPackage(join(pkgDir, 'example', 'simple'));
       PubPackage exampleSimpleDependencyPkg =
-      new PubPackage(join(pkgDir, 'example', 'simple_dependency'));
+          new PubPackage(join(pkgDir, 'example', 'simple_dependency'));
 
       String dst = join(top, 'simple');
       String dstDependency = join(top, 'simple_dependency');
@@ -76,106 +71,81 @@ void defineTests(FileSystemTestContext ctx) {
     }, timeout: new Timeout(new Duration(minutes: 2)));
 
     test('simple_filter_dependencies', () async {
-      String top = (await ctx.prepare()
-      )
-          .path;
+      String top = (await ctx.prepare()).path;
       PubPackage exampleSimplePkg =
-      new PubPackage(join
-      (pkgDir, 'example', 'simple'
-      ));
+          new PubPackage(join(pkgDir, 'example', 'simple'));
       PubPackage exampleSimpleDependencyPkg =
-      new PubPackage(join
-      (pkgDir, 'example', 'simple_dependency'
-      ));
+          new PubPackage(join(pkgDir, 'example', 'simple_dependency'));
 
-      String dst = join(top,
-      'simple');
-      String dstDependency = join(
-      top, 'simple_dependency');
-      PubPackage pkg =
-      await exampleSimplePkg.clone(dst);
-      await exampleSimpleDependencyPkg
-          .clone(dstDependency);
-      await runCmd(pkg
-          .pubCmd(pubGetArgs(offline: true))
-      , stderr: stderr);
+      String dst = join(top, 'simple');
+      String dstDependency = join(top, 'simple_dependency');
+      PubPackage pkg = await exampleSimplePkg.clone(dst);
+      await exampleSimpleDependencyPkg.clone(dstDependency);
+      await runCmd(pkg.pubCmd(pubGetArgs(offline: true)), stderr: stderr);
 
       // filtering on a dummy package
-      ProcessResult result = await
-      runCmd(
-      pkg.dartCmd([
-      pubTestDependenciesDartScript,
-      /*'--get',*/ '
-      -r',
-      'json',
-      '-p'
-      ,
-      'vm',
-      '-f',
-      '
-      dummy'
-      ]) // --get-offline failed using 1.16
-      // p', 'vm'])
-      ,
-      stderr: stderr);
-
-      // on 1.13, current windows is failing
-      if (!Platform.isWindows)
-      {
-      expect(result.exitCode, 0);
-      }
-
-      //expect(result.stdout.contains("All tests passed"), isTrue);
-      expect(pubRunTestJsonIsSuccess(result.stdout), isFalse
-      ,
-      reason: result.toString());
-      expect(pubRunTestJsonSuccessCount(result.stdout), 0
-      ,
-      reason: result.stdout.toString()
-      );
-      expect(pubRunTestJsonFailureCount(result.stdout)
-      , 0,
-      reason: result.stdout.toString
-      ());
-
-      // filtering on the only package it has
-      result = await runCmd(
-      pkg
-          .dartCmd([
-      pubTestDependenciesDartScript,
-      /*'--get',*/ '-r',
-      'json',
-      '-p',
-      'vm
-      ',
-      '-f',
-      'pubtest_example_simple_dependency'
-      ]
-      ) // --get-offline failed using 1.16
-      // p', 'vm'])
-      ,
-      stderr: stderr);
+      ProcessResult result = await runCmd(
+          pkg.dartCmd([
+            pubTestDependenciesDartScript,
+            '-r',
+            'json',
+            '-p',
+            'vm',
+            '-f',
+            'dummy'
+          ]) // --get-offline failed using 1.16
+          // p', 'vm'])
+          ,
+          stderr: stderr);
 
       // on 1.13, current windows is failing
       if (!Platform.isWindows) {
-      expect(result.exitCode, 0);
+        expect(result.exitCode, 0);
+      }
+
+      //expect(result.stdout.contains("All tests passed"), isTrue);
+      expect(pubRunTestJsonIsSuccess(result.stdout), isFalse,
+          reason: result.toString());
+      expect(pubRunTestJsonSuccessCount(result.stdout), 0,
+          reason: result.stdout.toString());
+      expect(pubRunTestJsonFailureCount(result.stdout), 0,
+          reason: result.stdout.toString());
+
+      // filtering on the only package it has
+      result = await runCmd(
+          pkg.dartCmd([
+            pubTestDependenciesDartScript,
+            '-r',
+            'json',
+            '-p',
+            'vm',
+            '-f',
+            'pubtest_example_simple_dependency'
+          ]) // --get-offline failed using 1.16
+          // p', 'vm'])
+          ,
+          stderr: stderr);
+
+      // on 1.13, current windows is failing
+      if (!Platform.isWindows) {
+        expect(result.exitCode, 0);
       }
 
       //expect(result.stdout.contains("All tests passed"), isTrue);
       expect(pubRunTestJsonIsSuccess(result.stdout), isTrue,
-      reason: result.toString());
+          reason: result.toString());
       expect(pubRunTestJsonSuccessCount(result.stdout), 1,
-      reason: result.stdout.toString());
+          reason: result.stdout.toString());
       expect(pubRunTestJsonFailureCount(result.stdout), 0,
-      reason: result.stdout.toString());
+          reason: result.stdout.toString());
     }, timeout: new Timeout(new Duration(minutes: 2)));
 
     test('simple_failed_dependencies', () async {
       String top = (await ctx.prepare()).path;
       PubPackage exampleSimplePkg =
-      new PubPackage(join(pkgDir, 'example', 'simple_failed'));
+          new PubPackage(join(pkgDir, 'example', 'simple_failed'));
       PubPackage exampleSimpleDependencyPkg =
-      new PubPackage(join(pkgDir, 'example', 'simple_failed_dependency'));
+          new PubPackage(join(pkgDir, 'example', 'simple_failed_dependency'));
 
       String dst = join(top, 'simple_failed');
       String dstDependency = join(top, 'simple_failed_dependency');
