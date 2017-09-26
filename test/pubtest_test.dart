@@ -14,11 +14,8 @@ class TestScript extends Script {}
 
 Directory get pkgDir => new File(getScriptPath(TestScript)).parent.parent;
 
-void main() =>
-    defineTests(newIoFileSystemContext(
-        io.Directory.systemTemp
-            .createTempSync('pubtest_test_')
-            .path));
+void main() => defineTests(newIoFileSystemContext(
+    io.Directory.systemTemp.createTempSync('pubtest_test_').path));
 
 String get pubTestDartScript {
   return join(pkgDir.path, 'bin', 'pubtest.dart');

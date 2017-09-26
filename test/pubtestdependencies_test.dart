@@ -47,7 +47,7 @@ void defineTests(FileSystemTestContext ctx) {
       ProcessResult result = await runCmd(
           pkg.dartCmd([
             pubTestDependenciesDartScript,
-            /*'--get',*/ '-r',
+            /*'--get',*/ '-r', /* -r requires 0.12.+*/
             'json',
             '-p',
             'vm'

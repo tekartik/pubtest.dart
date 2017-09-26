@@ -1,6 +1,6 @@
 name: pubtest_example_simple_dependency
 dependencies:
 dev_dependencies:
-  test: any
+  test: '>=0.12.24'
   pubtest:
     git: git://github.com/tekartik/pubtest.dart
