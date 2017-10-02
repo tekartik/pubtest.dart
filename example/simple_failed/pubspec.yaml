@@ -3,7 +3,7 @@ dependencies:
   pubtest_example_simple_failed_dependency:
     path: ../simple_failed_dependency
 dev_dependencies:
-  test: any
+  test: '>=0.12.24'
   dev_test: any
 
 

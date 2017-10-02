@@ -22,8 +22,6 @@ const String _CONCURRENCY = 'concurrency';
 const String packageOptionName = 'packageName';
 const String _PLATFORM = 'platform';
 const String _NAME = 'name';
-const String _reporterOption = "reporter";
-const String _reporterOptionAbbr = "r";
 
 bool _debug = false;
 

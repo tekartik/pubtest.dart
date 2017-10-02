@@ -3,7 +3,7 @@ dependencies:
   pubtest_example_simple_dependency:
     path: ../simple_dependency
 dev_dependencies:
-  test: any
+  test: '>=0.12.24'
   dev_test: any
   pubtest:
     git: git://github.com/tekartik/pubtest.dart
