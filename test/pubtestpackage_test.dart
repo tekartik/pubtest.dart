@@ -13,11 +13,8 @@ class TestScript extends Script {}
 
 Directory get pkgDir => new File(getScriptPath(TestScript)).parent.parent;
 
-void main() =>
-    defineTests(newIoFileSystemContext(
-        io.Directory.systemTemp
-            .createTempSync('pubtest_test_')
-            .path));
+void main() => defineTests(newIoFileSystemContext(
+    io.Directory.systemTemp.createTempSync('pubtest_test_').path));
 
 String get pubTestPackageDartScript {
   return join(pkgDir.path, 'bin', 'pubtestpackage.dart');
@@ -28,11 +25,9 @@ void defineTests(FileSystemTestContext ctx) {
   group('pubtestpackage', () {
     test('version', () async {
       ProcessResult result =
-      await runCmd(dartCmd([pubTestPackageDartScript, '--version']));
+          await runCmd(dartCmd([pubTestPackageDartScript, '--version']));
       expect(result.stdout, contains("pubtest"));
-      expect(new Version.parse(result.stdout
-          .split(' ')
-          .last), version);
+      expect(new Version.parse(result.stdout.split(' ').last), version);
     });
 
     group('path', () {

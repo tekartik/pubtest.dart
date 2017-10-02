@@ -251,8 +251,7 @@ Future testPackage(PubPackage pkg, CommonTestOptions testOptions,
     }
 
     if (testOptions.upgradeBefore == true) {
-      ProcessCmd cmd =
-          pkg.pubCmd(pubUpgradeArgs());
+      ProcessCmd cmd = pkg.pubCmd(pubUpgradeArgs());
       if (testOptions.dryRun) {
         print('\$ $cmd');
       } else {

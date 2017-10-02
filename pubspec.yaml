@@ -1,6 +1,6 @@
 name: pubtest
 author: Alexandre Roux <alex@tekartik.com>
-version: 0.2.3
+version: 0.2.4
 dependencies:
   args: any
   path: any
@@ -18,7 +18,7 @@ dependencies:
   fs_shim: '>=0.6.3'
 dev_dependencies:
   dev_test: any
-  test: '>=0.12.24'
+  test: '>=0.12.24+6'
   fs_shim_test:
     git: git://github.com/tekartik/fs_shim_test.dart
   chrome_travis:

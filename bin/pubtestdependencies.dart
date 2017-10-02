@@ -63,7 +63,7 @@ Future main(List<String> arguments) async {
   */
 
   CommonTestOptions testOptions =
-  new CommonTestOptions.fromArgResults(argResults);
+      new CommonTestOptions.fromArgResults(argResults);
 
   List<String> packageNames = argResults[packageOptionName];
 
@@ -98,8 +98,7 @@ Future main(List<String> arguments) async {
     //print(dst);
     PubPackage pkg = await dependency.package.clone(dst);
 
-    print(
-        '[pubtestdependencies] test on ${pkg}${files != null
+    print('[pubtestdependencies] test on ${pkg}${files != null
             ? " ${files}"
             : ""}');
 
