@@ -51,7 +51,7 @@ Experimental. Execute all declared dependencies test
 You can directly test a package even if you don't have it yet.
 To specify a git packages to run your tests on:
 
-    pubtestpackage -sgit git://github.com/tekartik/tekartik_common_utils.dart
+    pubtestpackage -sgit git://github.com/tekartik/common_utils.dart
     
 ## Activation
 

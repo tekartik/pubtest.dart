@@ -126,7 +126,7 @@ Future main(List<String> arguments) async {
       for (String dependency in dependencies) {
         PubPackage pkg = await parent.extractPackage(dependency);
         //print(parent);
-        if (pubspecYamlHasAnyDependencies(
+        if (pkg != null && pubspecYamlHasAnyDependencies(
             await pkg.getPubspecYaml(), ['test'])) {
           // add whole package
           list.add(new DependencyTestPackage(parent, pkg));
