@@ -50,7 +50,7 @@ class CommonTestOptions {
   bool getBeforeOffline;
 
   bool dryRun;
-  String reporter;
+  RunTestReporter reporter;
 
   String name;
 
@@ -64,7 +64,7 @@ class CommonTestOptions {
 
   CommonTestOptions.fromArgResults(ArgResults argResults) {
     dryRun = argResults[dryRunOptionName];
-    reporter = argResults[reporterOptionName];
+    reporter = runTestReporterFromString(argResults[reporterOptionName]);
 
     name = argResults[nameOptionName];
 

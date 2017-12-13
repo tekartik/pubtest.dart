@@ -66,7 +66,7 @@ void defineTests(FileSystemTestContext ctx) {
         PubPackage pkg = await exampleSuccessDir.clone(successDir.path);
 
         // Filter test having "success" in the data dir
-        ProcessResult result = await runCmd(pkg.dartCmd([
+        ProcessResult result = await devRunCmd(pkg.dartCmd([
           pubTestDartScript,
           '-p',
           'vm',

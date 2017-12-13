@@ -10,6 +10,7 @@ dependencies:
   yaml: any
   tekartik_pub:
     git: git://github.com/tekartik/pub.dart
+    version: '>=0.7.1'
   tekartik_sc:
     git: git://github.com/tekartik/sc.dart
     version: '>=0.3.1'
@@ -27,7 +28,7 @@ dev_dependencies:
 #test_dependencies: []
 dependency_overrides:
 #  tekartik_pub:
-#    path: /media/ssd/devx/git/github.com/tekartik/tekartik_pub.dart
+#    path: ../pub.dart
 #  fs_shim:
 #    git: git://github.com/tekartik/fs_shim.dart
 #  process_run:
