@@ -44,8 +44,7 @@ void defineTests(FileSystemTestContext ctx) {
       String dstDependency = join(top, 'simple_dependency');
       PubPackage pkg = await exampleSimplePkg.clone(dst);
       await exampleSimpleDependencyPkg.clone(dstDependency);
-      await devRunCmd(pkg.pubCmd(pubGetArgs(/*offline: true*/)),
-          stderr: stderr);
+      await runCmd(pkg.pubCmd(pubGetArgs(/*offline: true*/)), stderr: stderr);
       ProcessResult result = await runCmd(
           pkg.dartCmd([
             pubTestDependenciesDartScript,

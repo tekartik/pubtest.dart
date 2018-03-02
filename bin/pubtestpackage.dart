@@ -31,7 +31,7 @@ List<String> getFiles(ArgResults argResults) {
 Future main(List<String> arguments) async {
   ArgParser parser = new ArgParser(allowTrailingOptions: true);
   addArgs(parser);
-  parser.addMultiOption(packageSourceOptionName,
+  parser.addOption(packageSourceOptionName,
       abbr: 's', help: "package source", allowed: [sourceGit, sourcePath]);
   parser.addFlag(getOptionName,
       help: 'Get dependencies first (for path dependencies only)',
