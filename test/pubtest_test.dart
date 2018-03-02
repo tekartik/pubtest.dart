@@ -12,7 +12,8 @@ import 'package:tekartik_pub/io.dart';
 
 class TestScript extends Script {}
 
-Directory get pkgDir => new File(getScriptPath(TestScript)).parent.parent;
+Directory get pkgDir =>
+    new File(getScriptPath(TestScript)).parent.parent as Directory;
 
 void main() => defineTests(newIoFileSystemContext(
     io.Directory.systemTemp.createTempSync('pubtest_test_').path));
@@ -28,7 +29,8 @@ void defineTests(FileSystemTestContext ctx) {
       ProcessResult result =
           await runCmd(dartCmd([pubTestDartScript, '--version']));
       expect(result.stdout, contains("pubtest"));
-      expect(new Version.parse(result.stdout.split(' ').last), version);
+      expect(new Version.parse((result.stdout as String).split(' ').last),
+          version);
     });
 
     test('success', () async {
@@ -57,16 +59,16 @@ void defineTests(FileSystemTestContext ctx) {
 
     group('example', () {
       test('subdir', () async {
-        Directory top = await ctx.prepare();
+        Directory top = await ctx.prepare() as Directory;
 
-        Directory successDir = childDirectory(top, 'success');
+        Directory successDir = childDirectory(top, 'success') as Directory;
 
         PubPackage exampleSuccessDir = new PubPackage(
             childDirectory(pkgDir, join('example', 'success')).path);
         PubPackage pkg = await exampleSuccessDir.clone(successDir.path);
 
         // Filter test having "success" in the data dir
-        ProcessResult result = await devRunCmd(pkg.dartCmd([
+        ProcessResult result = await runCmd(pkg.dartCmd([
           pubTestDartScript,
           '-p',
           'vm',
@@ -84,9 +86,9 @@ void defineTests(FileSystemTestContext ctx) {
           expect(result.exitCode, 0);
         }
         //print(result.stdout);
-        expect(pubRunTestJsonIsSuccess(result.stdout), isTrue);
-        expect(pubRunTestJsonSuccessCount(result.stdout), 1);
-        expect(pubRunTestJsonFailureCount(result.stdout), 0);
+        expect(pubRunTestJsonIsSuccess(result.stdout as String), isTrue);
+        expect(pubRunTestJsonSuccessCount(result.stdout as String), 1);
+        expect(pubRunTestJsonFailureCount(result.stdout as String), 0);
 
         // run one level above
         result = await runCmd(pkg.dartCmd([
@@ -108,7 +110,7 @@ void defineTests(FileSystemTestContext ctx) {
         if (!Platform.isWindows) {
           expect(result.exitCode, 0);
         }
-        expect(pubRunTestJsonIsSuccess(result.stdout), isTrue);
+        expect(pubRunTestJsonIsSuccess(result.stdout as String), isTrue);
         //expect(pubRunTestJsonProcessResultSuccessCount(result), 1);
         //expect(pubRunTestJsonProcessResultFailureCount(result), 0);
       });

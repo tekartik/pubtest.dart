@@ -29,7 +29,8 @@ void defineTests(FileSystemTestContext ctx) {
       ProcessResult result =
           await runCmd(dartCmd([pubTestDependenciesDartScript, '--version']));
       expect(result.stdout, contains("pubtestdependencies"));
-      expect(new Version.parse(result.stdout.split(' ').last), version);
+      expect(
+          new Version.parse(result.stdout.split(' ').last as String), version);
     });
 
     test('simple_dependencies', () async {
@@ -43,11 +44,13 @@ void defineTests(FileSystemTestContext ctx) {
       String dstDependency = join(top, 'simple_dependency');
       PubPackage pkg = await exampleSimplePkg.clone(dst);
       await exampleSimpleDependencyPkg.clone(dstDependency);
-      await runCmd(pkg.pubCmd(pubGetArgs(/*offline: true*/)), stderr: stderr);
+      await devRunCmd(pkg.pubCmd(pubGetArgs(/*offline: true*/)),
+          stderr: stderr);
       ProcessResult result = await runCmd(
           pkg.dartCmd([
             pubTestDependenciesDartScript,
-            /*'--get',*/ '-r', /* -r requires 0.12.+*/
+            /*'--get',*/ '-r',
+            /* -r requires 0.12.+*/
             'json',
             '-p',
             'vm'
@@ -62,11 +65,11 @@ void defineTests(FileSystemTestContext ctx) {
       }
 
       //expect(result.stdout.contains("All tests passed"), isTrue);
-      expect(pubRunTestJsonIsSuccess(result.stdout), isTrue,
+      expect(pubRunTestJsonIsSuccess(result.stdout as String), isTrue,
           reason: result.toString());
-      expect(pubRunTestJsonSuccessCount(result.stdout), 1,
+      expect(pubRunTestJsonSuccessCount(result.stdout as String), 1,
           reason: result.stdout.toString());
-      expect(pubRunTestJsonFailureCount(result.stdout), 0,
+      expect(pubRunTestJsonFailureCount(result.stdout as String), 0,
           reason: result.stdout.toString());
     }, timeout: new Timeout(new Duration(minutes: 2)));
 
@@ -104,11 +107,11 @@ void defineTests(FileSystemTestContext ctx) {
       }
 
       //expect(result.stdout.contains("All tests passed"), isTrue);
-      expect(pubRunTestJsonIsSuccess(result.stdout), isFalse,
+      expect(pubRunTestJsonIsSuccess(result.stdout as String), isFalse,
           reason: result.toString());
-      expect(pubRunTestJsonSuccessCount(result.stdout), 0,
+      expect(pubRunTestJsonSuccessCount(result.stdout as String), 0,
           reason: result.stdout.toString());
-      expect(pubRunTestJsonFailureCount(result.stdout), 0,
+      expect(pubRunTestJsonFailureCount(result.stdout as String), 0,
           reason: result.stdout.toString());
 
       // filtering on the only package it has
@@ -132,11 +135,11 @@ void defineTests(FileSystemTestContext ctx) {
       }
 
       //expect(result.stdout.contains("All tests passed"), isTrue);
-      expect(pubRunTestJsonIsSuccess(result.stdout), isTrue,
+      expect(pubRunTestJsonIsSuccess(result.stdout as String), isTrue,
           reason: result.toString());
-      expect(pubRunTestJsonSuccessCount(result.stdout), 1,
+      expect(pubRunTestJsonSuccessCount(result.stdout as String), 1,
           reason: result.stdout.toString());
-      expect(pubRunTestJsonFailureCount(result.stdout), 0,
+      expect(pubRunTestJsonFailureCount(result.stdout as String), 0,
           reason: result.stdout.toString());
     }, timeout: new Timeout(new Duration(minutes: 2)));
 
@@ -165,7 +168,7 @@ void defineTests(FileSystemTestContext ctx) {
       }
 
       //expect(result.stdout.contains("All tests passed"), isTrue);
-      expect(pubRunTestJsonIsSuccess(result.stdout), isFalse);
+      expect(pubRunTestJsonIsSuccess(result.stdout as String), isFalse);
     }, timeout: new Timeout(new Duration(minutes: 2)));
   });
 }

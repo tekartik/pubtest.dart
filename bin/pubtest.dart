@@ -63,22 +63,23 @@ class CommonTestOptions {
   bool upgradeBefore;
 
   CommonTestOptions.fromArgResults(ArgResults argResults) {
-    dryRun = argResults[dryRunOptionName];
-    reporter = runTestReporterFromString(argResults[reporterOptionName]);
+    dryRun = argResults[dryRunOptionName] as bool;
+    reporter =
+        runTestReporterFromString(argResults[reporterOptionName] as String);
 
-    name = argResults[nameOptionName];
+    name = argResults[nameOptionName] as String;
 
-    getBeforeOffline = argResults[getOfflineOptionName];
+    getBeforeOffline = parseBool(argResults[getOfflineOptionName]);
     platforms = getPlatforms(argResults);
-    poolSize = int.parse(argResults[concurrencyOptionName]);
-    verbose = argResults[verboseOptionName];
+    poolSize = parseInt(argResults[concurrencyOptionName]);
+    verbose = parseBool(argResults[verboseOptionName]);
   }
 }
 
 class TestOptions extends CommonTestOptions {
   TestOptions.fromArgResults(ArgResults argResults)
       : super.fromArgResults(argResults) {
-    getBefore = argResults[getOptionName];
+    getBefore = parseBool(argResults[getOptionName]);
   }
 }
 
@@ -105,12 +106,11 @@ void addArgs(ArgParser parser) {
       abbr: 'k', help: 'Number of concurrent packages tested', defaultsTo: '1');
   parser.addOption(nameOptionName,
       abbr: 'n', help: 'A substring of the name of the test to run');
-  parser.addOption(platformOptionName,
+  parser.addMultiOption(platformOptionName,
       abbr: 'p',
       help: 'The platform(s) on which to run the tests.',
       allowed: allPlatforms,
-      defaultsTo: 'vm',
-      allowMultiple: true);
+      defaultsTo: ['vm']);
   parser.addFlag(getOfflineOptionName,
       help: 'Get dependencies first in offline mode', negatable: false);
 }
@@ -127,7 +127,7 @@ Future main(List<String> arguments) async {
       help: 'Get dependencies first', negatable: false);
   ArgResults argResults = parser.parse(arguments);
 
-  bool help = argResults[helpOptionName];
+  bool help = parseBool(argResults[helpOptionName]);
   if (help) {
     stdout.writeln(
         "Call 'pub run test' recursively (default from current directory)");
@@ -140,7 +140,7 @@ Future main(List<String> arguments) async {
     return;
   }
 
-  if (argResults[versionOptionName]) {
+  if (parseBool(argResults[versionOptionName])) {
     stdout.write('${currentScriptName} ${version}');
     return;
   }
@@ -156,7 +156,7 @@ Future main(List<String> arguments) async {
 
   TestOptions testOptions = new TestOptions.fromArgResults(argResults);
 
-  int packagePoolSize = int.parse(argResults[packageConcurrencyOptionName]);
+  int packagePoolSize = parseInt(argResults[packageConcurrencyOptionName]);
 
   Pool packagePool = new Pool(packagePoolSize);
 

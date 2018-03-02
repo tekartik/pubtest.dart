@@ -11,7 +11,8 @@ import 'package:pubtest/src/pubtest_version.dart';
 
 class TestScript extends Script {}
 
-Directory get pkgDir => new File(getScriptPath(TestScript)).parent.parent;
+Directory get pkgDir =>
+    new File(getScriptPath(TestScript)).parent.parent as Directory;
 
 void main() => defineTests(newIoFileSystemContext(
     io.Directory.systemTemp.createTempSync('pubtest_test_').path));
@@ -22,12 +23,24 @@ String get pubTestPackageDartScript {
 
 void defineTests(FileSystemTestContext ctx) {
   //useVMConfiguration();
+
+  checkErrorExitCode(result) {
+    if (!Platform.isWindows) {
+      try {
+        expect(result.exitCode, 1);
+      } catch (_) {
+        expect(result.exitCode, 255);
+      }
+    }
+  }
+
   group('pubtestpackage', () {
     test('version', () async {
       ProcessResult result =
           await runCmd(dartCmd([pubTestPackageDartScript, '--version']));
       expect(result.stdout, contains("pubtest"));
-      expect(new Version.parse(result.stdout.split(' ').last), version);
+      expect(new Version.parse((result.stdout as String).split(' ').last),
+          version);
     });
 
     group('path', () {
@@ -57,9 +70,7 @@ void defineTests(FileSystemTestContext ctx) {
           'vm',
           'test/data/fail_test_.dart'
         ])); // ..connectStderr=true..connectStdout=true);
-        if (!Platform.isWindows) {
-          expect(result.exitCode, 1);
-        }
+        checkErrorExitCode(result);
       });
     });
 
@@ -93,9 +104,7 @@ void defineTests(FileSystemTestContext ctx) {
           '--get-offline',
           'test/data/fail_test_.dart'
         ])); // ..connectStderr=true..connectStdout=true);
-        if (!Platform.isWindows) {
-          expect(result.exitCode, 1);
-        }
+        checkErrorExitCode(result);
       });
     });
   });

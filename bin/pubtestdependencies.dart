@@ -31,13 +31,14 @@ bool _debug = false;
 Future main(List<String> arguments) async {
   ArgParser parser = new ArgParser(allowTrailingOptions: true);
   addArgs(parser);
-  parser.addOption(packageOptionName,
-      abbr: 'f',
-      help: 'Filter dependencies by package name',
-      allowMultiple: true);
+  parser.addMultiOption(
+    packageOptionName,
+    abbr: 'f',
+    help: 'Filter dependencies by package name',
+  );
   ArgResults argResults = parser.parse(arguments);
 
-  bool help = argResults[_HELP];
+  bool help = parseBool(argResults[_HELP]);
   if (help) {
     stdout.writeln(
         "Call 'pub run test' recursively (default from current directory)");
@@ -50,7 +51,7 @@ Future main(List<String> arguments) async {
     return;
   }
 
-  if (argResults['version']) {
+  if (parseBool(argResults['version'])) {
     stdout.write('${currentScriptName} ${version}');
     return;
   }
@@ -65,7 +66,7 @@ Future main(List<String> arguments) async {
   CommonTestOptions testOptions =
       new CommonTestOptions.fromArgResults(argResults);
 
-  List<String> packageNames = argResults[packageOptionName];
+  List<String> packageNames = argResults[packageOptionName] as List<String>;
 
   // get dirs in parameters, default to current
   List<String> dirsOrFiles = new List.from(argResults.rest);
@@ -77,7 +78,7 @@ Future main(List<String> arguments) async {
   //PubTest pubTest = new PubTest();
   NewTestList list = new NewTestList();
 
-  int packagePoolSize = int.parse(argResults[packageConcurrencyOptionName]);
+  int packagePoolSize = parseInt(argResults[packageConcurrencyOptionName]);
 
   List<PubPackage> errors = [];
   Future _handleProject(DependencyTestPackage dependency,
@@ -126,8 +127,9 @@ Future main(List<String> arguments) async {
       for (String dependency in dependencies) {
         PubPackage pkg = await parent.extractPackage(dependency);
         //print(parent);
-        if (pkg != null && pubspecYamlHasAnyDependencies(
-            await pkg.getPubspecYaml(), ['test'])) {
+        if (pkg != null &&
+            pubspecYamlHasAnyDependencies(
+                await pkg.getPubspecYaml(), ['test'])) {
           // add whole package
           list.add(new DependencyTestPackage(parent, pkg));
         }
@@ -165,7 +167,7 @@ int _w2;
   //int _w2; print('#2 ${list.packages}');
   for (TestPackage pkg in list.packages) {
     await packagePool.withResource(() async {
-      await _handleProject(pkg, list.getTests(pkg));
+      await _handleProject(pkg as DependencyTestPackage, list.getTests(pkg));
     });
   }
 

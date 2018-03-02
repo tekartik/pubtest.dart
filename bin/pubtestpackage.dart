@@ -31,17 +31,14 @@ List<String> getFiles(ArgResults argResults) {
 Future main(List<String> arguments) async {
   ArgParser parser = new ArgParser(allowTrailingOptions: true);
   addArgs(parser);
-  parser.addOption(packageSourceOptionName,
-      abbr: 's',
-      help: "package source",
-      allowed: [sourceGit, sourcePath],
-      allowMultiple: false);
+  parser.addMultiOption(packageSourceOptionName,
+      abbr: 's', help: "package source", allowed: [sourceGit, sourcePath]);
   parser.addFlag(getOptionName,
       help: 'Get dependencies first (for path dependencies only)',
       negatable: false);
   ArgResults argResults = parser.parse(arguments);
 
-  bool help = argResults[helpOptionName];
+  bool help = parseBool(argResults[helpOptionName]);
   if (help) {
     stdout.writeln("'pub run test' on some packages");
     stdout.writeln();
@@ -55,7 +52,7 @@ Future main(List<String> arguments) async {
     return;
   }
 
-  if (argResults['version']) {
+  if (parseBool(argResults['version'])) {
     stdout.write('${currentScriptName} ${version}');
     return;
   }
@@ -63,7 +60,7 @@ Future main(List<String> arguments) async {
   TestOptions testOptions = new TestOptions.fromArgResults(argResults);
 
   // Handle git package
-  String source = argResults[packageSourceOptionName];
+  String source = argResults[packageSourceOptionName] as String;
   if (source == sourceGit) {
     if (argResults.rest.length < 1) {
       stderr.writeln("Missing git source information");
