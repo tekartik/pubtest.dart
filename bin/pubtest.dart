@@ -42,7 +42,8 @@ const List<String> allPlatforms = const [
   "phantomjs",
   "firefox",
   "safari",
-  "ie"
+  "ie",
+  "node"
 ];
 
 class CommonTestOptions {
