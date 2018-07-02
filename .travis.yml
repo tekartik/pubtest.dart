@@ -3,6 +3,6 @@ sudo: required
 dist: trusty
 dart:
   - stable
-  - dev
+#  - dev
 script:
   - tool/travis.sh
