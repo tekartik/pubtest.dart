@@ -1,29 +1,20 @@
 @TestOn("vm")
 library tekartik_pub.test.pub_test;
 
-import 'dart:io' as io;
+import 'dart:io';
 
 import 'package:dev_test/test.dart';
-import 'package:fs_shim_test/test_io.dart';
+import 'package:path/path.dart';
+
 import 'package:process_run/cmd_run.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:pubtest/src/pubtest_version.dart';
 import 'package:tekartik_pub/io.dart';
 
-class TestScript extends Script {}
+String get pubTestDartScript =>
+    normalize(absolute(join('bin', 'pubtest.dart')));
 
-Directory get pkgDir =>
-    new File(getScriptPath(TestScript)).parent.parent as Directory;
-
-void main() => defineTests(newIoFileSystemContext(
-    io.Directory.systemTemp.createTempSync('pubtest_test_').path));
-
-String get pubTestDartScript {
-  return join(pkgDir.path, 'bin', 'pubtest.dart');
-}
-
-void defineTests(FileSystemTestContext ctx) {
-  //useVMConfiguration();
+void main() {
   group('pubtest', () {
     test('version', () async {
       ProcessResult result =
@@ -34,38 +25,54 @@ void defineTests(FileSystemTestContext ctx) {
     });
 
     test('success', () async {
-      ProcessResult result = await runCmd(dartCmd(
-          [pubTestDartScript, '-p', 'vm', 'test/data/success_test_.dart']));
+      var testPath = join('test', 'data', 'success_test.dart');
+      try {
+        await new File(join('test', 'data', 'success_test_.dart'))
+            .copy(testPath);
 
-      // on 1.13, current windows is failing
-      if (!Platform.isWindows) {
-        expect(result.exitCode, 0);
+        ProcessResult result =
+            await runCmd(dartCmd([pubTestDartScript, '-p', 'vm', testPath]));
+
+        // on 1.13, current windows is failing
+        if (!Platform.isWindows) {
+          expect(result.exitCode, 0);
+        }
+
+        expect(result.stdout.contains("All tests passed"), isTrue);
+      } finally {
+        try {
+          await new File(testPath).delete();
+        } catch (_) {}
       }
-
-      expect(result.stdout.contains("All tests passed"), isTrue);
     });
 
     test('failure', () async {
-      ProcessResult result = await runCmd(dartCmd([
-        pubTestDartScript,
-        '-p',
-        'vm',
-        'test/data/fail_test_.dart'
-      ])); // ..connectStderr=true..connectStdout=true);
-      if (!Platform.isWindows) {
-        expect(result.exitCode, 1);
+      var testPath = join('test', 'data', 'fail_test.dart');
+      try {
+        await new File(join('test', 'data', 'fail_test_.dart')).copy(testPath);
+        ProcessResult result = await runCmd(dartCmd([
+          pubTestDartScript,
+          '-p',
+          'vm',
+          testPath
+        ])); // ..connectStderr=true..connectStdout=true);
+        if (!Platform.isWindows) {
+          expect(result.exitCode, 1);
+        }
+      } finally {
+        try {
+          await new File(testPath).delete();
+        } catch (_) {}
       }
     });
 
     group('example', () {
       test('subdir', () async {
-        Directory top = await ctx.prepare() as Directory;
+        String top = (await Directory.systemTemp.createTemp()).path;
 
-        Directory successDir = childDirectory(top, 'success') as Directory;
-
-        PubPackage exampleSuccessDir = new PubPackage(
-            childDirectory(pkgDir, join('example', 'success')).path);
-        PubPackage pkg = await exampleSuccessDir.clone(successDir.path);
+        PubPackage exampleSuccessDir =
+            new PubPackage(join('example', 'success'));
+        PubPackage pkg = await exampleSuccessDir.clone(join(top, 'success'));
 
         // Filter test having "success" in the data dir
         ProcessResult result = await runCmd(pkg.dartCmd([
@@ -95,7 +102,7 @@ void defineTests(FileSystemTestContext ctx) {
           pubTestDartScript,
           '-p',
           'vm',
-          '${top.path}',
+          '${top}',
           '-n',
           'success',
           '-r',

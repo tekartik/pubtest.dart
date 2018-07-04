@@ -1,28 +1,19 @@
 @TestOn("vm")
 library tekartik_pub.test.pub_test;
 
-import 'dart:io' as io;
+import 'dart:io';
 
 import 'package:dev_test/test.dart';
-import 'package:fs_shim_test/test_io.dart';
 import 'package:path/path.dart';
 import 'package:process_run/cmd_run.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:pubtest/src/pubtest_version.dart';
 import 'package:tekartik_pub/io.dart';
 
-class TestScript extends Script {}
+String get pubTestDependenciesDartScript =>
+    normalize(absolute(join('bin', 'pubtestdependencies.dart')));
 
-String get pkgDir => new File(getScriptPath(TestScript)).parent.parent.path;
-
-void main() => defineTests(newIoFileSystemContext(
-    io.Directory.systemTemp.createTempSync('pubtestdependencies_test_').path));
-
-String get pubTestDependenciesDartScript {
-  return join(pkgDir, 'bin', 'pubtestdependencies.dart');
-}
-
-void defineTests(FileSystemTestContext ctx) {
+void main() {
   //useVMConfiguration();
   group('pubtestdependencies', () {
     test('version', () async {
@@ -34,11 +25,11 @@ void defineTests(FileSystemTestContext ctx) {
     });
 
     test('simple_dependencies', () async {
-      String top = (await ctx.prepare()).path;
-      PubPackage exampleSimplePkg =
-          new PubPackage(join(pkgDir, 'example', 'simple'));
+      String top = (await Directory.systemTemp.createTemp()).path;
+
+      PubPackage exampleSimplePkg = new PubPackage(join('example', 'simple'));
       PubPackage exampleSimpleDependencyPkg =
-          new PubPackage(join(pkgDir, 'example', 'simple_dependency'));
+          new PubPackage(join('example', 'simple_dependency'));
 
       String dst = join(top, 'simple');
       String dstDependency = join(top, 'simple_dependency');
@@ -73,11 +64,10 @@ void defineTests(FileSystemTestContext ctx) {
     }, timeout: new Timeout(new Duration(minutes: 2)));
 
     test('simple_filter_dependencies', () async {
-      String top = (await ctx.prepare()).path;
-      PubPackage exampleSimplePkg =
-          new PubPackage(join(pkgDir, 'example', 'simple'));
+      String top = (await Directory.systemTemp.createTemp()).path;
+      PubPackage exampleSimplePkg = new PubPackage(join('example', 'simple'));
       PubPackage exampleSimpleDependencyPkg =
-          new PubPackage(join(pkgDir, 'example', 'simple_dependency'));
+          new PubPackage(join('example', 'simple_dependency'));
 
       String dst = join(top, 'simple');
       String dstDependency = join(top, 'simple_dependency');
@@ -143,11 +133,11 @@ void defineTests(FileSystemTestContext ctx) {
     }, timeout: new Timeout(new Duration(minutes: 2)));
 
     test('simple_failed_dependencies', () async {
-      String top = (await ctx.prepare()).path;
+      String top = (await Directory.systemTemp.createTemp()).path;
       PubPackage exampleSimplePkg =
-          new PubPackage(join(pkgDir, 'example', 'simple_failed'));
+          new PubPackage(join('example', 'simple_failed'));
       PubPackage exampleSimpleDependencyPkg =
-          new PubPackage(join(pkgDir, 'example', 'simple_failed_dependency'));
+          new PubPackage(join('example', 'simple_failed_dependency'));
 
       String dst = join(top, 'simple_failed');
       String dstDependency = join(top, 'simple_failed_dependency');

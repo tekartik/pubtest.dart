@@ -1,27 +1,18 @@
 @TestOn("vm")
 library tekartik_pub.test.pub_test;
 
-import 'dart:io' as io;
+import 'dart:io';
 
 import 'package:dev_test/test.dart';
-import 'package:fs_shim_test/test_io.dart';
+import 'package:path/path.dart';
 import 'package:process_run/cmd_run.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:pubtest/src/pubtest_version.dart';
 
-class TestScript extends Script {}
+String get pubTestPackageDartScript =>
+    normalize(absolute(join('bin', 'pubtestpackage.dart')));
 
-Directory get pkgDir =>
-    new File(getScriptPath(TestScript)).parent.parent as Directory;
-
-void main() => defineTests(newIoFileSystemContext(
-    io.Directory.systemTemp.createTempSync('pubtest_test_').path));
-
-String get pubTestPackageDartScript {
-  return join(pkgDir.path, 'bin', 'pubtestpackage.dart');
-}
-
-void defineTests(FileSystemTestContext ctx) {
+void main() {
   //useVMConfiguration();
 
   checkErrorExitCode(result) {

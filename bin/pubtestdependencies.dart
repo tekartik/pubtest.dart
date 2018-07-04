@@ -15,15 +15,9 @@ import 'pubtest.dart';
 
 String get currentScriptName => basenameWithoutExtension(Platform.script.path);
 
-const String _HELP = 'help';
+const String helpFlag = 'help';
 //const String _LOG = 'log';
-const String _DRY_RUN = 'dry-run';
-const String _CONCURRENCY = 'concurrency';
-const String packageOptionName = 'packageName';
-const String _PLATFORM = 'platform';
-const String _NAME = 'name';
-
-bool _debug = false;
+const String packageNameOption = 'package-name';
 
 ///
 /// Recursively update (pull) git folders
@@ -32,13 +26,13 @@ Future main(List<String> arguments) async {
   ArgParser parser = new ArgParser(allowTrailingOptions: true);
   addArgs(parser);
   parser.addMultiOption(
-    packageOptionName,
+    packageNameOption,
     abbr: 'f',
     help: 'Filter dependencies by package name',
   );
   ArgResults argResults = parser.parse(arguments);
 
-  bool help = parseBool(argResults[_HELP]);
+  bool help = parseBool(argResults[helpFlag]);
   if (help) {
     stdout.writeln(
         "Call 'pub run test' recursively (default from current directory)");
@@ -66,7 +60,7 @@ Future main(List<String> arguments) async {
   CommonTestOptions testOptions =
       new CommonTestOptions.fromArgResults(argResults);
 
-  List<String> packageNames = argResults[packageOptionName] as List<String>;
+  List<String> packageNames = argResults[packageNameOption] as List<String>;
 
   // get dirs in parameters, default to current
   List<String> dirsOrFiles = new List.from(argResults.rest);
@@ -100,8 +94,8 @@ Future main(List<String> arguments) async {
     PubPackage pkg = await dependency.package.clone(dst);
 
     print('[pubtestdependencies] test on ${pkg}${files != null
-            ? " ${files}"
-            : ""}');
+        ? " ${files}"
+        : ""}');
 
     // fix options - get needed
     testOptions.upgradeBefore = true;

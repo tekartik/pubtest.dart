@@ -2,7 +2,7 @@ name: pubtest
 author: Alexandre Roux <alex@tekartik.com>
 version: 0.4.0
 environment:
-  sdk: '>=1.24.3 <2.0.0'
+  sdk: '>=2.0.0-dev.63 <2.0.0'
 dependencies:
   args: any
   path: any
@@ -13,29 +13,25 @@ dependencies:
   tekartik_pub:
     git:
       url: git://github.com/tekartik/pub.dart
-      ref: dart1
+      ref: dart2
     version: '>=0.7.1'
   tekartik_sc:
     git:
       url: git://github.com/tekartik/sc.dart
-      ref: dart1
+      ref: dart2
     version: '>=0.3.1'
   tekartik_io_utils:
     git:
       url: git://github.com/tekartik/io_utils.dart
-      ref: dart1
+      ref: dart2
   fs_shim: '>=0.7.3'
 dev_dependencies:
   dev_test: any
   test: '>=0.12.24+6'
-  fs_shim_test:
-    git:
-      url: git://github.com/tekartik/fs_shim_test.dart
-      ref: dart1
   chrome_travis:
     git:
       url: git://github.com/tekartik/chrome_travis.dart
-      ref: dart1
+      ref: dart2
     version: '>=0.1.3'
 #test_dependencies: []
 dependency_overrides:

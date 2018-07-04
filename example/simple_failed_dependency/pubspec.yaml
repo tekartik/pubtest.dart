@@ -1,4 +1,3 @@
 name: pubtest_example_simple_failed_dependency
-dependencies:
 dev_dependencies:
   test: '>=0.12.24'

@@ -237,8 +237,8 @@ Future testPackage(PubPackage pkg, CommonTestOptions testOptions,
   // if no file is given make sure the test/folder exists
   if (files == null) {
     // no tests found
-    if (!(await FileSystemEntity
-        .isDirectory(childDirectory(pkg.dir, "test").path))) {
+    if (!(await FileSystemEntity.isDirectory(
+        childDirectory(pkg.dir, "test").path))) {
       return;
     }
   }
