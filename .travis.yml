@@ -2,7 +2,7 @@ language: dart
 sudo: required
 dist: trusty
 dart:
-  - stable
-#  - dev
+#  - stable
+  - dev
 script:
   - tool/travis.sh
