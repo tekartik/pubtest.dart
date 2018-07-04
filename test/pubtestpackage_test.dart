@@ -9,6 +9,8 @@ import 'package:process_run/cmd_run.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:pubtest/src/pubtest_version.dart';
 
+var longTimeout = new Timeout(new Duration(minutes: 2));
+
 String get pubTestPackageDartScript =>
     normalize(absolute(join('bin', 'pubtestpackage.dart')));
 
@@ -83,7 +85,7 @@ void main() {
         }
 
         expect(result.stdout.contains("All tests passed"), isTrue);
-      });
+      }, timeout: longTimeout);
 
       test('failure', () async {
         ProcessResult result = await runCmd(dartCmd([
@@ -96,7 +98,7 @@ void main() {
           'test/data/fail_test_.dart'
         ])); // ..connectStderr=true..connectStdout=true);
         checkErrorExitCode(result);
-      });
+      }, timeout: longTimeout);
     });
   });
 }

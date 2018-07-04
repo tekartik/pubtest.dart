@@ -11,6 +11,8 @@ import 'package:pub_semver/pub_semver.dart';
 import 'package:pubtest/src/pubtest_version.dart';
 import 'package:tekartik_pub/io.dart';
 
+var longTimeout = new Timeout(new Duration(minutes: 2));
+
 String get pubTestDartScript =>
     normalize(absolute(join('bin', 'pubtest.dart')));
 
@@ -121,7 +123,7 @@ void main() {
         //expect(pubRunTestJsonProcessResultSuccessCount(result), 1);
         //expect(pubRunTestJsonProcessResultFailureCount(result), 0);
       });
-    });
+    }, timeout: longTimeout);
 
     // expect
   });
