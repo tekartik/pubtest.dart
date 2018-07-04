@@ -8,7 +8,7 @@ dependencies:
   path: any
   pool: any
   pub_semver: any
-  process_run: '>=0.5.0'
+  process_run: '>=0.6.0-dev.1'
   yaml: any
   tekartik_pub:
     git:
@@ -26,8 +26,8 @@ dependencies:
       ref: dart2
   fs_shim: '>=0.7.3'
 dev_dependencies:
-  dev_test: any
-  test: '>=0.12.24+6'
+  dev_test: '>=0.12.0-dev.1'
+  test: '>=1.2.0'
   chrome_travis:
     git:
       url: git://github.com/tekartik/chrome_travis.dart
