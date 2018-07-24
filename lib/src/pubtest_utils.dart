@@ -147,7 +147,8 @@ class PubTest {
 
 Iterable<String> pubspecYamlGetTestDependenciesPackageName(Map yaml) {
   if (yaml.containsKey('test_dependencies')) {
-    Iterable<String> list = (yaml['test_dependencies'] as Iterable)?.cast<String>();
+    Iterable<String> list =
+        (yaml['test_dependencies'] as Iterable)?.cast<String>();
     if (list == null) {
       list = [];
     }

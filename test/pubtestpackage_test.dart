@@ -99,6 +99,6 @@ void main() {
         ])); // ..connectStderr=true..connectStdout=true);
         checkErrorExitCode(result);
       }, timeout: longTimeout);
-    });
+    }, skip: true); // URL points to dart1
   });
 }

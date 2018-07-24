@@ -33,6 +33,8 @@ dev_dependencies:
       url: git://github.com/tekartik/chrome_travis.dart
       ref: dart2
     version: '>=0.1.3'
+  build_runner: '>=0.9.0'
+  build_test: '>=0.10.2'
 #test_dependencies: []
 dependency_overrides:
 #  tekartik_pub:

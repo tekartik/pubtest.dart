@@ -93,9 +93,8 @@ Future main(List<String> arguments) async {
     //print(dst);
     PubPackage pkg = await dependency.package.clone(dst);
 
-    print('[pubtestdependencies] test on ${pkg}${files != null
-        ? " ${files}"
-        : ""}');
+    print(
+        '[pubtestdependencies] test on ${pkg}${files != null ? " ${files}" : ""}');
 
     // fix options - get needed
     testOptions.upgradeBefore = true;
