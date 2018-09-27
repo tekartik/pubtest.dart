@@ -1,4 +1,6 @@
 name: pubtest_example_simple_failed
+environment:
+  sdk: '>=2.0.0-dev.58 <3.0.0'
 dependencies:
   pubtest_example_simple_failed_dependency:
     path: ../simple_failed_dependency
