@@ -8,7 +8,7 @@ import 'package:path/path.dart';
 
 import 'package:process_run/cmd_run.dart';
 import 'package:pub_semver/pub_semver.dart';
-import 'package:pubtest/src/pubtest_version.dart';
+import 'package:tekartik_pubtest/src/pubtest_version.dart';
 import 'package:tekartik_pub/io.dart';
 
 var longTimeout = new Timeout(new Duration(minutes: 2));
@@ -20,7 +20,7 @@ void main() {
   group('pubtest', () {
     test('version', () async {
       ProcessResult result =
-          await runCmd(dartCmd([pubTestDartScript, '--version']));
+          await runCmd(DartCmd([pubTestDartScript, '--version']));
       expect(result.stdout, contains("pubtest"));
       expect(new Version.parse((result.stdout as String).split(' ').last),
           version);
@@ -33,7 +33,7 @@ void main() {
             .copy(testPath);
 
         ProcessResult result =
-            await runCmd(dartCmd([pubTestDartScript, '-p', 'vm', testPath]));
+            await runCmd(DartCmd([pubTestDartScript, '-p', 'vm', testPath]));
 
         // on 1.13, current windows is failing
         if (!Platform.isWindows) {
@@ -52,7 +52,7 @@ void main() {
       var testPath = join('test', 'data', 'fail_test.dart');
       try {
         await new File(join('test', 'data', 'fail_test_.dart')).copy(testPath);
-        ProcessResult result = await runCmd(dartCmd([
+        ProcessResult result = await runCmd(DartCmd([
           pubTestDartScript,
           '-p',
           'vm',

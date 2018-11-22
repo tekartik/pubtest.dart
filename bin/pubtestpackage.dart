@@ -1,5 +1,5 @@
 #!/usr/bin/env dart
-library pubtest.bin.pubtest;
+library tekartik_pubtest.bin.pubtest;
 
 // Pull recursively
 
@@ -7,12 +7,11 @@ import 'dart:io';
 
 import 'package:args/args.dart';
 import 'package:process_run/cmd_run.dart';
-import 'package:pubtest/src/pubtest_version.dart';
+import 'package:tekartik_pubtest/bin/pubtest.dart';
+import 'package:tekartik_pubtest/src/pubtest_version.dart';
 import 'package:tekartik_common_utils/common_utils_import.dart';
 import 'package:tekartik_pub/io.dart';
 import 'package:tekartik_sc/git.dart';
-
-import 'pubtest.dart';
 
 const String packageSourceOptionName = 'source';
 const String sourceGit = "git";

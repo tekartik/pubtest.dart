@@ -7,7 +7,7 @@ import 'package:dev_test/test.dart';
 import 'package:path/path.dart';
 import 'package:process_run/cmd_run.dart';
 import 'package:pub_semver/pub_semver.dart';
-import 'package:pubtest/src/pubtest_version.dart';
+import 'package:tekartik_pubtest/src/pubtest_version.dart';
 import 'package:tekartik_pub/io.dart';
 
 String get pubTestDependenciesDartScript =>
@@ -18,7 +18,7 @@ void main() {
   group('pubtestdependencies', () {
     test('version', () async {
       ProcessResult result =
-          await runCmd(dartCmd([pubTestDependenciesDartScript, '--version']));
+          await runCmd(DartCmd([pubTestDependenciesDartScript, '--version']));
       expect(result.stdout, contains("pubtestdependencies"));
       expect(
           new Version.parse(result.stdout.split(' ').last as String), version);

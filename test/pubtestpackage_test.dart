@@ -7,7 +7,7 @@ import 'package:dev_test/test.dart';
 import 'package:path/path.dart';
 import 'package:process_run/cmd_run.dart';
 import 'package:pub_semver/pub_semver.dart';
-import 'package:pubtest/src/pubtest_version.dart';
+import 'package:tekartik_pubtest/src/pubtest_version.dart';
 
 var longTimeout = new Timeout(new Duration(minutes: 2));
 
@@ -30,7 +30,7 @@ void main() {
   group('pubtestpackage', () {
     test('version', () async {
       ProcessResult result =
-          await runCmd(dartCmd([pubTestPackageDartScript, '--version']));
+          await runCmd(DartCmd([pubTestPackageDartScript, '--version']));
       expect(result.stdout, contains("pubtest"));
       expect(new Version.parse((result.stdout as String).split(' ').last),
           version);
@@ -38,7 +38,7 @@ void main() {
 
     group('path', () {
       test('success', () async {
-        ProcessResult result = await runCmd(dartCmd([
+        ProcessResult result = await runCmd(DartCmd([
           pubTestPackageDartScript,
           '-spath',
           '.',
@@ -55,7 +55,7 @@ void main() {
       });
 
       test('failure', () async {
-        ProcessResult result = await runCmd(dartCmd([
+        ProcessResult result = await runCmd(DartCmd([
           pubTestPackageDartScript,
           '-spath',
           '.'
@@ -69,7 +69,7 @@ void main() {
 
     group('git', () {
       test('success', () async {
-        ProcessResult result = await runCmd(dartCmd([
+        ProcessResult result = await runCmd(DartCmd([
           pubTestPackageDartScript,
           '-sgit',
           'https://github.com/tekartik/pubtest.dart',
@@ -88,7 +88,7 @@ void main() {
       }, timeout: longTimeout);
 
       test('failure', () async {
-        ProcessResult result = await runCmd(dartCmd([
+        ProcessResult result = await runCmd(DartCmd([
           pubTestPackageDartScript,
           '-sgit',
           'https://github.com/tekartik/pubtest.dart'

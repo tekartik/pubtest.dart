@@ -1,4 +1,4 @@
-library pubtest.src.pubtest_version;
+library tekartik_pubtest.src.pubtest_version;
 
 import 'package:pub_semver/pub_semver.dart';
 
