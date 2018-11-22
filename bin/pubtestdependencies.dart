@@ -7,11 +7,11 @@ import 'dart:async';
 import 'package:args/args.dart';
 import 'package:path/path.dart';
 import 'package:pool/pool.dart';
-import 'package:pubtest/src/pubtest_utils.dart';
-import 'package:pubtest/src/pubtest_version.dart';
+import 'package:tekartik_io_utils/io_utils_import.dart';
+import 'package:tekartik_pubtest/bin/pubtest.dart';
+import 'package:tekartik_pubtest/src/pubtest_utils.dart';
+import 'package:tekartik_pubtest/src/pubtest_version.dart';
 import 'package:tekartik_pub/io.dart';
-
-import 'pubtest.dart';
 
 String get currentScriptName => basenameWithoutExtension(Platform.script.path);
 

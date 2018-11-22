@@ -4,7 +4,7 @@ library tekartik_pubtest.test.src_pubtest_utils_test;
 import 'dart:convert';
 
 import 'package:dev_test/test.dart';
-import 'package:pubtest/src/pubtest_utils.dart';
+import 'package:tekartik_pubtest/src/pubtest_utils.dart';
 
 void main() {
   group('sec_pubtest_utils', () {
