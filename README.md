@@ -37,7 +37,7 @@ Global options:
 
 -n, --name                  A substring of the name of the test to run
 -p, --platform              The platform(s) on which to run the tests.
-                            [vm (default), dartium, content-shell, chrome, phantomjs, firefox, safari, ie]
+                            [vm (default), content-shell, chrome, phantomjs, firefox, safari, ie]
 ````
 
 ## pubtestdependencies

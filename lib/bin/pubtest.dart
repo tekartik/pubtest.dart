@@ -36,7 +36,6 @@ const String versionOptionName = "version";
 
 const List<String> allPlatforms = const [
   "vm",
-  "dartium",
   "content-shell",
   "chrome",
   "phantomjs",
