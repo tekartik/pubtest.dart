@@ -33,6 +33,7 @@ const String getOfflineOptionName = 'get-offline';
 const String reporterOptionName = "reporter";
 const String reporterOptionAbbr = "r";
 const String versionOptionName = "version";
+const String argForceRecursiveFlag = "force-recursive";
 
 const List<String> allPlatforms = const [
   "vm",
@@ -46,6 +47,7 @@ const List<String> allPlatforms = const [
 ];
 
 class CommonTestOptions {
+  bool forceRecursive;
   bool verbose;
   bool getBeforeOffline;
 
@@ -72,7 +74,7 @@ class CommonTestOptions {
     getBeforeOffline = parseBool(argResults[getOfflineOptionName]);
     platforms = getPlatforms(argResults);
     poolSize = parseInt(argResults[concurrencyOptionName]);
-    verbose = parseBool(argResults[verboseOptionName]);
+    verbose = parseBool(argResults[verboseOptionName], false);
   }
 }
 
@@ -80,6 +82,7 @@ class TestOptions extends CommonTestOptions {
   TestOptions.fromArgResults(ArgResults argResults)
       : super.fromArgResults(argResults) {
     getBefore = parseBool(argResults[getOptionName]);
+    forceRecursive = parseBool(argResults[argForceRecursiveFlag], false);
   }
 }
 
@@ -97,7 +100,8 @@ void addArgs(ArgParser parser) {
       negatable: false);
   parser.addFlag("version",
       help: 'Display the script version', negatable: false);
-  parser.addFlag("verbose", abbr: 'v', help: 'Verbose mode', negatable: false);
+  parser.addFlag(verboseOptionName,
+      abbr: 'v', help: 'Verbose mode', negatable: false);
   parser.addOption(concurrencyOptionName,
       abbr: 'j',
       help: 'Number of concurrent tests in the same package tested',
@@ -113,6 +117,10 @@ void addArgs(ArgParser parser) {
       defaultsTo: ['vm']);
   parser.addFlag(getOfflineOptionName,
       help: 'Get dependencies first in offline mode', negatable: false);
+  parser.addFlag(argForceRecursiveFlag,
+      abbr: 'f',
+      help: 'Force going recursive even in dart project',
+      defaultsTo: true);
 }
 
 ///
@@ -160,6 +168,9 @@ Future main(List<String> arguments) async {
 
   Pool packagePool = new Pool(packagePoolSize);
 
+  if (testOptions.verbose) {
+    stdout.writeln('Scanning $dirsOrFiles');
+  }
   // Handle pub sub path
   for (String dirOrFile in dirsOrFiles) {
     Directory dir;
@@ -196,7 +207,9 @@ Future main(List<String> arguments) async {
   }
 
   // Also Handle recursive projects
-  await recursivePubPath(dirs, dependencies: ['test']).listen((String dir) {
+  await recursivePubPath(dirs,
+          dependencies: ['test'], forceRecursive: testOptions.forceRecursive)
+      .listen((String dir) {
     list.add(new PubPackage(dir));
   }).asFuture();
 

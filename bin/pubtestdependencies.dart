@@ -27,7 +27,6 @@ Future main(List<String> arguments) async {
   addArgs(parser);
   parser.addMultiOption(
     packageNameOption,
-    abbr: 'f',
     help: 'Filter dependencies by package name',
   );
   ArgResults argResults = parser.parse(arguments);
