@@ -63,7 +63,7 @@ void main() {
           reason: result.stdout.toString());
     }, timeout: new Timeout(new Duration(minutes: 2)));
 
-    test('simple_filter_dependencies', () async {
+    solo_test('simple_filter_dependencies', () async {
       String top = (await Directory.systemTemp.createTemp()).path;
       PubPackage exampleSimplePkg = new PubPackage(join('example', 'simple'));
       PubPackage exampleSimpleDependencyPkg =
@@ -83,7 +83,7 @@ void main() {
             'json',
             '-p',
             'vm',
-            '-f',
+            '--package-name',
             'dummy'
           ]) // --get-offline failed using 1.16
           // p', 'vm'])
