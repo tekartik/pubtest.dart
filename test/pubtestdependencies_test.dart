@@ -83,7 +83,7 @@ void main() {
             'json',
             '-p',
             'vm',
-            '-f',
+            '--package-name',
             'dummy'
           ]) // --get-offline failed using 1.16
           // p', 'vm'])
