@@ -63,7 +63,7 @@ void main() {
           reason: result.stdout.toString());
     }, timeout: new Timeout(new Duration(minutes: 2)));
 
-    solo_test('simple_filter_dependencies', () async {
+    test('simple_filter_dependencies', () async {
       String top = (await Directory.systemTemp.createTemp()).path;
       PubPackage exampleSimplePkg = new PubPackage(join('example', 'simple'));
       PubPackage exampleSimpleDependencyPkg =
