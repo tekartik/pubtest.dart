@@ -1,6 +1,6 @@
 #!/usr/bin/env dart
 library tekartik_script.bin.pubget;
 
-import 'package:tekartik_pubtest/bin/pubtest.dart' as _;
+import 'package:tekartik_pubtest/bin/pubtest.dart' as pubtest;
 
-main(List<String> arguments) => _.main(arguments);
+Future main(List<String> arguments) => pubtest.main(arguments);

@@ -11,8 +11,10 @@ class TestPackage {
   PubPackage package;
   TestPackage(this.package);
 
+  @override
   int get hashCode => package.hashCode;
 
+  @override
   bool operator ==(o) {
     return o is TestPackage && o.package == package;
   }
@@ -24,7 +26,7 @@ class TestPackage {
 class TestList {
   // empty list means all!
   Map<PubPackage, List<String>> all = {};
-  add(PubPackage pkg, [String test]) {
+  void add(PubPackage pkg, [String test]) {
     //print("$pkg $test");
     if (all.containsKey(pkg)) {
       List<String> tests = all[pkg];
@@ -60,7 +62,7 @@ class TestList {
 class NewTestList {
   // empty list means all!
   Map<TestPackage, List<String>> all = {};
-  add(TestPackage pkg, [String test]) {
+  void add(TestPackage pkg, [String test]) {
     //print("$pkg $test");
     if (all.containsKey(pkg)) {
       List<String> tests = all[pkg];
@@ -91,10 +93,6 @@ class NewTestList {
 
   @override
   String toString() => all.toString();
-
-  bool operator ==(o) {
-    return o is PubPackage && o.dir.path == o.dir.path;
-  }
 }
 
 class PubTest {

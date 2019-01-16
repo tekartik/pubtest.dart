@@ -35,7 +35,7 @@ const String reporterOptionAbbr = "r";
 const String versionOptionName = "version";
 const String argForceRecursiveFlag = "force-recursive";
 
-const List<String> allPlatforms = const [
+const List<String> allPlatforms = [
   "vm",
   "content-shell",
   "chrome",
@@ -129,7 +129,7 @@ void addArgs(ArgParser parser) {
 Future main(List<String> arguments) async {
   //setupQuickLogging();
 
-  ArgParser parser = new ArgParser(allowTrailingOptions: true);
+  ArgParser parser = ArgParser(allowTrailingOptions: true);
   addArgs(parser);
   parser.addFlag(getOptionName,
       help: 'Get dependencies first', negatable: false);
@@ -154,19 +154,19 @@ Future main(List<String> arguments) async {
   }
 
   // get dirs in parameters, default to current
-  List<String> dirsOrFiles = new List.from(argResults.rest);
+  List<String> dirsOrFiles = List.from(argResults.rest);
   if (dirsOrFiles.isEmpty) {
     dirsOrFiles = [Directory.current.path];
   }
   List<String> dirs = [];
 
-  TestList list = new TestList();
+  TestList list = TestList();
 
-  TestOptions testOptions = new TestOptions.fromArgResults(argResults);
+  TestOptions testOptions = TestOptions.fromArgResults(argResults);
 
   int packagePoolSize = parseInt(argResults[packageConcurrencyOptionName]);
 
-  Pool packagePool = new Pool(packagePoolSize);
+  Pool packagePool = Pool(packagePoolSize);
 
   if (testOptions.verbose) {
     stdout.writeln('Scanning $dirsOrFiles');
@@ -174,7 +174,7 @@ Future main(List<String> arguments) async {
   // Handle pub sub path
   for (String dirOrFile in dirsOrFiles) {
     Directory dir;
-    if (await FileSystemEntity.isDirectory(dirOrFile)) {
+    if (FileSystemEntity.isDirectorySync(dirOrFile)) {
       dirs.add(dirOrFile);
 
       // Pkg dir, no need to look higher
@@ -182,7 +182,7 @@ Future main(List<String> arguments) async {
         continue;
       }
     } else {
-      dir = new File(dirOrFile).parent;
+      dir = File(dirOrFile).parent;
     }
 
     String packageDir;
@@ -195,7 +195,7 @@ Future main(List<String> arguments) async {
       if (pubspecYamlHasAnyDependencies(
           await getPubspecYaml(packageDir), ['test'])) {
         dirOrFile = relative(dirOrFile, from: packageDir);
-        PubPackage pkg = new PubPackage(packageDir);
+        PubPackage pkg = PubPackage(packageDir);
         if (dirOrFile == "test") {
           // add whole package
           list.add(pkg);
@@ -210,7 +210,7 @@ Future main(List<String> arguments) async {
   await recursivePubPath(dirs,
           dependencies: ['test'], forceRecursive: testOptions.forceRecursive)
       .listen((String dir) {
-    list.add(new PubPackage(dir));
+    list.add(PubPackage(dir));
   }).asFuture();
 
   //print(list.packages);
@@ -249,7 +249,7 @@ Future testPackage(PubPackage pkg, CommonTestOptions testOptions,
   // if no file is given make sure the test/folder exists
   if (files == null) {
     // no tests found
-    if (!(await FileSystemEntity.isDirectory(
+    if (!(FileSystemEntity.isDirectorySync(
         childDirectory(pkg.dir, "test").path))) {
       return;
     }
@@ -301,6 +301,6 @@ Future testPackage(PubPackage pkg, CommonTestOptions testOptions,
   } catch (e) {
     stderr.writeln('error thrown in ${pkg}');
     stderr.flush();
-    throw e;
+    rethrow;
   }
 }

@@ -11,7 +11,7 @@ import 'package:pub_semver/pub_semver.dart';
 import 'package:tekartik_pubtest/src/pubtest_version.dart';
 import 'package:tekartik_pub/io.dart';
 
-var longTimeout = new Timeout(new Duration(minutes: 2));
+var longTimeout = Timeout(Duration(minutes: 2));
 
 String get pubTestDartScript =>
     normalize(absolute(join('bin', 'pubtest.dart')));
@@ -22,15 +22,13 @@ void main() {
       ProcessResult result =
           await runCmd(DartCmd([pubTestDartScript, '--version']));
       expect(result.stdout, contains("pubtest"));
-      expect(new Version.parse((result.stdout as String).split(' ').last),
-          version);
+      expect(Version.parse((result.stdout as String).split(' ').last), version);
     });
 
     test('success', () async {
       var testPath = join('test', 'data', 'success_test.dart');
       try {
-        await new File(join('test', 'data', 'success_test_.dart'))
-            .copy(testPath);
+        await File(join('test', 'data', 'success_test_.dart')).copy(testPath);
 
         ProcessResult result =
             await runCmd(DartCmd([pubTestDartScript, '-p', 'vm', testPath]));
@@ -43,7 +41,7 @@ void main() {
         expect(result.stdout.contains("All tests passed"), isTrue);
       } finally {
         try {
-          await new File(testPath).delete();
+          await File(testPath).delete();
         } catch (_) {}
       }
     });
@@ -51,7 +49,7 @@ void main() {
     test('failure', () async {
       var testPath = join('test', 'data', 'fail_test.dart');
       try {
-        await new File(join('test', 'data', 'fail_test_.dart')).copy(testPath);
+        await File(join('test', 'data', 'fail_test_.dart')).copy(testPath);
         ProcessResult result = await runCmd(DartCmd([
           pubTestDartScript,
           '-p',
@@ -63,7 +61,7 @@ void main() {
         }
       } finally {
         try {
-          await new File(testPath).delete();
+          await File(testPath).delete();
         } catch (_) {}
       }
     });
@@ -72,8 +70,7 @@ void main() {
       test('subdir', () async {
         String top = (await Directory.systemTemp.createTemp()).path;
 
-        PubPackage exampleSuccessDir =
-            new PubPackage(join('example', 'success'));
+        PubPackage exampleSuccessDir = PubPackage(join('example', 'success'));
         PubPackage pkg = await exampleSuccessDir.clone(join(top, 'success'));
 
         // Filter test having "success" in the data dir
