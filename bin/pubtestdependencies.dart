@@ -23,7 +23,7 @@ const String packageNameOption = 'package-name';
 /// Recursively update (pull) git folders
 ///
 Future main(List<String> arguments) async {
-  ArgParser parser = new ArgParser(allowTrailingOptions: true);
+  ArgParser parser = ArgParser(allowTrailingOptions: true);
   addArgs(parser);
   parser.addMultiOption(
     packageNameOption,
@@ -56,20 +56,19 @@ Future main(List<String> arguments) async {
   }
   */
 
-  CommonTestOptions testOptions =
-      new CommonTestOptions.fromArgResults(argResults);
+  CommonTestOptions testOptions = CommonTestOptions.fromArgResults(argResults);
 
   List<String> packageNames = argResults[packageNameOption] as List<String>;
 
   // get dirs in parameters, default to current
-  List<String> dirsOrFiles = new List.from(argResults.rest);
+  List<String> dirsOrFiles = List.from(argResults.rest);
   if (dirsOrFiles.isEmpty) {
     dirsOrFiles = [Directory.current.path];
   }
   List<Directory> dirs = [];
 
   //PubTest pubTest = new PubTest();
-  NewTestList list = new NewTestList();
+  NewTestList list = NewTestList();
 
   int packagePoolSize = parseInt(argResults[packageConcurrencyOptionName]);
 
@@ -100,11 +99,11 @@ Future main(List<String> arguments) async {
     await testPackage(pkg, testOptions, files);
   }
 
-  Pool packagePool = new Pool(packagePoolSize);
+  Pool packagePool = Pool(packagePoolSize);
 
   Future _parseDirectory(String packageDir) async {
     //int w; print("#parsing $packageDir");
-    PubPackage parent = new PubPackage(packageDir);
+    PubPackage parent = PubPackage(packageDir);
 
     // get the test_dependencies first
     Iterable<String> dependencies = pubspecYamlGetTestDependenciesPackageName(
@@ -123,7 +122,7 @@ Future main(List<String> arguments) async {
             pubspecYamlHasAnyDependencies(
                 await pkg.getPubspecYaml(), ['test'])) {
           // add whole package
-          list.add(new DependencyTestPackage(parent, pkg));
+          list.add(DependencyTestPackage(parent, pkg));
         }
       }
     }
@@ -131,8 +130,8 @@ Future main(List<String> arguments) async {
 
   // Handle pub sub path
   for (String dirOrFile in dirsOrFiles) {
-    if (await FileSystemEntity.isDirectory(dirOrFile)) {
-      dirs.add(new Directory(dirOrFile));
+    if (FileSystemEntity.isDirectorySync(dirOrFile)) {
+      dirs.add(Directory(dirOrFile));
     }
 
     String packageDir = await getPubPackageRoot(dirOrFile);

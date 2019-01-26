@@ -1,6 +1,6 @@
 import 'package:test/test.dart';
 
-main() {
+void main() {
   test('success', () {
     expect(true, isTrue);
   });

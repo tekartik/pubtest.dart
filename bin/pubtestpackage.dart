@@ -28,7 +28,7 @@ List<String> getFiles(ArgResults argResults) {
 /// Recursively update (pull) git folders
 ///
 Future main(List<String> arguments) async {
-  ArgParser parser = new ArgParser(allowTrailingOptions: true);
+  ArgParser parser = ArgParser(allowTrailingOptions: true);
   addArgs(parser);
   parser.addOption(packageSourceOptionName,
       abbr: 's', help: "package source", allowed: [sourceGit, sourcePath]);
@@ -56,12 +56,12 @@ Future main(List<String> arguments) async {
     return;
   }
 
-  TestOptions testOptions = new TestOptions.fromArgResults(argResults);
+  TestOptions testOptions = TestOptions.fromArgResults(argResults);
 
   // Handle git package
   String source = argResults[packageSourceOptionName] as String;
   if (source == sourceGit) {
-    if (argResults.rest.length < 1) {
+    if (argResults.rest.isEmpty) {
       stderr.writeln("Missing git source information");
       exit(1);
     }
@@ -74,7 +74,7 @@ Future main(List<String> arguments) async {
     String srcGit = argResults.rest[0];
     String dir =
         (await Directory.systemTemp.createTemp('${currentScriptName}')).path;
-    GitProject git = new GitProject(srcGit, path: dir);
+    GitProject git = GitProject(srcGit, path: dir);
 
     // Cloning
     await runCmd(git.cloneCmd(progress: true, depth: 1),
@@ -85,10 +85,10 @@ Future main(List<String> arguments) async {
       stderr.writeln("Git project '$srcGit' is not a pub package in '$dir'");
       exit(1);
     }
-    PubPackage pkg = new PubPackage(dir);
+    PubPackage pkg = PubPackage(dir);
     await testPackage(pkg, testOptions, files);
   } else if (source == sourcePath) {
-    if (argResults.rest.length < 1) {
+    if (argResults.rest.isEmpty) {
       stderr.writeln("Missing path source information");
       exit(1);
     }
@@ -101,7 +101,7 @@ Future main(List<String> arguments) async {
       stderr.writeln("Project in '$dir' is not a pub package");
       exit(1);
     }
-    PubPackage pkg = new PubPackage(dir);
+    PubPackage pkg = PubPackage(dir);
     await testPackage(pkg, testOptions, files);
   } else {
     stderr.writeln("Missing source (path or git)");

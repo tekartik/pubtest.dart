@@ -9,7 +9,7 @@ import 'package:process_run/cmd_run.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:tekartik_pubtest/src/pubtest_version.dart';
 
-var longTimeout = new Timeout(new Duration(minutes: 2));
+var longTimeout = Timeout(Duration(minutes: 2));
 
 String get pubTestPackageDartScript =>
     normalize(absolute(join('bin', 'pubtestpackage.dart')));
@@ -17,7 +17,7 @@ String get pubTestPackageDartScript =>
 void main() {
   //useVMConfiguration();
 
-  checkErrorExitCode(result) {
+  void checkErrorExitCode(result) {
     if (!Platform.isWindows) {
       try {
         expect(result.exitCode, 1);
@@ -32,8 +32,7 @@ void main() {
       ProcessResult result =
           await runCmd(DartCmd([pubTestPackageDartScript, '--version']));
       expect(result.stdout, contains("pubtest"));
-      expect(new Version.parse((result.stdout as String).split(' ').last),
-          version);
+      expect(Version.parse((result.stdout as String).split(' ').last), version);
     });
 
     group('path', () {
@@ -58,8 +57,8 @@ void main() {
         ProcessResult result = await runCmd(DartCmd([
           pubTestPackageDartScript,
           '-spath',
-          '.'
-              '-p',
+          '.',
+          '-p',
           'vm',
           'test/data/fail_test_.dart'
         ])); // ..connectStderr=true..connectStdout=true);
@@ -91,8 +90,8 @@ void main() {
         ProcessResult result = await runCmd(DartCmd([
           pubTestPackageDartScript,
           '-sgit',
-          'https://github.com/tekartik/pubtest.dart'
-              '-p',
+          'https://github.com/tekartik/pubtest.dart',
+          '-p',
           'vm',
           '--get-offline',
           'test/data/fail_test_.dart'

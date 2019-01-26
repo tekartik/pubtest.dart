@@ -20,16 +20,15 @@ void main() {
       ProcessResult result =
           await runCmd(DartCmd([pubTestDependenciesDartScript, '--version']));
       expect(result.stdout, contains("pubtestdependencies"));
-      expect(
-          new Version.parse(result.stdout.split(' ').last as String), version);
+      expect(Version.parse(result.stdout.split(' ').last as String), version);
     });
 
     test('simple_dependencies', () async {
       String top = (await Directory.systemTemp.createTemp()).path;
 
-      PubPackage exampleSimplePkg = new PubPackage(join('example', 'simple'));
+      PubPackage exampleSimplePkg = PubPackage(join('example', 'simple'));
       PubPackage exampleSimpleDependencyPkg =
-          new PubPackage(join('example', 'simple_dependency'));
+          PubPackage(join('example', 'simple_dependency'));
 
       String dst = join(top, 'simple');
       String dstDependency = join(top, 'simple_dependency');
@@ -61,13 +60,13 @@ void main() {
           reason: result.stdout.toString());
       expect(pubRunTestJsonFailureCount(result.stdout as String), 0,
           reason: result.stdout.toString());
-    }, timeout: new Timeout(new Duration(minutes: 2)));
+    }, timeout: Timeout(Duration(minutes: 2)));
 
     test('simple_filter_dependencies', () async {
       String top = (await Directory.systemTemp.createTemp()).path;
-      PubPackage exampleSimplePkg = new PubPackage(join('example', 'simple'));
+      PubPackage exampleSimplePkg = PubPackage(join('example', 'simple'));
       PubPackage exampleSimpleDependencyPkg =
-          new PubPackage(join('example', 'simple_dependency'));
+          PubPackage(join('example', 'simple_dependency'));
 
       String dst = join(top, 'simple');
       String dstDependency = join(top, 'simple_dependency');
@@ -130,14 +129,14 @@ void main() {
           reason: result.stdout.toString());
       expect(pubRunTestJsonFailureCount(result.stdout as String), 0,
           reason: result.stdout.toString());
-    }, timeout: new Timeout(new Duration(minutes: 2)));
+    }, timeout: Timeout(Duration(minutes: 2)));
 
     test('simple_failed_dependencies', () async {
       String top = (await Directory.systemTemp.createTemp()).path;
       PubPackage exampleSimplePkg =
-          new PubPackage(join('example', 'simple_failed'));
+          PubPackage(join('example', 'simple_failed'));
       PubPackage exampleSimpleDependencyPkg =
-          new PubPackage(join('example', 'simple_failed_dependency'));
+          PubPackage(join('example', 'simple_failed_dependency'));
 
       String dst = join(top, 'simple_failed');
       String dstDependency = join(top, 'simple_failed_dependency');
@@ -158,6 +157,6 @@ void main() {
 
       //expect(result.stdout.contains("All tests passed"), isTrue);
       expect(pubRunTestJsonIsSuccess(result.stdout as String), isFalse);
-    }, timeout: new Timeout(new Duration(minutes: 2)));
+    }, timeout: Timeout(Duration(minutes: 2)));
   });
 }
