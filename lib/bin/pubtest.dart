@@ -300,7 +300,7 @@ Future testPackage(PubPackage pkg, CommonTestOptions testOptions,
     }
   } catch (e) {
     stderr.writeln('error thrown in ${pkg}');
-    stderr.flush();
+    await stderr.flush();
     rethrow;
   }
 }
