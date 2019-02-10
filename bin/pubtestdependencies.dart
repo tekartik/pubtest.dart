@@ -164,6 +164,6 @@ int _w2;
 
   if (exitCode != 0) {
     stderr.writeln('errors in packages: ${errors}');
-    stderr.flush();
+    await stderr.flush();
   }
 }
