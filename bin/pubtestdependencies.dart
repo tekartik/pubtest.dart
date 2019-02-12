@@ -23,8 +23,9 @@ const String packageNameOption = 'package-name';
 /// Recursively update (pull) git folders
 ///
 Future main(List<String> arguments) async {
+  final app = PubTestApp();
   ArgParser parser = ArgParser(allowTrailingOptions: true);
-  addArgs(parser);
+  app.addArgs(parser);
   parser.addMultiOption(
     packageNameOption,
     help: 'Filter dependencies by package name',
@@ -96,7 +97,7 @@ Future main(List<String> arguments) async {
 
     // fix options - get needed
     testOptions.upgradeBefore = true;
-    await testPackage(pkg, testOptions, files);
+    await app.testPackage(pkg, testOptions, files);
   }
 
   Pool packagePool = Pool(packagePoolSize);

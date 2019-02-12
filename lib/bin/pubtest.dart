@@ -10,11 +10,11 @@ import 'package:fs_shim/utils/io/entity.dart';
 import 'package:path/path.dart';
 import 'package:pool/pool.dart';
 import 'package:process_run/cmd_run.dart';
-import 'package:tekartik_pubtest/src/pubtest_utils.dart';
-import 'package:tekartik_pubtest/src/pubtest_version.dart';
 import 'package:tekartik_common_utils/common_utils_import.dart';
 import 'package:tekartik_io_utils/io_utils_import.dart';
 import 'package:tekartik_pub/io.dart';
+import 'package:tekartik_pubtest/src/pubtest_utils.dart';
+import 'package:tekartik_pubtest/src/pubtest_version.dart';
 
 export 'package:tekartik_io_utils/io_utils_import.dart';
 
@@ -86,143 +86,6 @@ class TestOptions extends CommonTestOptions {
   }
 }
 
-void addArgs(ArgParser parser) {
-  parser.addFlag(helpOptionName,
-      abbr: 'h', help: 'Usage help', negatable: false);
-  //parser.addOption(_LOG, abbr: 'l', help: 'Log level (fine, debug, info...)');
-  parser.addOption(reporterOptionName,
-      abbr: reporterOptionAbbr,
-      help: 'test result output',
-      allowed: pubRunTestReporters);
-  parser.addFlag(dryRunOptionName,
-      abbr: 'd',
-      help: 'Do not run test, simple show packages to be tested',
-      negatable: false);
-  parser.addFlag("version",
-      help: 'Display the script version', negatable: false);
-  parser.addFlag(verboseOptionName,
-      abbr: 'v', help: 'Verbose mode', negatable: false);
-  parser.addOption(concurrencyOptionName,
-      abbr: 'j',
-      help: 'Number of concurrent tests in the same package tested',
-      defaultsTo: '10');
-  parser.addOption(packageConcurrencyOptionName,
-      abbr: 'k', help: 'Number of concurrent packages tested', defaultsTo: '1');
-  parser.addOption(nameOptionName,
-      abbr: 'n', help: 'A substring of the name of the test to run');
-  parser.addMultiOption(platformOptionName,
-      abbr: 'p',
-      help: 'The platform(s) on which to run the tests.',
-      allowed: allPlatforms,
-      defaultsTo: ['vm']);
-  parser.addFlag(getOfflineOptionName,
-      help: 'Get dependencies first in offline mode', negatable: false);
-  parser.addFlag(argForceRecursiveFlag,
-      abbr: 'f',
-      help: 'Force going recursive even in dart project',
-      defaultsTo: true);
-}
-
-///
-/// Recursively update (pull) git folders
-///
-Future main(List<String> arguments) async {
-  //setupQuickLogging();
-
-  ArgParser parser = ArgParser(allowTrailingOptions: true);
-  addArgs(parser);
-  parser.addFlag(getOptionName,
-      help: 'Get dependencies first', negatable: false);
-  ArgResults argResults = parser.parse(arguments);
-
-  bool help = parseBool(argResults[helpOptionName]);
-  if (help) {
-    stdout.writeln(
-        "Call 'pub run test' recursively (default from current directory)");
-    stdout.writeln();
-    stdout.writeln(
-        'Usage: ${currentScriptName} [<folder_paths...>] [<arguments>]');
-    stdout.writeln();
-    stdout.writeln("Global options:");
-    stdout.writeln(parser.usage);
-    return;
-  }
-
-  if (parseBool(argResults[versionOptionName])) {
-    stdout.write('${currentScriptName} ${version}');
-    return;
-  }
-
-  // get dirs in parameters, default to current
-  List<String> dirsOrFiles = List.from(argResults.rest);
-  if (dirsOrFiles.isEmpty) {
-    dirsOrFiles = [Directory.current.path];
-  }
-  List<String> dirs = [];
-
-  TestList list = TestList();
-
-  TestOptions testOptions = TestOptions.fromArgResults(argResults);
-
-  int packagePoolSize = parseInt(argResults[packageConcurrencyOptionName]);
-
-  Pool packagePool = Pool(packagePoolSize);
-
-  if (testOptions.verbose) {
-    stdout.writeln('Scanning $dirsOrFiles');
-  }
-  // Handle pub sub path
-  for (String dirOrFile in dirsOrFiles) {
-    Directory dir;
-    if (FileSystemEntity.isDirectorySync(dirOrFile)) {
-      dirs.add(dirOrFile);
-
-      // Pkg dir, no need to look higher
-      if (await isPubPackageRoot(dirOrFile)) {
-        continue;
-      }
-    } else {
-      dir = File(dirOrFile).parent;
-    }
-
-    String packageDir;
-    try {
-      packageDir = await getPubPackageRoot(dir.path);
-    } catch (_) {}
-    if (packageDir != null) {
-      // if it is the test dir, assume testing the package instead
-
-      if (pubspecYamlHasAnyDependencies(
-          await getPubspecYaml(packageDir), ['test'])) {
-        dirOrFile = relative(dirOrFile, from: packageDir);
-        PubPackage pkg = PubPackage(packageDir);
-        if (dirOrFile == "test") {
-          // add whole package
-          list.add(pkg);
-        } else {
-          list.add(pkg, dirOrFile);
-        }
-      }
-    }
-  }
-
-  // Also Handle recursive projects
-  await recursivePubPath(dirs,
-          dependencies: ['test'], forceRecursive: testOptions.forceRecursive)
-      .listen((String dir) {
-    list.add(PubPackage(dir));
-  }).asFuture();
-
-  //print(list.packages);
-  for (PubPackage pkg in list.packages) {
-    await packagePool.withResource(() async {
-      await testPackage(pkg, testOptions, list.getTests(pkg));
-    });
-  }
-
-  //devErr("exitCode: $exitCode");
-}
-
 List<String> getPlatforms(ArgResults _argsResult) {
   List<String> platforms;
   if (_argsResult.wasParsed(platformOptionName)) {
@@ -244,42 +107,10 @@ List<String> getPlatforms(ArgResults _argsResult) {
   return platforms;
 }
 
-Future testPackage(PubPackage pkg, CommonTestOptions testOptions,
-    [List<String> files]) async {
-  // if no file is given make sure the test/folder exists
-  if (files == null) {
-    // no tests found
-    if (!(FileSystemEntity.isDirectorySync(
-        childDirectory(pkg.dir, "test").path))) {
-      return;
-    }
-  }
-  if (testOptions.dryRun) {
-    print('[dryRun] test on ${pkg.dir}${files != null ? " ${files}" : ""}');
-  }
-  try {
-    List<String> args = [];
-    if (files != null) {
-      args.addAll(files);
-    }
-
-    if (testOptions.upgradeBefore == true) {
-      ProcessCmd cmd = pkg.pubCmd(pubUpgradeArgs());
-      if (testOptions.dryRun) {
-        print('\$ $cmd');
-      } else {
-        await runCmd(cmd, verbose: testOptions.verbose);
-      }
-    } else if (testOptions.getBefore || testOptions.getBeforeOffline) {
-      ProcessCmd cmd =
-          pkg.pubCmd(pubGetArgs(offline: testOptions.getBeforeOffline));
-      if (testOptions.dryRun) {
-        print('\$ $cmd');
-      } else {
-        await runCmd(cmd, verbose: testOptions.verbose);
-      }
-    }
-
+class PubTestApp extends App {
+  @override
+  Future runTest(
+      PubPackage pkg, List<String> args, CommonTestOptions testOptions) async {
     ProcessCmd testCmd = pkg.pubCmd(pubRunTestArgs(
         args: args,
         concurrency: testOptions.poolSize,
@@ -298,9 +129,207 @@ Future testPackage(PubPackage pkg, CommonTestOptions testOptions,
         }
       }
     }
-  } catch (e) {
-    stderr.writeln('error thrown in ${pkg}');
-    await stderr.flush();
-    rethrow;
   }
+
+  @override
+  String get commandText => 'pub run test';
+}
+
+abstract class App {
+  void addArgs(ArgParser parser) {
+    parser.addFlag(helpOptionName,
+        abbr: 'h', help: 'Usage help', negatable: false);
+    //parser.addOption(_LOG, abbr: 'l', help: 'Log level (fine, debug, info...)');
+    parser.addOption(reporterOptionName,
+        abbr: reporterOptionAbbr,
+        help: 'test result output',
+        allowed: pubRunTestReporters);
+    parser.addFlag(dryRunOptionName,
+        abbr: 'd',
+        help: 'Do not run test, simple show packages to be tested',
+        negatable: false);
+    parser.addFlag("version",
+        help: 'Display the script version', negatable: false);
+    parser.addFlag(verboseOptionName,
+        abbr: 'v', help: 'Verbose mode', negatable: false);
+    parser.addOption(concurrencyOptionName,
+        abbr: 'j',
+        help: 'Number of concurrent tests in the same package tested',
+        defaultsTo: '10');
+    parser.addOption(packageConcurrencyOptionName,
+        abbr: 'k',
+        help: 'Number of concurrent packages tested',
+        defaultsTo: '1');
+    parser.addOption(nameOptionName,
+        abbr: 'n', help: 'A substring of the name of the test to run');
+    parser.addMultiOption(platformOptionName,
+        abbr: 'p',
+        help: 'The platform(s) on which to run the tests.',
+        allowed: allPlatforms,
+        defaultsTo: ['vm']);
+    parser.addFlag(getOfflineOptionName,
+        help: 'Get dependencies first in offline mode', negatable: false);
+    parser.addFlag(argForceRecursiveFlag,
+        abbr: 'f',
+        help: 'Force going recursive even in dart project',
+        defaultsTo: true);
+  }
+
+  /// different for pubtest and pbrtest
+  String get commandText;
+
+  ///
+  /// Recursively update (pull) git folders
+  ///
+  Future main(List<String> arguments) async {
+    //setupQuickLogging();
+
+    ArgParser parser = ArgParser(allowTrailingOptions: true);
+    addArgs(parser);
+    parser.addFlag(getOptionName,
+        help: 'Get dependencies first', negatable: false);
+    ArgResults argResults = parser.parse(arguments);
+
+    bool help = parseBool(argResults[helpOptionName]);
+    if (help) {
+      stdout.writeln(
+          "Call '$commandText' recursively (default from current directory)");
+      stdout.writeln();
+      stdout.writeln(
+          'Usage: ${currentScriptName} [<folder_paths...>] [<arguments>]');
+      stdout.writeln();
+      stdout.writeln("Global options:");
+      stdout.writeln(parser.usage);
+      return;
+    }
+
+    if (parseBool(argResults[versionOptionName])) {
+      stdout.write('${currentScriptName} ${version}');
+      return;
+    }
+
+    // get dirs in parameters, default to current
+    List<String> dirsOrFiles = List.from(argResults.rest);
+    if (dirsOrFiles.isEmpty) {
+      dirsOrFiles = [Directory.current.path];
+    }
+    List<String> dirs = [];
+
+    TestList list = TestList();
+
+    TestOptions testOptions = TestOptions.fromArgResults(argResults);
+
+    int packagePoolSize = parseInt(argResults[packageConcurrencyOptionName]);
+
+    Pool packagePool = Pool(packagePoolSize);
+
+    if (testOptions.verbose) {
+      stdout.writeln('Scanning $dirsOrFiles');
+    }
+    // Handle pub sub path
+    for (String dirOrFile in dirsOrFiles) {
+      Directory dir;
+      if (FileSystemEntity.isDirectorySync(dirOrFile)) {
+        dirs.add(dirOrFile);
+
+        // Pkg dir, no need to look higher
+        if (await isPubPackageRoot(dirOrFile)) {
+          continue;
+        }
+      } else {
+        dir = File(dirOrFile).parent;
+      }
+
+      String packageDir;
+      try {
+        packageDir = await getPubPackageRoot(dir.path);
+      } catch (_) {}
+      if (packageDir != null) {
+        // if it is the test dir, assume testing the package instead
+
+        if (pubspecYamlHasAnyDependencies(
+            await getPubspecYaml(packageDir), ['test'])) {
+          dirOrFile = relative(dirOrFile, from: packageDir);
+          PubPackage pkg = PubPackage(packageDir);
+          if (dirOrFile == "test") {
+            // add whole package
+            list.add(pkg);
+          } else {
+            list.add(pkg, dirOrFile);
+          }
+        }
+      }
+    }
+
+    // Also Handle recursive projects
+    await recursivePubPath(dirs,
+            dependencies: ['test'], forceRecursive: testOptions.forceRecursive)
+        .listen((String dir) {
+      list.add(PubPackage(dir));
+    }).asFuture();
+
+    //print(list.packages);
+    for (PubPackage pkg in list.packages) {
+      await packagePool.withResource(() async {
+        await testPackage(pkg, testOptions, list.getTests(pkg));
+      });
+    }
+
+    //devErr("exitCode: $exitCode");
+  }
+
+  Future testPackage(PubPackage pkg, CommonTestOptions testOptions,
+      [List<String> files]) async {
+    // if no file is given make sure the test/folder exists
+    if (files == null) {
+      // no tests found
+      if (!(FileSystemEntity.isDirectorySync(
+          childDirectory(pkg.dir, "test").path))) {
+        return;
+      }
+    }
+    if (testOptions.dryRun) {
+      print('[dryRun] test on ${pkg.dir}${files != null ? " ${files}" : ""}');
+    }
+    try {
+      List<String> args = [];
+      if (files != null) {
+        args.addAll(files);
+      }
+
+      if (testOptions.upgradeBefore == true) {
+        ProcessCmd cmd = pkg.pubCmd(pubUpgradeArgs());
+        if (testOptions.dryRun) {
+          print('\$ $cmd');
+        } else {
+          await runCmd(cmd, verbose: testOptions.verbose);
+        }
+      } else if (testOptions.getBefore || testOptions.getBeforeOffline) {
+        ProcessCmd cmd =
+            pkg.pubCmd(pubGetArgs(offline: testOptions.getBeforeOffline));
+        if (testOptions.dryRun) {
+          print('\$ $cmd');
+        } else {
+          await runCmd(cmd, verbose: testOptions.verbose);
+        }
+      }
+
+      await runTest(pkg, args, testOptions);
+    } catch (e) {
+      stderr.writeln('error thrown in ${pkg}');
+      await stderr.flush();
+      rethrow;
+    }
+  }
+
+  Future runTest(
+      PubPackage pkg, List<String> args, CommonTestOptions testOptions);
+}
+
+///
+/// Recursively update (pull) git folders
+///
+Future main(List<String> arguments) async {
+  final app = PubTestApp();
+  return app.main(arguments);
 }
