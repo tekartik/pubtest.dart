@@ -52,7 +52,7 @@ void run(String script) {
         await File(testPath).delete();
       } catch (_) {}
     }
-  });
+  }, timeout: longTimeout);
 
   test('failure', () async {
     var testPath = join('test', 'data', '${prefix}_fail_test.dart');
@@ -71,7 +71,7 @@ void run(String script) {
         await File(testPath).delete();
       } catch (_) {}
     }
-  });
+  }, timeout: longTimeout);
 
   group('example', () {
     test('subdir', () async {
