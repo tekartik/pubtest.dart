@@ -9,9 +9,10 @@ import 'package:args/args.dart';
 import 'package:fs_shim/utils/io/entity.dart';
 import 'package:path/path.dart';
 import 'package:pool/pool.dart';
-import 'package:process_run/cmd_run.dart';
+import 'package:process_run/cmd_run.dart' hide runCmd;
 import 'package:tekartik_common_utils/common_utils_import.dart';
 import 'package:tekartik_io_utils/io_utils_import.dart';
+import 'package:tekartik_io_utils/process_cmd_utils.dart';
 import 'package:tekartik_pub/io.dart';
 import 'package:tekartik_pubtest/src/pubtest_utils.dart';
 import 'package:tekartik_pubtest/src/pubtest_version.dart';
@@ -111,23 +112,30 @@ class PubTestApp extends App {
   @override
   Future runTest(
       PubPackage pkg, List<String> args, CommonTestOptions testOptions) async {
-    ProcessCmd testCmd = pkg.pubCmd(pubRunTestArgs(
-        args: args,
-        concurrency: testOptions.poolSize,
-        reporter: testOptions.reporter,
-        platforms: testOptions.platforms,
-        name: testOptions.name));
-    if (testOptions.dryRun) {
-      print('\$ $testCmd');
-    } else {
-      ProcessResult result =
-          await runCmd(testCmd, stdout: stdout, stderr: stderr);
-      if (result.exitCode != 0) {
-        stderr.writeln('test error in ${pkg}');
-        if (exitCode == 0) {
-          exitCode = result.exitCode;
-        }
+    if (await isFlutterPackageRoot(pkg.path)) {
+      if (!isFlutterSupported) {
+        stderr.writeln('flutter not supported for package in ${pkg}');
+        return;
       }
+      // Flutter way
+      var args = ['test', '--no-pub'];
+      if (testOptions.poolSize != null) {
+        args.addAll(['-j', '${testOptions.poolSize}']);
+      }
+      if (testOptions.name != null) {
+        args.addAll(['-n', testOptions.name]);
+      }
+      var cmd = FlutterCmd(args)..workingDirectory = pkg.path;
+
+      await runCmd(cmd, dryRun: testOptions.dryRun);
+    } else {
+      var testCmd = pkg.pubCmd(pubRunTestArgs(
+          args: args,
+          concurrency: testOptions.poolSize,
+          reporter: testOptions.reporter,
+          platforms: testOptions.platforms,
+          name: testOptions.name));
+      await runCmd(testCmd, dryRun: testOptions.dryRun);
     }
   }
 
@@ -263,7 +271,8 @@ abstract class App {
 
     // Also Handle recursive projects
     await recursivePubPath(dirs,
-            dependencies: ['test'], forceRecursive: testOptions.forceRecursive)
+            dependencies: ['test', 'flutter_test'],
+            forceRecursive: testOptions.forceRecursive)
         .listen((String dir) {
       list.add(PubPackage(dir));
     }).asFuture();
@@ -298,19 +307,39 @@ abstract class App {
       }
 
       if (testOptions.upgradeBefore == true) {
-        ProcessCmd cmd = pkg.pubCmd(pubUpgradeArgs());
-        if (testOptions.dryRun) {
-          print('\$ $cmd');
+        if (await isFlutterPackageRoot(pkg.path)) {
+          if (!isFlutterSupported) {
+            stderr.writeln('flutter not supported for package in ${pkg}');
+            return;
+          }
+          // Flutter way
+          var cmd = FlutterCmd(['packages', 'pub', 'upgrade'])
+            ..workingDirectory = pkg.path;
+          await runCmd(cmd, dryRun: testOptions.dryRun);
         } else {
-          await runCmd(cmd, verbose: testOptions.verbose);
+          // Regular dart
+          var cmd = pkg.pubCmd(pubUpgradeArgs());
+          await runCmd(cmd, dryRun: testOptions.dryRun);
         }
       } else if (testOptions.getBefore || testOptions.getBeforeOffline) {
-        ProcessCmd cmd =
-            pkg.pubCmd(pubGetArgs(offline: testOptions.getBeforeOffline));
-        if (testOptions.dryRun) {
-          print('\$ $cmd');
+        if (await isFlutterPackageRoot(pkg.path)) {
+          if (!isFlutterSupported) {
+            stderr.writeln('flutter not supported for package in ${pkg}');
+            return;
+          }
+          // Flutter way
+          var args = ['packages', 'pub', 'get'];
+          if (testOptions.getBeforeOffline) {
+            args.add('--offline');
+          }
+          var cmd = FlutterCmd(args)..workingDirectory = pkg.path;
+          await runCmd(cmd, dryRun: testOptions.dryRun);
         } else {
-          await runCmd(cmd, verbose: testOptions.verbose);
+          // Regular dart
+          var cmd =
+              pkg.pubCmd(pubGetArgs(offline: testOptions.getBeforeOffline));
+
+          await runCmd(cmd, dryRun: testOptions.dryRun);
         }
       }
 
