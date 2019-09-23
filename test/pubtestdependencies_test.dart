@@ -60,7 +60,7 @@ void main() {
           reason: result.stdout.toString());
       expect(pubRunTestJsonFailureCount(result.stdout as String), 0,
           reason: result.stdout.toString());
-    }, timeout: Timeout(Duration(minutes: 2)));
+    }, timeout: const Timeout(Duration(minutes: 2)));
 
     test('simple_filter_dependencies', () async {
       String top = (await Directory.systemTemp.createTemp()).path;
@@ -129,7 +129,7 @@ void main() {
           reason: result.stdout.toString());
       expect(pubRunTestJsonFailureCount(result.stdout as String), 0,
           reason: result.stdout.toString());
-    }, timeout: Timeout(Duration(minutes: 2)));
+    }, timeout: const Timeout(Duration(minutes: 2)));
 
     test('simple_failed_dependencies', () async {
       String top = (await Directory.systemTemp.createTemp()).path;
@@ -157,6 +157,6 @@ void main() {
 
       //expect(result.stdout.contains("All tests passed"), isTrue);
       expect(pubRunTestJsonIsSuccess(result.stdout as String), isFalse);
-    }, timeout: Timeout(Duration(minutes: 2)));
+    }, timeout: const Timeout(Duration(minutes: 2)));
   });
 }

@@ -11,7 +11,7 @@ import 'package:pub_semver/pub_semver.dart';
 import 'package:tekartik_pubtest/src/pubtest_version.dart';
 import 'package:tekartik_pub/io.dart';
 
-var longTimeout = Timeout(Duration(minutes: 2));
+var longTimeout = const Timeout(Duration(minutes: 2));
 
 String get _pubTestDartScript =>
     normalize(absolute(join('bin', 'pubtest.dart')));
@@ -36,9 +36,8 @@ void run(String script) {
     try {
       await File(join('test', 'data', 'success_test_.dart')).copy(testPath);
 
-      ProcessResult result = await runCmd(
-          DartCmd([script, '-p', 'vm', testPath])
-            ..includeParentEnvironment = false);
+      ProcessResult result =
+          await runCmd(DartCmd([script, '-p', 'vm', testPath]));
 
       // on 1.13, current windows is failing
       if (!Platform.isWindows) {
@@ -58,10 +57,12 @@ void run(String script) {
     var testPath = join('test', 'data', '${prefix}_fail_test.dart');
     try {
       await File(join('test', 'data', 'fail_test_.dart')).copy(testPath);
-      ProcessResult result = await runCmd(
-          DartCmd([script, '-p', 'vm', testPath])
-            ..includeParentEnvironment =
-                false); // ..connectStderr=true..connectStdout=true);
+      ProcessResult result = await runCmd(DartCmd([
+        script,
+        '-p',
+        'vm',
+        testPath
+      ])); // ..connectStderr=true..connectStdout=true);
       if (!Platform.isWindows) {
         expect(result.exitCode, 1);
       }
@@ -92,8 +93,7 @@ void run(String script) {
         'json',
         // '--get-offline' - this is causin an error
         '--get'
-      ])
-        ..includeParentEnvironment = false); // Prevent
+      ]));
 
       // on 1.13, current windows is failing
       if (!Platform.isWindows) {

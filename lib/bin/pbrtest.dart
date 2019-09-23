@@ -25,7 +25,7 @@ class PbrTestApp extends App {
         platforms: testOptions.platforms,
         name: testOptions.name));
     var pbrArgs = ['test', '--']..addAll(testArgs);
-    ProcessCmd testCmd = pkg.pbrCmd(pbrArgs)..includeParentEnvironment = false;
+    ProcessCmd testCmd = pkg.pbrCmd(pbrArgs);
     if (testOptions.dryRun) {
       print('\$ $testCmd');
     } else {
