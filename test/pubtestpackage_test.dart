@@ -9,7 +9,7 @@ import 'package:process_run/cmd_run.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:tekartik_pubtest/src/pubtest_version.dart';
 
-var longTimeout = Timeout(Duration(minutes: 2));
+var longTimeout = const Timeout(Duration(minutes: 2));
 
 String get pubTestPackageDartScript =>
     normalize(absolute(join('bin', 'pubtestpackage.dart')));

@@ -28,8 +28,10 @@ List<String> getFiles(ArgResults argResults) {
 /// Recursively update (pull) git folders
 ///
 Future main(List<String> arguments) async {
+  final app = PubTestApp();
+
   ArgParser parser = ArgParser(allowTrailingOptions: true);
-  addArgs(parser);
+  app.addArgs(parser);
   parser.addOption(packageSourceOptionName,
       abbr: 's', help: "package source", allowed: [sourceGit, sourcePath]);
   parser.addFlag(getOptionName,
@@ -86,7 +88,7 @@ Future main(List<String> arguments) async {
       exit(1);
     }
     PubPackage pkg = PubPackage(dir);
-    await testPackage(pkg, testOptions, files);
+    await app.testPackage(pkg, testOptions, files);
   } else if (source == sourcePath) {
     if (argResults.rest.isEmpty) {
       stderr.writeln("Missing path source information");
@@ -102,7 +104,7 @@ Future main(List<String> arguments) async {
       exit(1);
     }
     PubPackage pkg = PubPackage(dir);
-    await testPackage(pkg, testOptions, files);
+    await app.testPackage(pkg, testOptions, files);
   } else {
     stderr.writeln("Missing source (path or git)");
     exit(1);

@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.6.3
+
+* add `pbrtest`
+
 ## 0.4.0
 
 * strong mode support
