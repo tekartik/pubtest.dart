@@ -1,4 +1,4 @@
-@TestOn("vm")
+@TestOn('vm')
 library tekartik_pubtest.test.src_pubtest_utils_test;
 
 import 'dart:convert';

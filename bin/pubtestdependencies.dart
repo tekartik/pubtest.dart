@@ -24,15 +24,15 @@ const String packageNameOption = 'package-name';
 ///
 Future main(List<String> arguments) async {
   final app = PubTestApp();
-  ArgParser parser = ArgParser(allowTrailingOptions: true);
+  final parser = ArgParser(allowTrailingOptions: true);
   app.addArgs(parser);
   parser.addMultiOption(
     packageNameOption,
     help: 'Filter dependencies by package name',
   );
-  ArgResults argResults = parser.parse(arguments);
+  final argResults = parser.parse(arguments);
 
-  bool help = parseBool(argResults[helpFlag]);
+  final help = parseBool(argResults[helpFlag]);
   if (help) {
     stdout.writeln(
         "Call 'pub run test' recursively (default from current directory)");
@@ -40,7 +40,7 @@ Future main(List<String> arguments) async {
     stdout.writeln(
         'Usage: ${currentScriptName} [<folder_paths...>] [<arguments>]');
     stdout.writeln();
-    stdout.writeln("Global options:");
+    stdout.writeln('Global options:');
     stdout.writeln(parser.usage);
     return;
   }
@@ -57,23 +57,23 @@ Future main(List<String> arguments) async {
   }
   */
 
-  CommonTestOptions testOptions = CommonTestOptions.fromArgResults(argResults);
+  final testOptions = CommonTestOptions.fromArgResults(argResults);
 
-  List<String> packageNames = argResults[packageNameOption] as List<String>;
+  final packageNames = argResults[packageNameOption] as List<String>;
 
   // get dirs in parameters, default to current
-  List<String> dirsOrFiles = List.from(argResults.rest);
+  var dirsOrFiles = List<String>.from(argResults.rest);
   if (dirsOrFiles.isEmpty) {
     dirsOrFiles = [Directory.current.path];
   }
-  List<Directory> dirs = [];
+  final dirs = <Directory>[];
 
   //PubTest pubTest = new PubTest();
-  NewTestList list = NewTestList();
+  final list = NewTestList();
 
-  int packagePoolSize = parseInt(argResults[packageConcurrencyOptionName]);
+  final packagePoolSize = parseInt(argResults[packageConcurrencyOptionName]);
 
-  List<PubPackage> errors = [];
+  final errors = <PubPackage>[];
   Future _handleProject(DependencyTestPackage dependency,
       [List<String> files]) async {
     if (packageNames?.isNotEmpty == true) {
@@ -85,39 +85,36 @@ Future main(List<String> arguments) async {
 
     //await emptyOrCreateDirSync(pkg.path);
 
-    String dst = join(
+    final dst = join(
         dependency.parent.dir.path, 'build', 'test', dependency.package.name);
 
     //print(dependency);
     //print(dst);
-    PubPackage pkg = await dependency.package.clone(dst);
+    final pkg = await dependency.package.clone(dst);
 
     print(
-        '[pubtestdependencies] test on ${pkg}${files != null ? " ${files}" : ""}');
+        '[pubtestdependencies] test on ${pkg}${files != null ? ' ${files}' : ''}');
 
     // fix options - get needed
     testOptions.upgradeBefore = true;
     await app.testPackage(pkg, testOptions, files);
   }
 
-  Pool packagePool = Pool(packagePoolSize);
+  final packagePool = Pool(packagePoolSize);
 
   Future _parseDirectory(String packageDir) async {
-    //int w; print("#parsing $packageDir");
-    PubPackage parent = PubPackage(packageDir);
+    //int w; print('#parsing $packageDir');
+    final parent = PubPackage(packageDir);
 
     // get the test_dependencies first
-    Iterable<String> dependencies = pubspecYamlGetTestDependenciesPackageName(
-        await parent.getPubspecYaml());
-
-    if (dependencies == null) {
-      dependencies = await parent.extractPubspecDependencies();
-    }
+    final dependencies = pubspecYamlGetTestDependenciesPackageName(
+            await parent.getPubspecYaml()) ??
+        await parent.extractPubspecDependencies();
 
     //Map dotPackagesYaml = await getDotPackagesYaml(mainPackage.path);
     if (dependencies != null) {
-      for (String dependency in dependencies) {
-        PubPackage pkg = await parent.extractPackage(dependency);
+      for (final dependency in dependencies) {
+        final pkg = await parent.extractPackage(dependency);
         //print(parent);
         if (pkg != null &&
             pubspecYamlHasAnyDependencies(
@@ -130,12 +127,12 @@ Future main(List<String> arguments) async {
   }
 
   // Handle pub sub path
-  for (String dirOrFile in dirsOrFiles) {
+  for (final dirOrFile in dirsOrFiles) {
     if (FileSystemEntity.isDirectorySync(dirOrFile)) {
       dirs.add(Directory(dirOrFile));
     }
 
-    String packageDir = await getPubPackageRoot(dirOrFile);
+    final packageDir = await getPubPackageRoot(dirOrFile);
     if (packageDir != null) {
       await _parseDirectory(packageDir);
     }
@@ -157,7 +154,7 @@ Future main(List<String> arguments) async {
 int _w2;
 */
   //int _w2; print('#2 ${list.packages}');
-  for (TestPackage pkg in list.packages) {
+  for (final pkg in list.packages) {
     await packagePool.withResource(() async {
       await _handleProject(pkg as DependencyTestPackage, list.getTests(pkg));
     });

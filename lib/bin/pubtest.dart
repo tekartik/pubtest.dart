@@ -31,20 +31,20 @@ const String platformOptionName = 'platform';
 const String nameOptionName = 'name';
 const String getOptionName = 'get';
 const String getOfflineOptionName = 'get-offline';
-const String reporterOptionName = "reporter";
-const String reporterOptionAbbr = "r";
-const String versionOptionName = "version";
-const String argForceRecursiveFlag = "force-recursive";
+const String reporterOptionName = 'reporter';
+const String reporterOptionAbbr = 'r';
+const String versionOptionName = 'version';
+const String argForceRecursiveFlag = 'force-recursive';
 
 const List<String> allPlatforms = [
-  "vm",
-  "content-shell",
-  "chrome",
-  "phantomjs",
-  "firefox",
-  "safari",
-  "ie",
-  "node"
+  'vm',
+  'content-shell',
+  'chrome',
+  'phantomjs',
+  'firefox',
+  'safari',
+  'ie',
+  'node'
 ];
 
 class CommonTestOptions {
@@ -93,16 +93,16 @@ List<String> getPlatforms(ArgResults _argsResult) {
     platforms = _argsResult[platformOptionName] as List<String>;
   } else {
     // Allow platforms in env variable
-    String envPlatforms = Platform.environment["PUBTEST_PLATFORMS"];
+    var envPlatforms = Platform.environment['PUBTEST_PLATFORMS'];
     if (envPlatforms != null) {
-      stdout.writeln("Using platforms: ${envPlatforms}");
-      platforms = envPlatforms.split(",");
+      stdout.writeln('Using platforms: ${envPlatforms}');
+      platforms = envPlatforms.split(',');
     }
     // compatiblity with previous rpubtest
-    envPlatforms = Platform.environment["TEKARTIK_RPUBTEST_PLATFORMS"];
+    envPlatforms = Platform.environment['TEKARTIK_RPUBTEST_PLATFORMS'];
     if (envPlatforms != null) {
-      stdout.writeln("Using platforms: ${envPlatforms}");
-      platforms = envPlatforms.split(",");
+      stdout.writeln('Using platforms: ${envPlatforms}');
+      platforms = envPlatforms.split(',');
     }
   }
   return platforms;
@@ -156,7 +156,7 @@ abstract class App {
         abbr: 'd',
         help: 'Do not run test, simple show packages to be tested',
         negatable: false);
-    parser.addFlag("version",
+    parser.addFlag('version',
         help: 'Display the script version', negatable: false);
     parser.addFlag(verboseOptionName,
         abbr: 'v', help: 'Verbose mode', negatable: false);
@@ -192,13 +192,13 @@ abstract class App {
   Future main(List<String> arguments) async {
     //setupQuickLogging();
 
-    ArgParser parser = ArgParser(allowTrailingOptions: true);
+    final parser = ArgParser(allowTrailingOptions: true);
     addArgs(parser);
     parser.addFlag(getOptionName,
         help: 'Get dependencies first', negatable: false);
-    ArgResults argResults = parser.parse(arguments);
+    final argResults = parser.parse(arguments);
 
-    bool help = parseBool(argResults[helpOptionName]);
+    final help = parseBool(argResults[helpOptionName]);
     if (help) {
       stdout.writeln(
           "Call '$commandText' recursively (default from current directory)");
@@ -206,7 +206,7 @@ abstract class App {
       stdout.writeln(
           'Usage: ${currentScriptName} [<folder_paths...>] [<arguments>]');
       stdout.writeln();
-      stdout.writeln("Global options:");
+      stdout.writeln('Global options:');
       stdout.writeln(parser.usage);
       return;
     }
@@ -217,25 +217,25 @@ abstract class App {
     }
 
     // get dirs in parameters, default to current
-    List<String> dirsOrFiles = List.from(argResults.rest);
+    var dirsOrFiles = List<String>.from(argResults.rest);
     if (dirsOrFiles.isEmpty) {
       dirsOrFiles = [Directory.current.path];
     }
-    List<String> dirs = [];
+    final dirs = <String>[];
 
-    TestList list = TestList();
+    final list = TestList();
 
-    TestOptions testOptions = TestOptions.fromArgResults(argResults);
+    final testOptions = TestOptions.fromArgResults(argResults);
 
-    int packagePoolSize = parseInt(argResults[packageConcurrencyOptionName]);
+    final packagePoolSize = parseInt(argResults[packageConcurrencyOptionName]);
 
-    Pool packagePool = Pool(packagePoolSize);
+    final packagePool = Pool(packagePoolSize);
 
     if (testOptions.verbose) {
       stdout.writeln('Scanning $dirsOrFiles');
     }
     // Handle pub sub path
-    for (String dirOrFile in dirsOrFiles) {
+    for (var dirOrFile in dirsOrFiles) {
       Directory dir;
       if (FileSystemEntity.isDirectorySync(dirOrFile)) {
         dirs.add(dirOrFile);
@@ -258,8 +258,8 @@ abstract class App {
         if (pubspecYamlHasAnyDependencies(
             await getPubspecYaml(packageDir), ['test'])) {
           dirOrFile = relative(dirOrFile, from: packageDir);
-          PubPackage pkg = PubPackage(packageDir);
-          if (dirOrFile == "test") {
+          final pkg = PubPackage(packageDir);
+          if (dirOrFile == 'test') {
             // add whole package
             list.add(pkg);
           } else {
@@ -278,13 +278,13 @@ abstract class App {
     }).asFuture();
 
     //print(list.packages);
-    for (PubPackage pkg in list.packages) {
+    for (final pkg in list.packages) {
       await packagePool.withResource(() async {
         await testPackage(pkg, testOptions, list.getTests(pkg));
       });
     }
 
-    //devErr("exitCode: $exitCode");
+    //devErr('exitCode: $exitCode');
   }
 
   Future testPackage(PubPackage pkg, CommonTestOptions testOptions,
@@ -293,15 +293,15 @@ abstract class App {
     if (files == null) {
       // no tests found
       if (!(FileSystemEntity.isDirectorySync(
-          childDirectory(pkg.dir, "test").path))) {
+          childDirectory(pkg.dir, 'test').path))) {
         return;
       }
     }
     if (testOptions.dryRun) {
-      print('[dryRun] test on ${pkg.dir}${files != null ? " ${files}" : ""}');
+      print('[dryRun] test on ${pkg.dir}${files != null ? ' ${files}' : ''}');
     }
     try {
-      List<String> args = [];
+      final args = <String>[];
       if (files != null) {
         args.addAll(files);
       }

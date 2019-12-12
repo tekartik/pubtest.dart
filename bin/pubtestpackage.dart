@@ -14,8 +14,8 @@ import 'package:tekartik_pub/io.dart';
 import 'package:tekartik_sc/git.dart';
 
 const String packageSourceOptionName = 'source';
-const String sourceGit = "git";
-const String sourcePath = "path";
+const String sourceGit = 'git';
+const String sourcePath = 'path';
 
 List<String> getFiles(ArgResults argResults) {
   if (argResults.rest.length > 1) {
@@ -30,16 +30,16 @@ List<String> getFiles(ArgResults argResults) {
 Future main(List<String> arguments) async {
   final app = PubTestApp();
 
-  ArgParser parser = ArgParser(allowTrailingOptions: true);
+  final parser = ArgParser(allowTrailingOptions: true);
   app.addArgs(parser);
   parser.addOption(packageSourceOptionName,
-      abbr: 's', help: "package source", allowed: [sourceGit, sourcePath]);
+      abbr: 's', help: 'package source', allowed: [sourceGit, sourcePath]);
   parser.addFlag(getOptionName,
       help: 'Get dependencies first (for path dependencies only)',
       negatable: false);
-  ArgResults argResults = parser.parse(arguments);
+  final argResults = parser.parse(arguments);
 
-  bool help = parseBool(argResults[helpOptionName]);
+  final help = parseBool(argResults[helpOptionName]);
   if (help) {
     stdout.writeln("'pub run test' on some packages");
     stdout.writeln();
@@ -48,7 +48,7 @@ Future main(List<String> arguments) async {
     stdout.writeln(
         'Example: ${currentScriptName} -sgit git://github.com/tekartik/tekartik_common_utils.dart');
     stdout.writeln();
-    stdout.writeln("Global options:");
+    stdout.writeln('Global options:');
     stdout.writeln(parser.usage);
     return;
   }
@@ -58,25 +58,25 @@ Future main(List<String> arguments) async {
     return;
   }
 
-  TestOptions testOptions = TestOptions.fromArgResults(argResults);
+  final testOptions = TestOptions.fromArgResults(argResults);
 
   // Handle git package
-  String source = argResults[packageSourceOptionName] as String;
+  final source = argResults[packageSourceOptionName] as String;
   if (source == sourceGit) {
     if (argResults.rest.isEmpty) {
-      stderr.writeln("Missing git source information");
+      stderr.writeln('Missing git source information');
       exit(1);
     }
-    List<String> files = getFiles(argResults);
+    final files = getFiles(argResults);
     // fix options
     if (testOptions.getBeforeOffline != true) {
       testOptions.getBefore = true;
     }
 
-    String srcGit = argResults.rest[0];
-    String dir =
+    final srcGit = argResults.rest[0];
+    final dir =
         (await Directory.systemTemp.createTemp('${currentScriptName}')).path;
-    GitProject git = GitProject(srcGit, path: dir);
+    final git = GitProject(srcGit, path: dir);
 
     // Cloning
     await runCmd(git.cloneCmd(progress: true, depth: 1),
@@ -87,26 +87,26 @@ Future main(List<String> arguments) async {
       stderr.writeln("Git project '$srcGit' is not a pub package in '$dir'");
       exit(1);
     }
-    PubPackage pkg = PubPackage(dir);
+    final pkg = PubPackage(dir);
     await app.testPackage(pkg, testOptions, files);
   } else if (source == sourcePath) {
     if (argResults.rest.isEmpty) {
-      stderr.writeln("Missing path source information");
+      stderr.writeln('Missing path source information');
       exit(1);
     }
-    List<String> files = getFiles(argResults);
+    final files = getFiles(argResults);
 
-    String dir = argResults.rest[0];
+    final dir = argResults.rest[0];
 
     // Pkg dir, no need to look higher
     if (!await isPubPackageRoot(dir)) {
       stderr.writeln("Project in '$dir' is not a pub package");
       exit(1);
     }
-    PubPackage pkg = PubPackage(dir);
+    final pkg = PubPackage(dir);
     await app.testPackage(pkg, testOptions, files);
   } else {
-    stderr.writeln("Missing source (path or git)");
+    stderr.writeln('Missing source (path or git)');
     exit(1);
   }
 }

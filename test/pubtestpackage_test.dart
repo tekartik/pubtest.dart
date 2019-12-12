@@ -1,4 +1,4 @@
-@TestOn("vm")
+@TestOn('vm')
 library tekartik_pub.test.pub_test;
 
 import 'dart:io';
@@ -29,15 +29,15 @@ void main() {
 
   group('pubtestpackage', () {
     test('version', () async {
-      ProcessResult result =
+      final result =
           await runCmd(DartCmd([pubTestPackageDartScript, '--version']));
-      expect(result.stdout, contains("pubtest"));
+      expect(result.stdout, contains('pubtest'));
       expect(Version.parse((result.stdout as String).split(' ').last), version);
     });
 
     group('path', () {
       test('success', () async {
-        ProcessResult result = await runCmd(DartCmd([
+        final result = await runCmd(DartCmd([
           pubTestPackageDartScript,
           '-spath',
           '.',
@@ -50,11 +50,11 @@ void main() {
         if (!Platform.isWindows) {
           expect(result.exitCode, 0);
         }
-        expect(result.stdout.contains("All tests passed"), isTrue);
+        expect(result.stdout.contains('All tests passed'), isTrue);
       });
 
       test('failure', () async {
-        ProcessResult result = await runCmd(DartCmd([
+        final result = await runCmd(DartCmd([
           pubTestPackageDartScript,
           '-spath',
           '.',
@@ -68,7 +68,7 @@ void main() {
 
     group('git', () {
       test('success', () async {
-        ProcessResult result = await runCmd(DartCmd([
+        final result = await runCmd(DartCmd([
           pubTestPackageDartScript,
           '-sgit',
           'https://github.com/tekartik/pubtest.dart',
@@ -83,11 +83,11 @@ void main() {
           expect(result.exitCode, 0);
         }
 
-        expect(result.stdout.contains("All tests passed"), isTrue);
+        expect(result.stdout.contains('All tests passed'), isTrue);
       }, timeout: longTimeout);
 
       test('failure', () async {
-        ProcessResult result = await runCmd(DartCmd([
+        final result = await runCmd(DartCmd([
           pubTestPackageDartScript,
           '-sgit',
           'https://github.com/tekartik/pubtest.dart',

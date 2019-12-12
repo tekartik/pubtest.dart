@@ -29,7 +29,7 @@ class TestList {
   void add(PubPackage pkg, [String test]) {
     //print("$pkg $test");
     if (all.containsKey(pkg)) {
-      List<String> tests = all[pkg];
+      var tests = all[pkg];
       // if either is null, keep it null
       if (tests == null || test == null) {
         all[pkg] = null;
@@ -65,7 +65,7 @@ class NewTestList {
   void add(TestPackage pkg, [String test]) {
     //print("$pkg $test");
     if (all.containsKey(pkg)) {
-      List<String> tests = all[pkg];
+      var tests = all[pkg];
       // if either is null, keep it null
       if (tests == null || test == null) {
         all[pkg] = null;
@@ -145,11 +145,7 @@ class PubTest {
 
 Iterable<String> pubspecYamlGetTestDependenciesPackageName(Map yaml) {
   if (yaml.containsKey('test_dependencies')) {
-    Iterable<String> list =
-        (yaml['test_dependencies'] as Iterable)?.cast<String>();
-    if (list == null) {
-      list = [];
-    }
+    final list = (yaml['test_dependencies'] as Iterable)?.cast<String>() ?? [];
     return list;
   }
   return null;
