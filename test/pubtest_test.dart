@@ -1,4 +1,4 @@
-@TestOn("vm")
+@TestOn('vm')
 library tekartik_pub.test.pub_test;
 
 import 'dart:io';
@@ -26,7 +26,7 @@ void run(String script) {
   // we use a prefix, needed since this can be called during pubtest_test and pbrtest_test
   var prefix = basenameWithoutExtension(script);
   test('version', () async {
-    ProcessResult result = await runCmd(DartCmd([script, '--version']));
+    final result = await runCmd(DartCmd([script, '--version']));
     expect(result.stdout, contains(basenameWithoutExtension(script)));
     expect(Version.parse((result.stdout as String).split(' ').last), version);
   });
@@ -36,15 +36,14 @@ void run(String script) {
     try {
       await File(join('test', 'data', 'success_test_.dart')).copy(testPath);
 
-      ProcessResult result =
-          await runCmd(DartCmd([script, '-p', 'vm', testPath]));
+      final result = await runCmd(DartCmd([script, '-p', 'vm', testPath]));
 
       // on 1.13, current windows is failing
       if (!Platform.isWindows) {
         expect(result.exitCode, 0, reason: result.stderr?.toString());
       }
 
-      expect(result.stdout.contains("All tests passed"), isTrue);
+      expect(result.stdout.contains('All tests passed'), isTrue);
     } finally {
       // cleanup
       try {
@@ -57,7 +56,7 @@ void run(String script) {
     var testPath = join('test', 'data', '${prefix}_fail_test.dart');
     try {
       await File(join('test', 'data', 'fail_test_.dart')).copy(testPath);
-      ProcessResult result = await runCmd(DartCmd([
+      final result = await runCmd(DartCmd([
         script,
         '-p',
         'vm',
@@ -76,13 +75,13 @@ void run(String script) {
 
   group('example', () {
     test('subdir', () async {
-      String top = (await Directory.systemTemp.createTemp()).path;
+      final top = (await Directory.systemTemp.createTemp()).path;
 
-      PubPackage exampleSuccessDir = PubPackage(join('example', 'success'));
-      PubPackage pkg = await exampleSuccessDir.clone(join(top, 'success'));
+      final exampleSuccessDir = PubPackage(join('example', 'success'));
+      final pkg = await exampleSuccessDir.clone(join(top, 'success'));
 
-      // Filter test having "success" in the data dir
-      ProcessResult result = await runCmd(pkg.dartCmd([
+      // Filter test having 'success' in the data dir
+      var result = await runCmd(pkg.dartCmd([
         script,
         '-p',
         'vm',

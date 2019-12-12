@@ -24,13 +24,12 @@ class PbrTestApp extends App {
         reporter: testOptions.reporter,
         platforms: testOptions.platforms,
         name: testOptions.name));
-    var pbrArgs = ['test', '--']..addAll(testArgs);
-    ProcessCmd testCmd = pkg.pbrCmd(pbrArgs);
+    var pbrArgs = ['test', '--', ...testArgs];
+    final testCmd = pkg.pbrCmd(pbrArgs);
     if (testOptions.dryRun) {
       print('\$ $testCmd');
     } else {
-      ProcessResult result =
-          await runCmd(testCmd, stdout: stdout, stderr: stderr);
+      final result = await runCmd(testCmd, stdout: stdout, stderr: stderr);
       if (result.exitCode != 0) {
         stderr.writeln('test error in ${pkg}');
         if (exitCode == 0) {
