@@ -1,4 +1,5 @@
 #!/usr/bin/env dart
+
 library pubtest.bin.pubtest;
 
 // Pull recursively
