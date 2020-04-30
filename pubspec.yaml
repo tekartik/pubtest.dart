@@ -8,7 +8,7 @@ dependencies:
   path: any
   pool: any
   pub_semver: any
-  process_run: '>=0.10.3'
+  process_run: '>=0.10.9-dev.1'
   yaml: any
   tekartik_pub:
     git:
