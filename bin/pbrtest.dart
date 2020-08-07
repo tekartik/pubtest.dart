@@ -1,6 +1,6 @@
 #!/usr/bin/env dart
 
-library tekartik_script.bin.pubget;
+library tekartik_pubtest.bin.pbrtest;
 
 import 'package:tekartik_pubtest/bin/pbrtest.dart' as pbrtest;
 

@@ -46,6 +46,11 @@ Experimental. Execute all declared dependencies test
 
     pubtestdependencies
 
+```
+# Test a single dependency
+pubtestdependencies.dart --package-name process_run -v
+```
+    
 ## pubtestpackage
 
 You can directly test a package even if you don't have it yet.

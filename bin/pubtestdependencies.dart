@@ -1,6 +1,6 @@
 #!/usr/bin/env dart
 
-library pubtest.bin.pubtest;
+library tekartik_pubtest.bin.pubtestdependencies;
 
 // Pull recursively
 import 'dart:async';

@@ -1,6 +1,6 @@
 #!/usr/bin/env dart
 
-library tekartik_pubtest.bin.pubtest;
+library tekartik_pubtest.bin.pubtestpackage;
 
 // Pull recursively
 

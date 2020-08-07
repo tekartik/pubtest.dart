@@ -1,6 +1,6 @@
 #!/usr/bin/env dart
 
-library tekartik_script.bin.pubget;
+library tekartik_pubtest.bin.pubtest;
 
 import 'package:tekartik_pubtest/bin/pubtest.dart' as pubtest;
 
