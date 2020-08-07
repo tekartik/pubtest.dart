@@ -1,6 +1,6 @@
 name: tekartik_pubtest
 author: Alexandre Roux <alex@tekartik.com>
-version: 0.6.8
+version: 0.6.9
 environment:
   sdk: '>=2.8.0 <3.0.0'
 dependencies:

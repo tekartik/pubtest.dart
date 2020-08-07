@@ -11,6 +11,7 @@ import 'package:fs_shim/utils/io/entity.dart';
 import 'package:path/path.dart';
 import 'package:pool/pool.dart';
 import 'package:process_run/cmd_run.dart' hide runCmd;
+import 'package:process_run/shell_run.dart';
 import 'package:tekartik_common_utils/common_utils_import.dart';
 import 'package:tekartik_io_utils/io_utils_import.dart';
 import 'package:tekartik_io_utils/process_cmd_utils.dart';
@@ -136,7 +137,14 @@ class PubTestApp extends App {
           reporter: testOptions.reporter,
           platforms: testOptions.platforms,
           name: testOptions.name));
-      await runCmd(testCmd, dryRun: testOptions.dryRun);
+      if (testOptions.dryRun ?? false) {
+        await runCmd(testCmd, dryRun: testOptions.dryRun);
+      } else {
+        var shell =
+            Shell(workingDirectory: pkg.path, verbose: testOptions.verbose);
+        await shell.run(
+            '${executableArgumentsToString(testCmd.executable, testCmd.arguments)}');
+      }
     }
   }
 
@@ -275,13 +283,20 @@ abstract class App {
             dependencies: ['test', 'flutter_test'],
             forceRecursive: testOptions.forceRecursive)
         .listen((String dir) {
+      // devPrint('adding $dir');
       list.add(PubPackage(dir));
     }).asFuture();
 
-    //print(list.packages);
+    // devPrint(list.packages);
     for (final pkg in list.packages) {
+      // devPrint(pkg);
       await packagePool.withResource(() async {
-        await testPackage(pkg, testOptions, list.getTests(pkg));
+        try {
+          await testPackage(pkg, testOptions, list.getTests(pkg));
+        } catch (e) {
+          stderr.writeln('ERROR $e in $pkg');
+          rethrow;
+        }
       });
     }
 
