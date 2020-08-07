@@ -1,5 +1,6 @@
 import 'package:process_run/cmd_run.dart' hide runCmd;
 import 'package:process_run/cmd_run.dart' as cmd_run;
+import 'package:process_run/shell_run.dart';
 import 'package:tekartik_io_utils/io_utils_import.dart';
 
 /// Verbose run of command
@@ -11,6 +12,11 @@ Future<ProcessResult> runCmd(ProcessCmd cmd,
     }
   }
 
+  Future<ProcessResult> _runCmd(ProcessCmd cmd, {bool verbose}) async {
+    return await Shell(workingDirectory: cmd.workingDirectory, verbose: true)
+        .runExecutableArguments(cmd.executable, cmd.arguments);
+  }
+
   if (dryRun == true) {
     _writeWorkingDirectory();
     stdout.writeln('\$ $cmd');
@@ -19,12 +25,13 @@ Future<ProcessResult> runCmd(ProcessCmd cmd,
   ProcessResult result;
   if (oneByOne == true) {
     _writeWorkingDirectory();
-    result = await cmd_run.runCmd(cmd, verbose: verbose);
+
+    result = await _runCmd(cmd, verbose: verbose);
     if (result.exitCode != 0) {
       throw Exception('error $cmd exitCode: ${result.exitCode}');
     }
   } else {
-    result = await cmd_run.runCmd(cmd, verbose: verbose);
+    result = await _runCmd(cmd, verbose: verbose);
     _writeWorkingDirectory();
     stdout.writeln('\$ $cmd');
     stdout.write(result.stdout);

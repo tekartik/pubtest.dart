@@ -1,6 +1,6 @@
 name: tekartik_pubtest
 author: Alexandre Roux <alex@tekartik.com>
-version: 0.6.10
+version: 0.6.11
 environment:
   sdk: '>=2.8.0 <3.0.0'
 dependencies:
@@ -8,7 +8,8 @@ dependencies:
   path: any
   pool: any
   pub_semver: any
-  process_run: '>=0.10.11'
+  process_run: '>=0.10.11+1'
+  synchronized:
   yaml: any
   tekartik_pub:
     git:
