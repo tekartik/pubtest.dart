@@ -28,13 +28,17 @@ void main() {
     });
 
     test('synchronized dependency', () async {
-      final result = await runCmd(DartCmd([
+      // print(userEnvironment);
+      final result =
+          await Shell(verbose: false).runExecutableArguments('dart', [
         pubTestDependenciesDartScript,
         '--package-name',
         'synchronized',
-        '-v'
-      ]));
-      expect(result.stdout, contains('pubtestdependencies'),
+        '-v',
+        '-n',
+        'BasicLock'
+      ]);
+      expect(result.stdout, contains('All tests passed'),
           reason: getReason(result));
       //expect(Version.parse(result.stdout.split(' ').last as String), version);
     });
@@ -51,7 +55,13 @@ void main() {
       final pkg = await exampleSimplePkg.clone(dst);
       await exampleSimpleDependencyPkg.clone(dstDependency);
       await runCmd(pkg.pubCmd(pubGetArgs(/*offline: true*/)), stderr: stderr);
-      final result = await Shell(workingDirectory: pkg.path, verbose: false)
+      // Precompile
+      await Shell(workingDirectory: pkg.path, verbose: true)
+          .runExecutableArguments(
+              'dart', [pubTestDependenciesDartScript, '--version']);
+      await Shell(workingDirectory: pkg.path, verbose: true)
+          .run('pub run test --version');
+      var result = await Shell(workingDirectory: pkg.path, verbose: true)
           .runExecutableArguments('dart', [
         pubTestDependenciesDartScript,
         /*'--get',*/ '-r',
@@ -62,7 +72,17 @@ void main() {
         // verbose
         // '-v'
       ]);
-
+      result = await Shell(workingDirectory: pkg.path, verbose: true)
+          .runExecutableArguments('dart', [
+        pubTestDependenciesDartScript,
+        /*'--get',*/ '-r',
+        /* -r requires 0.12.+*/
+        'json',
+        '-p',
+        'vm',
+        // verbose
+        // '-v'
+      ]);
       try {
         // on 1.13, current windows is failing
         if (!Platform.isWindows) {
@@ -79,7 +99,7 @@ void main() {
             reason: getReason(result));
       } catch (e) {
         stderr.writeln(
-            'Can fail - tests withing tests - but TODO investigate: $e');
+            'Can fail - tests withing tests - but TODO investigate: $e, reason; ${getReason(result)}');
       }
     }, timeout: longTimeout);
 
