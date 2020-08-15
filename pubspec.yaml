@@ -1,6 +1,6 @@
 name: tekartik_pubtest
 author: Alexandre Roux <alex@tekartik.com>
-version: 0.6.12
+version: 0.7.0
 environment:
   sdk: '>=2.8.0 <3.0.0'
 dependencies:
@@ -15,12 +15,12 @@ dependencies:
     git:
       url: git://github.com/tekartik/pub.dart
       ref: dart2
-    version: '>=0.10.17'
+    version: '>=0.11.0'
   tekartik_sc:
     git:
       url: git://github.com/tekartik/sc.dart
       ref: dart2
-    version: '>=0.8.5+1'
+    version: '>=0.9.0'
   tekartik_io_utils:
     git:
       url: git://github.com/tekartik/io_utils.dart

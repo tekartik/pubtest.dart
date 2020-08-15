@@ -14,9 +14,9 @@ import 'package:tekartik_pubtest/src/pubtest_version.dart';
 import 'package:tekartik_pub/io.dart';
 
 var longTimeout = const Timeout(Duration(minutes: 2));
-
+var exampleBinPath = join('example', 'bin');
 String get _pubTestDartScript =>
-    normalize(absolute(join('bin', 'pubtest.dart')));
+    normalize(absolute(join(exampleBinPath, 'pubtest.dart')));
 
 void main() {
   group('pubtest', () {

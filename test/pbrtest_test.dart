@@ -9,7 +9,7 @@ import 'pubtest_test.dart';
 var longTimeout = const Timeout(Duration(minutes: 2));
 
 String get _pbrTestDartScript =>
-    normalize(absolute(join('bin', 'pbrtest.dart')));
+    normalize(absolute(join(exampleBinPath, 'pbrtest.dart')));
 
 void main() {
   group('pbrtest', () {

@@ -1,7 +1,3 @@
-#!/usr/bin/env dart
-
-library tekartik_pubtest.bin.pbrtest;
-
 import 'dart:io';
 
 import 'package:process_run/cmd_run.dart';

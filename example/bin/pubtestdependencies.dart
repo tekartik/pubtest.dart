@@ -1,8 +1,3 @@
-#!/usr/bin/env dart
-
-library tekartik_pubtest.bin.pubtestdependencies;
-
-// Pull recursively
 import 'dart:async';
 
 import 'package:args/args.dart';

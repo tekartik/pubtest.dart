@@ -1,9 +1,3 @@
-#!/usr/bin/env dart
-
-library tekartik_pubtest.bin.pubtest;
-
-// Pull recursively
-
 import 'dart:io';
 
 import 'package:args/args.dart';
