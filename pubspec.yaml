@@ -1,8 +1,9 @@
 name: tekartik_pubtest
 author: Alexandre Roux <alex@tekartik.com>
 version: 0.7.0
+publish_to: none
 environment:
-  sdk: '>=2.8.0 <3.0.0'
+  sdk: '>=2.10.0-0 <3.0.0'
 dependencies:
   args: any
   path: any

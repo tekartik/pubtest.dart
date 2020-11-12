@@ -1,6 +1,7 @@
 name: pubtest_example_simple
+publish_to: none
 environment:
-  sdk: '>=2.0.0-dev.58 <3.0.0'
+  sdk: '>=2.10.0-0 <3.0.0'
 dependencies:
   pubtest_example_simple_dependency:
     path: ../simple_dependency
@@ -11,4 +12,3 @@ dev_dependencies:
     git:
       url: git://github.com/tekartik/pubtest.dart
       ref: dart2
-
