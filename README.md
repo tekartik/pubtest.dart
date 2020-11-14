@@ -4,6 +4,17 @@ Helper to run pub test
 
 [![Build Status](https://travis-ci.org/tekartik/pubtest.dart.svg?branch=master)](https://travis-ci.org/tekartik/pubtest.dart)
 
+## Setup
+
+pubspec.yaml:
+
+```yaml
+  tekartik_pubtest:
+    git:
+      url: git://github.com/tekartik/pubtest.dart
+      ref: dart2
+    version: '>=0.7.0'
+```
 ## pubtest command
 
     pubtest
@@ -46,6 +57,11 @@ Experimental. Execute all declared dependencies test
 
     pubtestdependencies
 
+```
+# Test a single dependency
+pubtestdependencies.dart --package-name process_run -v
+```
+    
 ## pubtestpackage
 
 You can directly test a package even if you don't have it yet.
@@ -53,14 +69,4 @@ To specify a git packages to run your tests on:
 
     pubtestpackage -sgit git://github.com/tekartik/common_utils.dart
     
-## Activation
-
-### From git repository
-
-    pub global activate -s git git://github.com/tekartik/pubtest.dart
-
-### From local path
-
-    pub global activate -s path .
-
 

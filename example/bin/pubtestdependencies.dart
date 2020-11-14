@@ -1,8 +1,3 @@
-#!/usr/bin/env dart
-
-library pubtest.bin.pubtest;
-
-// Pull recursively
 import 'dart:async';
 
 import 'package:args/args.dart';

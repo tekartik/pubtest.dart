@@ -1,5 +1,3 @@
-library tekartik_pubtest.src.pubtest_utils;
-
 import 'package:tekartik_pub/io.dart';
 
 class DependencyTestPackage extends TestPackage {

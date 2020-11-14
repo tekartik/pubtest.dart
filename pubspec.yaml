@@ -1,6 +1,6 @@
 name: tekartik_pubtest
 author: Alexandre Roux <alex@tekartik.com>
-version: 0.6.8
+version: 0.7.0
 environment:
   sdk: '>=2.8.0 <3.0.0'
 dependencies:
@@ -8,18 +8,19 @@ dependencies:
   path: any
   pool: any
   pub_semver: any
-  process_run: '>=0.10.9-dev.1'
+  process_run: '>=0.10.11+1'
+  synchronized:
   yaml: any
   tekartik_pub:
     git:
       url: git://github.com/tekartik/pub.dart
       ref: dart2
-    version: '>=0.10.17'
+    version: '>=0.11.0'
   tekartik_sc:
     git:
       url: git://github.com/tekartik/sc.dart
       ref: dart2
-    version: '>=0.8.5+1'
+    version: '>=0.9.0'
   tekartik_io_utils:
     git:
       url: git://github.com/tekartik/io_utils.dart
@@ -30,7 +31,7 @@ dependencies:
       url: git://github.com/tekartik/common_utils.dart
       ref: dart2
     version: '>=0.10.7+1'
-  fs_shim: '>=0.7.3'
+  fs_shim: '>=1.0.1-dev.1'
 dev_dependencies:
   dev_test: '>=0.13.2-dev.3'
   test: '>=1.2.0'
@@ -48,6 +49,7 @@ dependency_overrides:
 #  fs_shim:
 #    git: git://github.com/tekartik/fs_shim.dart
 #  process_run:
+#    path: ../process_run.dart
 #    git: git://github.com/tekartik/process_run.dart
 executables:
   pubtest:

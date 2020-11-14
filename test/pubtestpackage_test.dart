@@ -9,10 +9,12 @@ import 'package:process_run/cmd_run.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:tekartik_pubtest/src/pubtest_version.dart';
 
+import 'pubtest_test.dart';
+
 var longTimeout = const Timeout(Duration(minutes: 2));
 
 String get pubTestPackageDartScript =>
-    normalize(absolute(join('bin', 'pubtestpackage.dart')));
+    normalize(absolute(join(exampleBinPath, 'pubtestpackage.dart')));
 
 void main() {
   //useVMConfiguration();

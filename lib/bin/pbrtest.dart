@@ -1,7 +1,3 @@
-#!/usr/bin/env dart
-
-library tekartik_pubtest.bin.pbrtest;
-
 import 'dart:io';
 
 import 'package:process_run/cmd_run.dart';
@@ -30,7 +26,8 @@ class PbrTestApp extends App {
     if (testOptions.dryRun) {
       print('\$ $testCmd');
     } else {
-      final result = await runCmd(testCmd, stdout: stdout, stderr: stderr);
+      final result = await runCmd(testCmd,
+          stdout: stdout, stderr: stderr, verbose: testOptions.verbose);
       if (result.exitCode != 0) {
         stderr.writeln('test error in ${pkg}');
         if (exitCode == 0) {

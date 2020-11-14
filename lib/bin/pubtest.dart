@@ -1,9 +1,3 @@
-#!/usr/bin/env dart
-
-library tekartik_pubtest.bin.pubtest;
-
-// Pull recursively
-
 import 'dart:io';
 
 import 'package:args/args.dart';
@@ -11,12 +5,14 @@ import 'package:fs_shim/utils/io/entity.dart';
 import 'package:path/path.dart';
 import 'package:pool/pool.dart';
 import 'package:process_run/cmd_run.dart' hide runCmd;
+import 'package:process_run/shell_run.dart';
 import 'package:tekartik_common_utils/common_utils_import.dart';
 import 'package:tekartik_io_utils/io_utils_import.dart';
-import 'package:tekartik_io_utils/process_cmd_utils.dart';
+//import 'package:tekartik_io_utils/process_cmd_utils.dart';
 import 'package:tekartik_pub/io.dart';
 import 'package:tekartik_pubtest/src/pubtest_utils.dart';
 import 'package:tekartik_pubtest/src/pubtest_version.dart';
+import 'package:tekartik_pubtest/src/run_cmd.dart';
 
 export 'package:tekartik_io_utils/io_utils_import.dart';
 
@@ -78,6 +74,11 @@ class CommonTestOptions {
     poolSize = parseInt(argResults[concurrencyOptionName]);
     verbose = parseBool(argResults[verboseOptionName], false);
   }
+
+  Map<String, dynamic> toDebugMap() =>
+      <String, dynamic>{if (verbose ?? false) 'verbose': verbose};
+  @override
+  String toString() => toDebugMap().toString();
 }
 
 class TestOptions extends CommonTestOptions {
@@ -128,7 +129,8 @@ class PubTestApp extends App {
       }
       var cmd = FlutterCmd(args)..workingDirectory = pkg.path;
 
-      await runCmd(cmd, dryRun: testOptions.dryRun);
+      await runCmd(cmd,
+          dryRun: testOptions.dryRun, verbose: testOptions.verbose);
     } else {
       var testCmd = pkg.pubCmd(pubRunTestArgs(
           args: args,
@@ -136,7 +138,18 @@ class PubTestApp extends App {
           reporter: testOptions.reporter,
           platforms: testOptions.platforms,
           name: testOptions.name));
-      await runCmd(testCmd, dryRun: testOptions.dryRun);
+      if (testOptions.dryRun ?? false) {
+        await runCmd(testCmd,
+            dryRun: testOptions.dryRun, verbose: testOptions.verbose);
+      } else {
+        var shell = Shell(
+            workingDirectory: pkg.path,
+            commandVerbose: true,
+            verbose: testOptions.verbose);
+        stdout.writeln('[${pkg.path}]');
+        await shell.runExecutableArguments(
+            testCmd.executable, testCmd.arguments);
+      }
     }
   }
 
@@ -275,13 +288,20 @@ abstract class App {
             dependencies: ['test', 'flutter_test'],
             forceRecursive: testOptions.forceRecursive)
         .listen((String dir) {
+      // devPrint('adding $dir');
       list.add(PubPackage(dir));
     }).asFuture();
 
-    //print(list.packages);
+    // devPrint(list.packages);
     for (final pkg in list.packages) {
+      // devPrint(pkg);
       await packagePool.withResource(() async {
-        await testPackage(pkg, testOptions, list.getTests(pkg));
+        try {
+          await testPackage(pkg, testOptions, list.getTests(pkg));
+        } catch (e) {
+          stderr.writeln('ERROR $e in $pkg');
+          rethrow;
+        }
       });
     }
 
@@ -316,11 +336,13 @@ abstract class App {
           // Flutter way
           var cmd = FlutterCmd(['packages', 'pub', 'upgrade'])
             ..workingDirectory = pkg.path;
-          await runCmd(cmd, dryRun: testOptions.dryRun);
+          await runCmd(cmd,
+              dryRun: testOptions.dryRun, verbose: testOptions.verbose);
         } else {
           // Regular dart
           var cmd = pkg.pubCmd(pubUpgradeArgs());
-          await runCmd(cmd, dryRun: testOptions.dryRun);
+          await runCmd(cmd,
+              dryRun: testOptions.dryRun, verbose: testOptions.verbose);
         }
       } else if (testOptions.getBefore || testOptions.getBeforeOffline) {
         if (await isFlutterPackageRoot(pkg.path)) {
@@ -334,13 +356,15 @@ abstract class App {
             args.add('--offline');
           }
           var cmd = FlutterCmd(args)..workingDirectory = pkg.path;
-          await runCmd(cmd, dryRun: testOptions.dryRun);
+          await runCmd(cmd,
+              dryRun: testOptions.dryRun, verbose: testOptions.verbose);
         } else {
           // Regular dart
           var cmd =
               pkg.pubCmd(pubGetArgs(offline: testOptions.getBeforeOffline));
 
-          await runCmd(cmd, dryRun: testOptions.dryRun);
+          await runCmd(cmd,
+              dryRun: testOptions.dryRun, verbose: testOptions.verbose);
         }
       }
 
