@@ -13,6 +13,6 @@ String get _pbrTestDartScript =>
 
 void main() {
   group('pbrtest', () {
-    run(_pbrTestDartScript);
+    defineTests(_pbrTestDartScript);
   });
 }

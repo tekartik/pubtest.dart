@@ -33,8 +33,8 @@ Future main(List<String> arguments) async {
     stdout.writeln(
         "Call 'pub run test' recursively (default from current directory)");
     stdout.writeln();
-    stdout.writeln(
-        'Usage: ${currentScriptName} [<folder_paths...>] [<arguments>]');
+    stdout
+        .writeln('Usage: $currentScriptName [<folder_paths...>] [<arguments>]');
     stdout.writeln();
     stdout.writeln('Global options:');
     stdout.writeln(parser.usage);
@@ -42,7 +42,7 @@ Future main(List<String> arguments) async {
   }
 
   if (parseBool(argResults['version'])) {
-    stdout.write('${currentScriptName} ${version}');
+    stdout.write('$currentScriptName $version');
     return;
   }
   /*
@@ -89,7 +89,7 @@ Future main(List<String> arguments) async {
     final pkg = await dependency.package.clone(dst);
 
     print(
-        '[pubtestdependencies] test on ${pkg}${files != null ? ' ${files}' : ''}');
+        '[pubtestdependencies] test on $pkg${files != null ? ' $files' : ''}');
 
     // fix options - get needed
     testOptions.upgradeBefore = true;
@@ -157,7 +157,7 @@ int _w2;
   }
 
   if (exitCode != 0) {
-    stderr.writeln('errors in packages: ${errors}');
+    stderr.writeln('errors in packages: $errors');
     await stderr.flush();
   }
 }
