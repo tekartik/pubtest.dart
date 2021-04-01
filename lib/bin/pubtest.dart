@@ -97,13 +97,13 @@ List<String> getPlatforms(ArgResults _argsResult) {
     // Allow platforms in env variable
     var envPlatforms = Platform.environment['PUBTEST_PLATFORMS'];
     if (envPlatforms != null) {
-      stdout.writeln('Using platforms: ${envPlatforms}');
+      stdout.writeln('Using platforms: $envPlatforms');
       platforms = envPlatforms.split(',');
     }
     // compatiblity with previous rpubtest
     envPlatforms = Platform.environment['TEKARTIK_RPUBTEST_PLATFORMS'];
     if (envPlatforms != null) {
-      stdout.writeln('Using platforms: ${envPlatforms}');
+      stdout.writeln('Using platforms: $envPlatforms');
       platforms = envPlatforms.split(',');
     }
   }
@@ -116,7 +116,7 @@ class PubTestApp extends App {
       PubPackage pkg, List<String> args, CommonTestOptions testOptions) async {
     if (await isFlutterPackageRoot(pkg.path)) {
       if (!isFlutterSupported) {
-        stderr.writeln('flutter not supported for package in ${pkg}');
+        stderr.writeln('flutter not supported for package in $pkg');
         return;
       }
       // Flutter way
@@ -132,12 +132,15 @@ class PubTestApp extends App {
       await runCmd(cmd,
           dryRun: testOptions.dryRun, verbose: testOptions.verbose);
     } else {
-      var testCmd = pkg.pubCmd(pubRunTestArgs(
-          args: args,
-          concurrency: testOptions.poolSize,
-          reporter: testOptions.reporter,
-          platforms: testOptions.platforms,
-          name: testOptions.name));
+      var testCmd = ProcessCmd('dart', [
+        'test',
+        ...pubRunTestArgs(
+            args: args,
+            concurrency: testOptions.poolSize,
+            reporter: testOptions.reporter,
+            platforms: testOptions.platforms,
+            name: testOptions.name)
+      ]);
       if (testOptions.dryRun ?? false) {
         await runCmd(testCmd,
             dryRun: testOptions.dryRun, verbose: testOptions.verbose);
@@ -218,7 +221,7 @@ abstract class App {
           "Call '$commandText' recursively (default from current directory)");
       stdout.writeln();
       stdout.writeln(
-          'Usage: ${currentScriptName} [<folder_paths...>] [<arguments>]');
+          'Usage: $currentScriptName [<folder_paths...>] [<arguments>]');
       stdout.writeln();
       stdout.writeln('Global options:');
       stdout.writeln(parser.usage);
@@ -226,7 +229,7 @@ abstract class App {
     }
 
     if (parseBool(argResults[versionOptionName])) {
-      stdout.write('${currentScriptName} ${version}');
+      stdout.write('$currentScriptName $version');
       return;
     }
 
@@ -319,7 +322,7 @@ abstract class App {
       }
     }
     if (testOptions.dryRun) {
-      print('[dryRun] test on ${pkg.dir}${files != null ? ' ${files}' : ''}');
+      print('[dryRun] test on ${pkg.dir}${files != null ? ' $files' : ''}');
     }
     try {
       final args = <String>[];
@@ -330,7 +333,7 @@ abstract class App {
       if (testOptions.upgradeBefore == true) {
         if (await isFlutterPackageRoot(pkg.path)) {
           if (!isFlutterSupported) {
-            stderr.writeln('flutter not supported for package in ${pkg}');
+            stderr.writeln('flutter not supported for package in $pkg');
             return;
           }
           // Flutter way
@@ -347,7 +350,7 @@ abstract class App {
       } else if (testOptions.getBefore || testOptions.getBeforeOffline) {
         if (await isFlutterPackageRoot(pkg.path)) {
           if (!isFlutterSupported) {
-            stderr.writeln('flutter not supported for package in ${pkg}');
+            stderr.writeln('flutter not supported for package in $pkg');
             return;
           }
           // Flutter way
@@ -370,7 +373,7 @@ abstract class App {
 
       await runTest(pkg, args, testOptions);
     } catch (e) {
-      stderr.writeln('error thrown in ${pkg}');
+      stderr.writeln('error thrown in $pkg');
       await stderr.flush();
       rethrow;
     }

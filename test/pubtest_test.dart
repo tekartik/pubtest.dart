@@ -20,7 +20,7 @@ String get _pubTestDartScript =>
 
 void main() {
   group('pubtest', () {
-    run(_pubTestDartScript);
+    defineTests(_pubTestDartScript);
   });
 }
 
@@ -28,7 +28,7 @@ String getReason(ProcessResult result) {
   return 'OUT:\n${result.stdout}\nERR:\n${{result.stderr}}';
 }
 
-void run(String script) {
+void defineTests(String script) {
   // we use a prefix, needed since this can be called during pubtest_test and pbrtest_test
   var prefix = basenameWithoutExtension(script);
   test('version', () async {
@@ -152,7 +152,7 @@ void run(String script) {
         script,
         '-p',
         'vm',
-        '${top}',
+        '$top',
         '-n',
         'success',
         '-r',

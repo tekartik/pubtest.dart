@@ -39,9 +39,9 @@ Future main(List<String> arguments) async {
     stdout.writeln("'pub run test' on some packages");
     stdout.writeln();
     stdout.writeln(
-        'Usage: ${currentScriptName} [<source>] [<test-files>] [<arguments>]');
+        'Usage: $currentScriptName [<source>] [<test-files>] [<arguments>]');
     stdout.writeln(
-        'Example: ${currentScriptName} -sgit git://github.com/tekartik/tekartik_common_utils.dart');
+        'Example: $currentScriptName -sgit git://github.com/tekartik/tekartik_common_utils.dart');
     stdout.writeln();
     stdout.writeln('Global options:');
     stdout.writeln(parser.usage);
@@ -49,7 +49,7 @@ Future main(List<String> arguments) async {
   }
 
   if (parseBool(argResults['version'])) {
-    stdout.write('${currentScriptName} ${version}');
+    stdout.write('$currentScriptName $version');
     return;
   }
 
@@ -70,7 +70,7 @@ Future main(List<String> arguments) async {
 
     final srcGit = argResults.rest[0];
     final dir =
-        (await Directory.systemTemp.createTemp('${currentScriptName}')).path;
+        (await Directory.systemTemp.createTemp('$currentScriptName')).path;
     final git = GitProject(srcGit, path: dir);
 
     // Cloning

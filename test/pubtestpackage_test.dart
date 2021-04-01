@@ -5,7 +5,8 @@ import 'dart:io';
 
 import 'package:dev_test/test.dart';
 import 'package:path/path.dart';
-import 'package:process_run/cmd_run.dart';
+import 'package:process_run/cmd_run.dart' hide run;
+import 'package:process_run/shell.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:tekartik_pubtest/src/pubtest_version.dart';
 
@@ -39,20 +40,16 @@ void main() {
 
     group('path', () {
       test('success', () async {
-        final result = await runCmd(DartCmd([
-          pubTestPackageDartScript,
-          '-spath',
-          '.',
-          '-p',
-          'vm',
-          'test/data/success_test_.dart'
-        ]));
+        final result = (await run('dart run $pubTestPackageDartScript'
+                ' -spath . -p vm test/data/success_test_.dart'))
+            .first;
 
         // on 1.13, current windows is failing
         if (!Platform.isWindows) {
           expect(result.exitCode, 0);
         }
-        expect(result.stdout.contains('All tests passed'), isTrue);
+        expect(result.stdout.contains('All tests passed'), isTrue,
+            reason: result.outText);
       });
 
       test('failure', () async {

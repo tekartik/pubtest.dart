@@ -29,7 +29,7 @@ class PbrTestApp extends App {
       final result = await runCmd(testCmd,
           stdout: stdout, stderr: stderr, verbose: testOptions.verbose);
       if (result.exitCode != 0) {
-        stderr.writeln('test error in ${pkg}');
+        stderr.writeln('test error in $pkg');
         if (exitCode == 0) {
           exitCode = result.exitCode;
         }

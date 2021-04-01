@@ -8,3 +8,7 @@ dev_dependencies:
     git:
       url: git://github.com/tekartik/pubtest.dart
       ref: dart2
+  pedantic:
+dependency_overrides:
+  tekartik_pubtest:
+    path: ../..
