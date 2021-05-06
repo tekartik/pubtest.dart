@@ -4,11 +4,4 @@ environment:
   sdk: '>=2.10.0-0 <3.0.0'
 dev_dependencies:
   test: '>=1.2.0'
-  tekartik_pubtest:
-    git:
-      url: git://github.com/tekartik/pubtest.dart
-      ref: null_safety
   pedantic:
-dependency_overrides:
-  tekartik_pubtest:
-    path: ../..

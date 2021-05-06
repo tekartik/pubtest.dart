@@ -103,8 +103,8 @@ Future main(List<String> arguments) async {
     final parent = PubPackage(packageDir);
 
     // get the test_dependencies first
-    final dependencies = pubspecYamlGetTestDependenciesPackageName(await (parent
-            .getPubspecYaml() as FutureOr<Map<dynamic, dynamic>>)) ??
+    final dependencies = pubspecYamlGetTestDependenciesPackageName(
+            (await parent.getPubspecYaml())!) ??
         await parent.extractPubspecDependencies();
 
     //Map dotPackagesYaml = await getDotPackagesYaml(mainPackage.path);
@@ -114,8 +114,7 @@ Future main(List<String> arguments) async {
         //print(parent);
         if (pkg != null &&
             pubspecYamlHasAnyDependencies(
-                await (pkg.getPubspecYaml() as FutureOr<Map<dynamic, dynamic>>),
-                ['test'])) {
+                (await pkg.getPubspecYaml())!, ['test'])) {
           // add whole package
           list.add(DependencyTestPackage(parent, pkg));
         }

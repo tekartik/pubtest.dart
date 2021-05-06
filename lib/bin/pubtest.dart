@@ -64,8 +64,9 @@ class CommonTestOptions {
 
   CommonTestOptions.fromArgResults(ArgResults argResults) {
     dryRun = argResults[dryRunOptionName] as bool?;
-    reporter =
-        runTestReporterFromString(argResults[reporterOptionName] as String);
+    reporter = argResults[reporterOptionName] == null
+        ? null
+        : runTestReporterFromString(argResults[reporterOptionName] as String);
 
     name = argResults[nameOptionName] as String?;
 
@@ -134,12 +135,12 @@ class PubTestApp extends App {
     } else {
       var testCmd = ProcessCmd('dart', [
         'test',
-        ...pubRunTestArgs(
+        ...pubRunTestRunnerArgs(TestRunnerArgs(
             args: args,
             concurrency: testOptions.poolSize,
             reporter: testOptions.reporter,
             platforms: testOptions.platforms,
-            name: testOptions.name)
+            name: testOptions.name))
       ]);
       if (testOptions.dryRun ?? false) {
         await runCmd(testCmd,
@@ -273,9 +274,7 @@ abstract class App {
         // if it is the test dir, assume testing the package instead
 
         if (pubspecYamlHasAnyDependencies(
-            await (getPubspecYaml(packageDir)
-                as FutureOr<Map<dynamic, dynamic>>),
-            ['test'])) {
+            (await getPubspecYaml(packageDir))!, ['test'])) {
           dirOrFile = relative(dirOrFile, from: packageDir);
           final pkg = PubPackage(packageDir);
           if (dirOrFile == 'test') {
