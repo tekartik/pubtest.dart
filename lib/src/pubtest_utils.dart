@@ -23,8 +23,8 @@ class TestPackage {
 
 class TestList {
   // empty list means all!
-  Map<PubPackage, List<String>> all = {};
-  void add(PubPackage pkg, [String test]) {
+  Map<PubPackage, List<String>?> all = {};
+  void add(PubPackage pkg, [String? test]) {
     //print("$pkg $test");
     if (all.containsKey(pkg)) {
       var tests = all[pkg];
@@ -32,11 +32,7 @@ class TestList {
       if (tests == null || test == null) {
         all[pkg] = null;
       } else {
-        if (tests == null) {
-          tests = [test];
-        } else {
-          tests.add(test);
-        }
+        tests.add(test);
       }
     } else {
       if (test == null) {
@@ -49,7 +45,7 @@ class TestList {
 
   Iterable<PubPackage> get packages => all.keys;
 
-  List<String> getTests(PubPackage pkg) {
+  List<String>? getTests(PubPackage pkg) {
     return all[pkg];
   }
 
@@ -59,8 +55,8 @@ class TestList {
 
 class NewTestList {
   // empty list means all!
-  Map<TestPackage, List<String>> all = {};
-  void add(TestPackage pkg, [String test]) {
+  Map<TestPackage, List<String>?> all = {};
+  void add(TestPackage pkg, [String? test]) {
     //print("$pkg $test");
     if (all.containsKey(pkg)) {
       var tests = all[pkg];
@@ -68,11 +64,7 @@ class NewTestList {
       if (tests == null || test == null) {
         all[pkg] = null;
       } else {
-        if (tests == null) {
-          tests = [test];
-        } else {
-          tests.add(test);
-        }
+        tests.add(test);
       }
     } else {
       if (test == null) {
@@ -85,7 +77,7 @@ class NewTestList {
 
   Iterable<TestPackage> get packages => all.keys;
 
-  List<String> getTests(TestPackage pkg) {
+  List<String>? getTests(TestPackage pkg) {
     return all[pkg];
   }
 
@@ -94,12 +86,12 @@ class NewTestList {
 }
 
 class PubTest {
-  TestList list;
-  int poolSize;
-  bool dryRun;
-  var reporter;
-  List<String> platforms;
-  String name;
+  TestList? list;
+  int? poolSize;
+  bool? dryRun;
+  String? reporter;
+  List<String>? platforms;
+  String? name;
 
   /*
   Future _handleProject(PubPackage pkg, [List<String> files]) async {
@@ -141,9 +133,9 @@ class PubTest {
   */
 }
 
-Iterable<String> pubspecYamlGetTestDependenciesPackageName(Map yaml) {
+Iterable<String>? pubspecYamlGetTestDependenciesPackageName(Map yaml) {
   if (yaml.containsKey('test_dependencies')) {
-    final list = (yaml['test_dependencies'] as Iterable)?.cast<String>() ?? [];
+    final list = (yaml['test_dependencies'] as Iterable?)?.cast<String>() ?? [];
     return list;
   }
   return null;

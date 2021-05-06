@@ -9,8 +9,8 @@ import 'package:process_run/cmd_run.dart';
 import 'package:process_run/shell_run.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:tekartik_common_utils/common_utils_import.dart';
-import 'package:tekartik_pubtest/src/pubtest_version.dart';
 import 'package:tekartik_pub/io.dart';
+import 'package:tekartik_pubtest/src/pubtest_version.dart';
 
 import 'pubtest_test.dart';
 
@@ -24,7 +24,7 @@ void main() {
       final result =
           await runCmd(DartCmd([pubTestDependenciesDartScript, '--version']));
       expect(result.stdout, contains('pubtestdependencies'));
-      expect(Version.parse(result.stdout.split(' ').last as String), version);
+      expect(Version.parse(result.outText.split(' ').last), version);
     });
 
     test('synchronized dependency', () async {

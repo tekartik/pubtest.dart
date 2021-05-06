@@ -3,7 +3,7 @@ author: Alexandre Roux <alex@tekartik.com>
 version: 0.7.0
 publish_to: none
 environment:
-  sdk: '>=2.10.0-0 <3.0.0'
+  sdk: '>=2.12.0 <3.0.0'
 dependencies:
   args: any
   path: any
@@ -15,22 +15,22 @@ dependencies:
   tekartik_pub:
     git:
       url: git://github.com/tekartik/pub.dart
-      ref: dart2
+      ref: null_safety
     version: '>=0.11.0'
   tekartik_sc:
     git:
       url: git://github.com/tekartik/sc.dart
-      ref: dart2
+      ref: null_safety
     version: '>=0.9.0'
   tekartik_io_utils:
     git:
       url: git://github.com/tekartik/io_utils.dart
-      ref: dart2
+      ref: null_safety
     version: '>=0.5.2'
   tekartik_common_utils:
     git:
       url: git://github.com/tekartik/common_utils.dart
-      ref: dart2
+      ref: null_safety
     version: '>=0.10.7+1'
   fs_shim: '>=1.0.1-dev.1'
 dev_dependencies:
@@ -39,7 +39,7 @@ dev_dependencies:
   chrome_travis:
     git:
       url: git://github.com/tekartik/chrome_travis.dart
-      ref: dart2
+      ref: null_safety
     version: '>=0.1.4'
   build_runner: '>=0.9.0'
   build_test: '>=0.10.2'

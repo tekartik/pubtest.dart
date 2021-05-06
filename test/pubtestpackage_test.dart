@@ -20,7 +20,7 @@ String get pubTestPackageDartScript =>
 void main() {
   //useVMConfiguration();
 
-  void checkErrorExitCode(result) {
+  void checkErrorExitCode(ProcessResult result) {
     if (!Platform.isWindows) {
       try {
         expect(result.exitCode, 1);
@@ -48,7 +48,7 @@ void main() {
         if (!Platform.isWindows) {
           expect(result.exitCode, 0);
         }
-        expect(result.stdout.contains('All tests passed'), isTrue,
+        expect(result.outText.contains('All tests passed'), isTrue,
             reason: result.outText);
       });
 
@@ -82,7 +82,7 @@ void main() {
           expect(result.exitCode, 0);
         }
 
-        expect(result.stdout.contains('All tests passed'), isTrue);
+        expect(result.outText.contains('All tests passed'), isTrue);
       }, timeout: longTimeout);
 
       test('failure', () async {

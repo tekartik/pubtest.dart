@@ -12,7 +12,7 @@ const String packageSourceOptionName = 'source';
 const String sourceGit = 'git';
 const String sourcePath = 'path';
 
-List<String> getFiles(ArgResults argResults) {
+List<String>? getFiles(ArgResults argResults) {
   if (argResults.rest.length > 1) {
     return argResults.rest.sublist(1);
   }
@@ -34,7 +34,7 @@ Future main(List<String> arguments) async {
       negatable: false);
   final argResults = parser.parse(arguments);
 
-  final help = parseBool(argResults[helpOptionName]);
+  final help = parseBool(argResults[helpOptionName])!;
   if (help) {
     stdout.writeln("'pub run test' on some packages");
     stdout.writeln();
@@ -48,7 +48,7 @@ Future main(List<String> arguments) async {
     return;
   }
 
-  if (parseBool(argResults['version'])) {
+  if (parseBool(argResults['version'])!) {
     stdout.write('$currentScriptName $version');
     return;
   }
@@ -56,7 +56,7 @@ Future main(List<String> arguments) async {
   final testOptions = TestOptions.fromArgResults(argResults);
 
   // Handle git package
-  final source = argResults[packageSourceOptionName] as String;
+  final source = argResults[packageSourceOptionName] as String?;
   if (source == sourceGit) {
     if (argResults.rest.isEmpty) {
       stderr.writeln('Missing git source information');
