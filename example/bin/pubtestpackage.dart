@@ -2,10 +2,10 @@ import 'dart:io';
 
 import 'package:args/args.dart';
 import 'package:process_run/cmd_run.dart';
-import 'package:tekartik_pubtest/bin/pubtest.dart';
-import 'package:tekartik_pubtest/src/pubtest_version.dart';
 import 'package:tekartik_common_utils/common_utils_import.dart';
 import 'package:tekartik_pub/io.dart';
+import 'package:tekartik_pubtest/bin/pubtest.dart';
+import 'package:tekartik_pubtest/src/pubtest_version.dart';
 import 'package:tekartik_sc/git.dart';
 
 const String packageSourceOptionName = 'source';
