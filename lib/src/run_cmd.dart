@@ -3,17 +3,17 @@ import 'package:process_run/shell_run.dart';
 import 'package:tekartik_io_utils/io_utils_import.dart';
 
 /// Verbose run of command
-Future<ProcessResult> runCmd(ProcessCmd cmd,
-    {bool dryRun, bool oneByOne, bool verbose}) async {
+Future<ProcessResult?> runCmd(ProcessCmd cmd,
+    {bool? dryRun, bool? oneByOne, bool? verbose}) async {
   void _writeWorkingDirectory() {
     if (cmd.workingDirectory != '.' && cmd.workingDirectory != null) {
       stdout.writeln('[${cmd.workingDirectory}]');
     }
   }
 
-  Future<ProcessResult> _runCmd(ProcessCmd cmd, {bool verbose}) async {
+  Future<ProcessResult> _runCmd(ProcessCmd cmd, {bool? verbose}) async {
     return await Shell(workingDirectory: cmd.workingDirectory, verbose: true)
-        .runExecutableArguments(cmd.executable, cmd.arguments);
+        .runExecutableArguments(cmd.executable!, cmd.arguments);
   }
 
   if (dryRun == true) {

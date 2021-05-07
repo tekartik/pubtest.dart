@@ -9,8 +9,8 @@ import 'package:process_run/cmd_run.dart';
 import 'package:process_run/shell_run.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:tekartik_common_utils/common_utils_import.dart';
-import 'package:tekartik_pubtest/src/pubtest_version.dart';
 import 'package:tekartik_pub/io.dart';
+import 'package:tekartik_pubtest/src/pubtest_version.dart';
 
 import 'pubtest_test.dart';
 
@@ -21,16 +21,17 @@ void main() {
   //useVMConfiguration();
   group('pubtestdependencies', () {
     test('version', () async {
-      final result =
-          await runCmd(DartCmd([pubTestDependenciesDartScript, '--version']));
+      final result = await runCmd(
+          DartCmd(['run', pubTestDependenciesDartScript, '--version']));
       expect(result.stdout, contains('pubtestdependencies'));
-      expect(Version.parse(result.stdout.split(' ').last as String), version);
+      expect(Version.parse(result.outText.split(' ').last), version);
     });
 
     test('synchronized dependency', () async {
       // print(userEnvironment);
       final result =
           await Shell(verbose: false).runExecutableArguments('dart', [
+        'run',
         pubTestDependenciesDartScript,
         '--package-name',
         'synchronized',
@@ -53,16 +54,21 @@ void main() {
       final dst = join(top, 'simple');
       final dstDependency = join(top, 'simple_dependency');
       final pkg = await exampleSimplePkg.clone(dst);
+      print(dst);
+      print(pkg.path);
       await exampleSimpleDependencyPkg.clone(dstDependency);
-      await runCmd(pkg.pubCmd(pubGetArgs(/*offline: true*/)), stderr: stderr);
+      await Shell(workingDirectory: pkg.path, verbose: true)
+          .run('dart pub get');
+      //await runCmd(pkg.pubCmd(pubGetArgs(/*offline: true*/)), stderr: stderr);
       // Precompile
       await Shell(workingDirectory: pkg.path, verbose: true)
           .runExecutableArguments(
-              'dart', [pubTestDependenciesDartScript, '--version']);
+              'dart', ['run', pubTestDependenciesDartScript, '--version']);
       await Shell(workingDirectory: pkg.path, verbose: true)
-          .run('pub run test --version');
+          .run('dart test --version');
       var result = await Shell(workingDirectory: pkg.path, verbose: true)
           .runExecutableArguments('dart', [
+        'run',
         pubTestDependenciesDartScript,
         /*'--get',*/ '-r',
         /* -r requires 0.12.+*/
@@ -74,6 +80,7 @@ void main() {
       ]);
       result = await Shell(workingDirectory: pkg.path, verbose: true)
           .runExecutableArguments('dart', [
+        'run',
         pubTestDependenciesDartScript,
         /*'--get',*/ '-r',
         /* -r requires 0.12.+*/
@@ -118,6 +125,7 @@ void main() {
       // filtering on a dummy package
       var result = await runCmd(
           pkg.dartCmd([
+            'run',
             pubTestDependenciesDartScript,
             '-r',
             'json',
@@ -150,6 +158,7 @@ void main() {
       // filtering on the only package it has
       result = await runCmd(
           pkg.dartCmd([
+            'run',
             pubTestDependenciesDartScript,
             '-r',
             'json',
@@ -193,7 +202,8 @@ void main() {
       await exampleSimpleDependencyPkg.clone(dstDependency);
       await runCmd(pkg.pubCmd(pubGetArgs(/*offline: true*/)), stderr: stderr);
       final result = await runCmd(
-          pkg.dartCmd([pubTestDependenciesDartScript, '-r', 'json', '-p', 'vm'])
+          pkg.dartCmd(
+              ['run', pubTestDependenciesDartScript, '-r', 'json', '-p', 'vm'])
           // '--get-offline' failed on sdk 1.16
           // p', 'vm'])
           ,

@@ -45,29 +45,30 @@ const List<String> allPlatforms = [
 ];
 
 class CommonTestOptions {
-  bool forceRecursive;
-  bool verbose;
-  bool getBeforeOffline;
+  bool? forceRecursive;
+  bool? verbose;
+  bool? getBeforeOffline;
 
-  bool dryRun;
-  RunTestReporter reporter;
+  bool? dryRun;
+  RunTestReporter? reporter;
 
-  String name;
+  String? name;
 
-  List<String> platforms;
+  List<String>? platforms;
 
-  int poolSize;
+  int? poolSize;
 
   // set by upper class
-  bool getBefore;
-  bool upgradeBefore;
+  bool? getBefore;
+  bool? upgradeBefore;
 
   CommonTestOptions.fromArgResults(ArgResults argResults) {
-    dryRun = argResults[dryRunOptionName] as bool;
-    reporter =
-        runTestReporterFromString(argResults[reporterOptionName] as String);
+    dryRun = argResults[dryRunOptionName] as bool?;
+    reporter = argResults[reporterOptionName] == null
+        ? null
+        : runTestReporterFromString(argResults[reporterOptionName] as String);
 
-    name = argResults[nameOptionName] as String;
+    name = argResults[nameOptionName] as String?;
 
     getBeforeOffline = parseBool(argResults[getOfflineOptionName]);
     platforms = getPlatforms(argResults);
@@ -89,10 +90,10 @@ class TestOptions extends CommonTestOptions {
   }
 }
 
-List<String> getPlatforms(ArgResults _argsResult) {
-  List<String> platforms;
+List<String>? getPlatforms(ArgResults _argsResult) {
+  List<String>? platforms;
   if (_argsResult.wasParsed(platformOptionName)) {
-    platforms = _argsResult[platformOptionName] as List<String>;
+    platforms = _argsResult[platformOptionName] as List<String>?;
   } else {
     // Allow platforms in env variable
     var envPlatforms = Platform.environment['PUBTEST_PLATFORMS'];
@@ -125,7 +126,7 @@ class PubTestApp extends App {
         args.addAll(['-j', '${testOptions.poolSize}']);
       }
       if (testOptions.name != null) {
-        args.addAll(['-n', testOptions.name]);
+        args.addAll(['-n', testOptions.name!]);
       }
       var cmd = FlutterCmd(args)..workingDirectory = pkg.path;
 
@@ -134,12 +135,12 @@ class PubTestApp extends App {
     } else {
       var testCmd = ProcessCmd('dart', [
         'test',
-        ...pubRunTestArgs(
+        ...pubRunTestRunnerArgs(TestRunnerArgs(
             args: args,
             concurrency: testOptions.poolSize,
             reporter: testOptions.reporter,
             platforms: testOptions.platforms,
-            name: testOptions.name)
+            name: testOptions.name))
       ]);
       if (testOptions.dryRun ?? false) {
         await runCmd(testCmd,
@@ -148,10 +149,10 @@ class PubTestApp extends App {
         var shell = Shell(
             workingDirectory: pkg.path,
             commandVerbose: true,
-            verbose: testOptions.verbose);
+            verbose: testOptions.verbose!);
         stdout.writeln('[${pkg.path}]');
         await shell.runExecutableArguments(
-            testCmd.executable, testCmd.arguments);
+            testCmd.executable!, testCmd.arguments);
       }
     }
   }
@@ -215,7 +216,7 @@ abstract class App {
         help: 'Get dependencies first', negatable: false);
     final argResults = parser.parse(arguments);
 
-    final help = parseBool(argResults[helpOptionName]);
+    final help = parseBool(argResults[helpOptionName])!;
     if (help) {
       stdout.writeln(
           "Call '$commandText' recursively (default from current directory)");
@@ -228,7 +229,7 @@ abstract class App {
       return;
     }
 
-    if (parseBool(argResults[versionOptionName])) {
+    if (parseBool(argResults[versionOptionName])!) {
       stdout.write('$currentScriptName $version');
       return;
     }
@@ -244,16 +245,16 @@ abstract class App {
 
     final testOptions = TestOptions.fromArgResults(argResults);
 
-    final packagePoolSize = parseInt(argResults[packageConcurrencyOptionName]);
+    final packagePoolSize = parseInt(argResults[packageConcurrencyOptionName])!;
 
     final packagePool = Pool(packagePoolSize);
 
-    if (testOptions.verbose) {
+    if (testOptions.verbose!) {
       stdout.writeln('Scanning $dirsOrFiles');
     }
     // Handle pub sub path
     for (var dirOrFile in dirsOrFiles) {
-      Directory dir;
+      late Directory dir;
       if (FileSystemEntity.isDirectorySync(dirOrFile)) {
         dirs.add(dirOrFile);
 
@@ -265,7 +266,7 @@ abstract class App {
         dir = File(dirOrFile).parent;
       }
 
-      String packageDir;
+      String? packageDir;
       try {
         packageDir = await getPubPackageRoot(dir.path);
       } catch (_) {}
@@ -273,7 +274,7 @@ abstract class App {
         // if it is the test dir, assume testing the package instead
 
         if (pubspecYamlHasAnyDependencies(
-            await getPubspecYaml(packageDir), ['test'])) {
+            (await getPubspecYaml(packageDir))!, ['test'])) {
           dirOrFile = relative(dirOrFile, from: packageDir);
           final pkg = PubPackage(packageDir);
           if (dirOrFile == 'test') {
@@ -312,7 +313,7 @@ abstract class App {
   }
 
   Future testPackage(PubPackage pkg, CommonTestOptions testOptions,
-      [List<String> files]) async {
+      [List<String>? files]) async {
     // if no file is given make sure the test/folder exists
     if (files == null) {
       // no tests found
@@ -321,7 +322,7 @@ abstract class App {
         return;
       }
     }
-    if (testOptions.dryRun) {
+    if (testOptions.dryRun!) {
       print('[dryRun] test on ${pkg.dir}${files != null ? ' $files' : ''}');
     }
     try {
@@ -347,7 +348,7 @@ abstract class App {
           await runCmd(cmd,
               dryRun: testOptions.dryRun, verbose: testOptions.verbose);
         }
-      } else if (testOptions.getBefore || testOptions.getBeforeOffline) {
+      } else if (testOptions.getBefore! || testOptions.getBeforeOffline!) {
         if (await isFlutterPackageRoot(pkg.path)) {
           if (!isFlutterSupported) {
             stderr.writeln('flutter not supported for package in $pkg');
@@ -355,7 +356,7 @@ abstract class App {
           }
           // Flutter way
           var args = ['packages', 'pub', 'get'];
-          if (testOptions.getBeforeOffline) {
+          if (testOptions.getBeforeOffline!) {
             args.add('--offline');
           }
           var cmd = FlutterCmd(args)..workingDirectory = pkg.path;

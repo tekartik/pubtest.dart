@@ -3,15 +3,14 @@ library tekartik_pub.test.pub_test;
 
 import 'dart:io';
 
-import 'package:process_run/shell_run.dart';
-import 'package:tekartik_common_utils/common_utils_import.dart';
-import 'package:test/test.dart';
 import 'package:path/path.dart';
-
 import 'package:process_run/cmd_run.dart';
+import 'package:process_run/shell_run.dart';
 import 'package:pub_semver/pub_semver.dart';
-import 'package:tekartik_pubtest/src/pubtest_version.dart';
+import 'package:tekartik_common_utils/common_utils_import.dart';
 import 'package:tekartik_pub/io.dart';
+import 'package:tekartik_pubtest/src/pubtest_version.dart';
+import 'package:test/test.dart';
 
 var longTimeout = const Timeout(Duration(minutes: 2));
 var exampleBinPath = join('example', 'bin');
@@ -28,19 +27,31 @@ String getReason(ProcessResult result) {
   return 'OUT:\n${result.stdout}\nERR:\n${{result.stderr}}';
 }
 
-void defineTests(String script) {
+void defineTests(String script, {String suffix = 'pub'}) {
   // we use a prefix, needed since this can be called during pubtest_test and pbrtest_test
-  var prefix = basenameWithoutExtension(script);
   test('version', () async {
-    final result = await runCmd(DartCmd([script, '--version']));
+    final result = await runCmd(DartCmd(['run', script, '--version']));
     expect(result.stdout, contains(basenameWithoutExtension(script)));
     expect(Version.parse((result.stdout as String).split(' ').last), version);
   });
 
-  test('success1', () async {
-    var testPath = join('test', 'data', 'success_test_.dart');
+  String _fileWithSuffix(String srcPath) {
+    return '${withoutExtension(srcPath)}${suffix}_test${extension(srcPath)}';
+  }
+
+  /// Use suffix
+  Future<String> copyFile(String srcPath) async {
+    var dstPath = _fileWithSuffix(srcPath);
+    await File(srcPath).copy(dstPath);
+    return dstPath;
+  }
+
+  test('success', () async {
+    var testPath = join('test', 'data', 'success_test.dart');
+
     try {
-      final result = await runCmd(DartCmd([script, '-p', 'vm', testPath]));
+      final result =
+          await runCmd(DartCmd(['run', script, '-p', 'vm', testPath]));
 
       // on 1.13, current windows is failing
       if (!Platform.isWindows) {
@@ -51,52 +62,24 @@ void defineTests(String script) {
     } finally {}
   }, timeout: longTimeout);
 
-  test('success2', () async {
-    var testPath = join('test', 'data', '${prefix}_success_test.dart');
-    try {
-      await File(join('test', 'data', 'success_test_.dart')).copy(testPath);
-
-      var result = await runCmd(DartCmd([script, '-p', 'vm', testPath]));
-      // devPrint('reason: ${getReason(result)}');
-      result =
-          (await Shell(verbose: true).run('pub run test -j 10 -p vm $testPath'))
-              .first;
-
-      // on 1.13, current windows is failing
-      if (!Platform.isWindows) {
-        expect(result.exitCode, 0, reason: result.stderr?.toString());
-      }
-
-      // No longer sent when executed like this
-      await Shell(verbose: true)
-          .run('pub run test -j 10 -p vm test/data/success_test_.dart');
-      // expect(result.stdout.contains('All tests passed'), isTrue, reason: getReason(result));
-    } finally {
-      // cleanup
-      try {
-        await File(testPath).delete();
-      } catch (_) {}
-    }
-  }, timeout: longTimeout);
-
   test('failure', () async {
-    var testPath = join('test', 'data', '${prefix}_fail_test.dart');
+    var testSrcPath = join('test', 'data', 'fail_test_.dart');
+    var testPath = await copyFile(testSrcPath);
     try {
-      await File(join('test', 'data', 'fail_test_.dart')).copy(testPath);
       final result = await runCmd(DartCmd([
+        'run',
         script,
         '-p',
         'vm',
         testPath
       ])); // ..connectStderr=true..connectStdout=true);
       if (!Platform.isWindows) {
-        expect(result.exitCode, 255);
+        expect(result.exitCode,
+            isNot(0)); // sometimes 1, sometimes 255, don't know why
       }
     } finally {
       // cleanup
-      try {
-        await File(testPath).delete();
-      } catch (_) {}
+      await File(testPath).delete();
     }
   }, timeout: longTimeout);
 
@@ -109,6 +92,7 @@ void defineTests(String script) {
 
       // Filter test having 'success' in the data dir
       var result = await runCmd(pkg.dartCmd([
+        'run',
         script,
         '-p',
         'vm',
@@ -121,6 +105,7 @@ void defineTests(String script) {
         '--get'
       ]));
       result = await Shell(verbose: true).runExecutableArguments('dart', [
+        'run',
         script,
         '-p',
         'vm',
@@ -149,6 +134,7 @@ void defineTests(String script) {
 
       // run one level above
       result = await runCmd(pkg.dartCmd([
+        'run',
         script,
         '-p',
         'vm',

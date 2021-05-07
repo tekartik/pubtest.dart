@@ -4,10 +4,10 @@ import 'package:args/args.dart';
 import 'package:path/path.dart';
 import 'package:pool/pool.dart';
 import 'package:tekartik_io_utils/io_utils_import.dart';
+import 'package:tekartik_pub/io.dart';
 import 'package:tekartik_pubtest/bin/pubtest.dart';
 import 'package:tekartik_pubtest/src/pubtest_utils.dart';
 import 'package:tekartik_pubtest/src/pubtest_version.dart';
-import 'package:tekartik_pub/io.dart';
 
 String get currentScriptName => basenameWithoutExtension(Platform.script.path);
 
@@ -28,7 +28,7 @@ Future main(List<String> arguments) async {
   );
   final argResults = parser.parse(arguments);
 
-  final help = parseBool(argResults[helpFlag]);
+  final help = parseBool(argResults[helpFlag])!;
   if (help) {
     stdout.writeln(
         "Call 'pub run test' recursively (default from current directory)");
@@ -41,7 +41,7 @@ Future main(List<String> arguments) async {
     return;
   }
 
-  if (parseBool(argResults['version'])) {
+  if (parseBool(argResults['version'])!) {
     stdout.write('$currentScriptName $version');
     return;
   }
@@ -55,7 +55,7 @@ Future main(List<String> arguments) async {
 
   final testOptions = CommonTestOptions.fromArgResults(argResults);
 
-  final packageNames = argResults[packageNameOption] as List<String>;
+  final packageNames = argResults[packageNameOption] as List<String>?;
 
   // get dirs in parameters, default to current
   var dirsOrFiles = List<String>.from(argResults.rest);
@@ -67,13 +67,13 @@ Future main(List<String> arguments) async {
   //PubTest pubTest = new PubTest();
   final list = NewTestList();
 
-  final packagePoolSize = parseInt(argResults[packageConcurrencyOptionName]);
+  final packagePoolSize = parseInt(argResults[packageConcurrencyOptionName])!;
 
   final errors = <PubPackage>[];
   Future _handleProject(DependencyTestPackage dependency,
-      [List<String> files]) async {
+      [List<String>? files]) async {
     if (packageNames?.isNotEmpty == true) {
-      if (!packageNames.contains(dependency.package.name)) {
+      if (!packageNames!.contains(dependency.package.name)) {
         return;
       }
     }
@@ -104,7 +104,7 @@ Future main(List<String> arguments) async {
 
     // get the test_dependencies first
     final dependencies = pubspecYamlGetTestDependenciesPackageName(
-            await parent.getPubspecYaml()) ??
+            (await parent.getPubspecYaml())!) ??
         await parent.extractPubspecDependencies();
 
     //Map dotPackagesYaml = await getDotPackagesYaml(mainPackage.path);
@@ -114,7 +114,7 @@ Future main(List<String> arguments) async {
         //print(parent);
         if (pkg != null &&
             pubspecYamlHasAnyDependencies(
-                await pkg.getPubspecYaml(), ['test'])) {
+                (await pkg.getPubspecYaml())!, ['test'])) {
           // add whole package
           list.add(DependencyTestPackage(parent, pkg));
         }
@@ -129,9 +129,7 @@ Future main(List<String> arguments) async {
     }
 
     final packageDir = await getPubPackageRoot(dirOrFile);
-    if (packageDir != null) {
-      await _parseDirectory(packageDir);
-    }
+    await _parseDirectory(packageDir);
   }
 
   /*
