@@ -1,6 +1,6 @@
 name: tekartik_pubtest
 author: Alexandre Roux <alex@tekartik.com>
-version: 0.7.0
+version: 0.7.1
 publish_to: none
 environment:
   sdk: '>=2.12.0 <3.0.0'
@@ -53,6 +53,6 @@ dependency_overrides:
 #    path: ../process_run.dart
 #    git: git://github.com/tekartik/process_run.dart
 executables:
-  pubtest:
+  # pubtest:
   pubtestdependencies:
   pubtestpackage:

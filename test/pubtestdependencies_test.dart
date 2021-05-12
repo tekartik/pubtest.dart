@@ -15,7 +15,7 @@ import 'package:tekartik_pubtest/src/pubtest_version.dart';
 import 'pubtest_test.dart';
 
 String get pubTestDependenciesDartScript =>
-    normalize(absolute(join(exampleBinPath, 'pubtestdependencies.dart')));
+    normalize(absolute(join('bin', 'pubtestdependencies.dart')));
 
 void main() {
   //useVMConfiguration();
