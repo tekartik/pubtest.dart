@@ -1,5 +1,5 @@
 name: tekartik_pubtest
-author: Alexandre Roux <alex@tekartik.com>
+
 version: 0.7.1
 publish_to: none
 environment:
