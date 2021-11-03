@@ -13,8 +13,8 @@ class TestPackage {
   int get hashCode => package.hashCode;
 
   @override
-  bool operator ==(o) {
-    return o is TestPackage && o.package == package;
+  bool operator ==(Object other) {
+    return other is TestPackage && other.package == package;
   }
 
   @override

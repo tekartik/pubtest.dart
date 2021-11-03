@@ -1,9 +1,6 @@
-import 'dart:async';
-
 import 'package:args/args.dart';
 import 'package:path/path.dart';
 import 'package:pool/pool.dart';
-import 'package:tekartik_io_utils/io_utils_import.dart';
 import 'package:tekartik_pub/io.dart';
 import 'package:tekartik_pubtest/bin/pubtest.dart';
 import 'package:tekartik_pubtest/src/pubtest_utils.dart';

@@ -1,4 +1,3 @@
-import 'package:process_run/cmd_run.dart' hide runCmd;
 import 'package:process_run/shell_run.dart';
 import 'package:tekartik_io_utils/io_utils_import.dart';
 

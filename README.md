@@ -11,8 +11,8 @@ pubspec.yaml:
 ```yaml
   tekartik_pubtest:
     git:
-      url: git://github.com/tekartik/pubtest.dart
-      ref: dart2
+      url: https://github.com/tekartik/pubtest.dart
+      ref: dart2_3
     version: '>=0.7.0'
 ```
 ## pubtest command
@@ -67,6 +67,6 @@ pubtestdependencies.dart --package-name process_run -v
 You can directly test a package even if you don't have it yet.
 To specify a git packages to run your tests on:
 
-    pubtestpackage -sgit git://github.com/tekartik/common_utils.dart
+    pubtestpackage -sgit https://github.com/tekartik/common_utils.dart
     
 

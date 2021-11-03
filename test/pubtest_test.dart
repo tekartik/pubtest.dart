@@ -6,7 +6,6 @@ import 'dart:io';
 import 'package:path/path.dart';
 import 'package:process_run/cmd_run.dart';
 import 'package:process_run/shell_run.dart';
-import 'package:pub_semver/pub_semver.dart';
 import 'package:tekartik_common_utils/common_utils_import.dart';
 import 'package:tekartik_pub/io.dart';
 import 'package:tekartik_pubtest/src/pubtest_version.dart';
@@ -96,7 +95,7 @@ void defineTests(String script, {String suffix = 'pub'}) {
         script,
         '-p',
         'vm',
-        '${pkg.dir.path}',
+        (pkg.dir.path),
         '-n',
         'success',
         '-r',
@@ -138,7 +137,7 @@ void defineTests(String script, {String suffix = 'pub'}) {
         script,
         '-p',
         'vm',
-        '$top',
+        top,
         '-n',
         'success',
         '-r',

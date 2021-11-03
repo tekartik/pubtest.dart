@@ -1,8 +1,5 @@
-import 'dart:io';
-
 import 'package:args/args.dart';
 import 'package:process_run/cmd_run.dart';
-import 'package:tekartik_common_utils/common_utils_import.dart';
 import 'package:tekartik_pub/io.dart';
 import 'package:tekartik_pubtest/bin/pubtest.dart';
 import 'package:tekartik_pubtest/src/pubtest_version.dart';
@@ -41,7 +38,7 @@ Future main(List<String> arguments) async {
     stdout.writeln(
         'Usage: $currentScriptName [<source>] [<test-files>] [<arguments>]');
     stdout.writeln(
-        'Example: $currentScriptName -sgit git://github.com/tekartik/tekartik_common_utils.dart');
+        'Example: $currentScriptName -sgit https://github.com/tekartik/tekartik_common_utils.dart');
     stdout.writeln();
     stdout.writeln('Global options:');
     stdout.writeln(parser.usage);
@@ -69,8 +66,7 @@ Future main(List<String> arguments) async {
     }
 
     final srcGit = argResults.rest[0];
-    final dir =
-        (await Directory.systemTemp.createTemp('$currentScriptName')).path;
+    final dir = (await Directory.systemTemp.createTemp(currentScriptName)).path;
     final git = GitProject(srcGit, path: dir);
 
     // Cloning
