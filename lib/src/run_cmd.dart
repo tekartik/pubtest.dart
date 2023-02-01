@@ -4,33 +4,33 @@ import 'package:tekartik_io_utils/io_utils_import.dart';
 /// Verbose run of command
 Future<ProcessResult?> runCmd(ProcessCmd cmd,
     {bool? dryRun, bool? oneByOne, bool? verbose}) async {
-  void _writeWorkingDirectory() {
+  void writeWorkingDirectory() {
     if (cmd.workingDirectory != '.' && cmd.workingDirectory != null) {
       stdout.writeln('[${cmd.workingDirectory}]');
     }
   }
 
-  Future<ProcessResult> _runCmd(ProcessCmd cmd, {bool? verbose}) async {
+  Future<ProcessResult> doRunCmd(ProcessCmd cmd, {bool? verbose}) async {
     return await Shell(workingDirectory: cmd.workingDirectory, verbose: true)
         .runExecutableArguments(cmd.executable!, cmd.arguments);
   }
 
   if (dryRun == true) {
-    _writeWorkingDirectory();
+    writeWorkingDirectory();
     stdout.writeln('\$ $cmd');
     return null;
   }
   ProcessResult result;
   if (oneByOne == true) {
-    _writeWorkingDirectory();
+    writeWorkingDirectory();
 
-    result = await _runCmd(cmd, verbose: verbose);
+    result = await doRunCmd(cmd, verbose: verbose);
     if (result.exitCode != 0) {
       throw Exception('error $cmd exitCode: ${result.exitCode}');
     }
   } else {
-    result = await _runCmd(cmd, verbose: verbose);
-    _writeWorkingDirectory();
+    result = await doRunCmd(cmd, verbose: verbose);
+    writeWorkingDirectory();
     stdout.writeln('\$ $cmd');
     stdout.write(result.stdout);
     stderr.write(result.stderr);
