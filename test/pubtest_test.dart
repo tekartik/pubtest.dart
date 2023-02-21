@@ -34,13 +34,13 @@ void defineTests(String script, {String suffix = 'pub'}) {
     expect(Version.parse((result.stdout as String).split(' ').last), version);
   });
 
-  String _fileWithSuffix(String srcPath) {
+  String fileWithSuffix(String srcPath) {
     return '${withoutExtension(srcPath)}${suffix}_test${extension(srcPath)}';
   }
 
   /// Use suffix
   Future<String> copyFile(String srcPath) async {
-    var dstPath = _fileWithSuffix(srcPath);
+    var dstPath = fileWithSuffix(srcPath);
     await File(srcPath).copy(dstPath);
     return dstPath;
   }

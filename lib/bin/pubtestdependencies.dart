@@ -67,7 +67,7 @@ Future main(List<String> arguments) async {
   final packagePoolSize = parseInt(argResults[packageConcurrencyOptionName])!;
 
   final errors = <PubPackage>[];
-  Future _handleProject(DependencyTestPackage dependency,
+  Future handleProject(DependencyTestPackage dependency,
       [List<String>? files]) async {
     if (packageNames?.isNotEmpty == true) {
       if (!packageNames!.contains(dependency.package.name)) {
@@ -95,7 +95,7 @@ Future main(List<String> arguments) async {
 
   final packagePool = Pool(packagePoolSize);
 
-  Future _parseDirectory(String packageDir) async {
+  Future parseDirectory(String packageDir) async {
     //int w; print('#parsing $packageDir');
     final parent = PubPackage(packageDir);
 
@@ -126,7 +126,7 @@ Future main(List<String> arguments) async {
     }
 
     final packageDir = await getPubPackageRoot(dirOrFile);
-    await _parseDirectory(packageDir);
+    await parseDirectory(packageDir);
   }
 
   /*
@@ -147,7 +147,7 @@ int _w2;
   //int _w2; print('#2 ${list.packages}');
   for (final pkg in list.packages) {
     await packagePool.withResource(() async {
-      await _handleProject(pkg as DependencyTestPackage, list.getTests(pkg));
+      await handleProject(pkg as DependencyTestPackage, list.getTests(pkg));
     });
   }
 

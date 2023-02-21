@@ -87,10 +87,10 @@ class TestOptions extends CommonTestOptions {
   }
 }
 
-List<String>? getPlatforms(ArgResults _argsResult) {
+List<String>? getPlatforms(ArgResults argsResult) {
   List<String>? platforms;
-  if (_argsResult.wasParsed(platformOptionName)) {
-    platforms = _argsResult[platformOptionName] as List<String>?;
+  if (argsResult.wasParsed(platformOptionName)) {
+    platforms = argsResult[platformOptionName] as List<String>?;
   } else {
     // Allow platforms in env variable
     var envPlatforms = Platform.environment['PUBTEST_PLATFORMS'];
@@ -291,7 +291,7 @@ abstract class App {
         .listen((String dir) {
       // devPrint('adding $dir');
       list.add(PubPackage(dir));
-    }).asFuture();
+    }).asFuture<void>();
 
     // devPrint(list.packages);
     for (final pkg in list.packages) {
