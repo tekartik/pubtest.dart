@@ -3,7 +3,7 @@ name: tekartik_pubtest
 version: 0.7.1
 publish_to: none
 environment:
-  sdk: '>=2.18.0 <3.0.0'
+  sdk: '>=2.18.0 <4.0.0'
 dependencies:
   args: any
   path: any
