@@ -1,9 +1,0 @@
-language: dart
-sudo: required
-dist: trusty
-dart:
-  - stable
-  - beta
-  - dev
-script:
-  - dart ./tool/travis.dart

@@ -12,7 +12,7 @@ pubspec.yaml:
   tekartik_pubtest:
     git:
       url: https://github.com/tekartik/pubtest.dart
-      ref: dart2_3
+      ref: dart3a
     version: '>=0.7.0'
 ```
 ## pubtest command
