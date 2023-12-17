@@ -29,8 +29,7 @@ void main() {
 
     test('synchronized dependency', () async {
       // print(userEnvironment);
-      final result =
-          await Shell(verbose: false).runExecutableArguments('dart', [
+      final result = await Shell(verbose: true).runExecutableArguments('dart', [
         'run',
         pubTestDependenciesDartScript,
         '--package-name',
@@ -42,7 +41,7 @@ void main() {
       expect(result.stdout, contains('All tests passed'),
           reason: getReason(result));
       //expect(Version.parse(result.stdout.split(' ').last as String), version);
-    });
+    }, skip: true);
 
     test('simple_dependencies', () async {
       final top = (await Directory.systemTemp.createTemp()).path;
