@@ -149,7 +149,7 @@ class PubTestApp extends App {
             verbose: testOptions.verbose!);
         stdout.writeln('[${pkg.path}]');
         await shell.runExecutableArguments(
-            testCmd.executable!, testCmd.arguments);
+            testCmd.executable, testCmd.arguments);
       }
     }
   }
