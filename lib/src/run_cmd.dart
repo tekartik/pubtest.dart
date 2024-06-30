@@ -12,7 +12,7 @@ Future<ProcessResult?> runCmd(ProcessCmd cmd,
 
   Future<ProcessResult> doRunCmd(ProcessCmd cmd, {bool? verbose}) async {
     return await Shell(workingDirectory: cmd.workingDirectory, verbose: true)
-        .runExecutableArguments(cmd.executable!, cmd.arguments);
+        .runExecutableArguments(cmd.executable, cmd.arguments);
   }
 
   if (dryRun == true) {
