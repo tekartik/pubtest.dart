@@ -3,8 +3,8 @@ library tekartik_pubtest.test.src_pubtest_utils_test;
 
 import 'dart:convert';
 
-import 'package:dev_test/test.dart';
 import 'package:tekartik_pubtest/src/pubtest_utils.dart';
+import 'package:test/test.dart';
 
 void main() {
   group('sec_pubtest_utils', () {
@@ -13,7 +13,7 @@ void main() {
       expect(
           pubspecYamlGetTestDependenciesPackageName(
               {'test_dependencies': null}),
-          []);
+          isEmpty);
       expect(
           pubspecYamlGetTestDependenciesPackageName({
             'test_dependencies': ['one']

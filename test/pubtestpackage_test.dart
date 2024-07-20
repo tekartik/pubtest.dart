@@ -3,12 +3,12 @@ library tekartik_pub.test.pub_test;
 
 import 'dart:io';
 
-import 'package:dev_test/test.dart';
 import 'package:path/path.dart';
 import 'package:process_run/cmd_run.dart' hide run;
 import 'package:process_run/shell.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:tekartik_pubtest/src/pubtest_version.dart';
+import 'package:test/test.dart';
 
 var longTimeout = const Timeout(Duration(minutes: 2));
 
