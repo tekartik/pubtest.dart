@@ -204,7 +204,7 @@ abstract class App {
   ///
   /// Recursively update (pull) git folders
   ///
-  Future main(List<String> arguments) async {
+  Future<void> main(List<String> arguments) async {
     //setupQuickLogging();
 
     final parser = ArgParser(allowTrailingOptions: true);
@@ -285,13 +285,10 @@ abstract class App {
     }
 
     // Also Handle recursive projects
-    await recursivePubPath(dirs,
-            dependencies: ['test', 'flutter_test'],
-            forceRecursive: testOptions.forceRecursive)
-        .listen((String dir) {
-      // devPrint('adding $dir');
+    for (var dir in await recursivePubPath(dirs,
+        dependencies: ['test', 'flutter_test'])) {
       list.add(PubPackage(dir));
-    }).asFuture<void>();
+    }
 
     // devPrint(list.packages);
     for (final pkg in list.packages) {
