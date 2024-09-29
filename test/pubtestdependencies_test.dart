@@ -1,5 +1,5 @@
 @TestOn('vm')
-library tekartik_pubtest.test.pubtestdependencies;
+library;
 
 import 'dart:io';
 

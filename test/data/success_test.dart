@@ -1,4 +1,4 @@
-library success_test;
+library;
 
 import 'package:test/test.dart';
 
