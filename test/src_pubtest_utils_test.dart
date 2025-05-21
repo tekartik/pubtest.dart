@@ -11,19 +11,26 @@ void main() {
     test('pubspecYamlGetTestDependenciesPackageName', () async {
       expect(pubspecYamlGetTestDependenciesPackageName({}), isNull);
       expect(
-          pubspecYamlGetTestDependenciesPackageName(
-              {'test_dependencies': null}),
-          isEmpty);
+        pubspecYamlGetTestDependenciesPackageName({'test_dependencies': null}),
+        isEmpty,
+      );
       expect(
-          pubspecYamlGetTestDependenciesPackageName({
-            'test_dependencies': ['one']
-          }),
-          ['one']);
+        pubspecYamlGetTestDependenciesPackageName({
+          'test_dependencies': ['one'],
+        }),
+        ['one'],
+      );
       expect(
-          pubspecYamlGetTestDependenciesPackageName(json.decode(json.encode({
-            'test_dependencies': ['one']
-          })) as Map),
-          ['one']);
+        pubspecYamlGetTestDependenciesPackageName(
+          json.decode(
+                json.encode({
+                  'test_dependencies': ['one'],
+                }),
+              )
+              as Map,
+        ),
+        ['one'],
+      );
     });
   });
 }

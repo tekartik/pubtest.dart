@@ -24,11 +24,17 @@ Future main(List<String> arguments) async {
 
   final parser = ArgParser(allowTrailingOptions: true);
   app.addArgs(parser);
-  parser.addOption(packageSourceOptionName,
-      abbr: 's', help: 'package source', allowed: [sourceGit, sourcePath]);
-  parser.addFlag(getOptionName,
-      help: 'Get dependencies first (for path dependencies only)',
-      negatable: false);
+  parser.addOption(
+    packageSourceOptionName,
+    abbr: 's',
+    help: 'package source',
+    allowed: [sourceGit, sourcePath],
+  );
+  parser.addFlag(
+    getOptionName,
+    help: 'Get dependencies first (for path dependencies only)',
+    negatable: false,
+  );
   final argResults = parser.parse(arguments);
 
   final help = parseBool(argResults[helpOptionName])!;
@@ -36,9 +42,11 @@ Future main(List<String> arguments) async {
     stdout.writeln("'pub run test' on some packages");
     stdout.writeln();
     stdout.writeln(
-        'Usage: $currentScriptName [<source>] [<test-files>] [<arguments>]');
+      'Usage: $currentScriptName [<source>] [<test-files>] [<arguments>]',
+    );
     stdout.writeln(
-        'Example: $currentScriptName -sgit https://github.com/tekartik/tekartik_common_utils.dart');
+      'Example: $currentScriptName -sgit https://github.com/tekartik/tekartik_common_utils.dart',
+    );
     stdout.writeln();
     stdout.writeln('Global options:');
     stdout.writeln(parser.usage);
@@ -70,8 +78,10 @@ Future main(List<String> arguments) async {
     final git = GitProject(srcGit, path: dir);
 
     // Cloning
-    await runCmd(git.cloneCmd(progress: true, depth: 1),
-        verbose: testOptions.verbose);
+    await runCmd(
+      git.cloneCmd(progress: true, depth: 1),
+      verbose: testOptions.verbose,
+    );
 
     // Pkg dir, no need to look higher
     if (!await isPubPackageRoot(dir)) {

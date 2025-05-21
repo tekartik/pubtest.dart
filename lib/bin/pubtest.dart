@@ -38,7 +38,7 @@ const List<String> allPlatforms = [
   'firefox',
   'safari',
   'ie',
-  'node'
+  'node',
 ];
 
 class CommonTestOptions {
@@ -61,9 +61,12 @@ class CommonTestOptions {
 
   CommonTestOptions.fromArgResults(ArgResults argResults) {
     dryRun = argResults[dryRunOptionName] as bool?;
-    reporter = argResults[reporterOptionName] == null
-        ? null
-        : runTestReporterFromString(argResults[reporterOptionName] as String);
+    reporter =
+        argResults[reporterOptionName] == null
+            ? null
+            : runTestReporterFromString(
+              argResults[reporterOptionName] as String,
+            );
 
     name = argResults[nameOptionName] as String?;
 
@@ -73,15 +76,16 @@ class CommonTestOptions {
     verbose = parseBool(argResults[verboseOptionName], false);
   }
 
-  Map<String, dynamic> toDebugMap() =>
-      <String, dynamic>{if (verbose ?? false) 'verbose': verbose};
+  Map<String, dynamic> toDebugMap() => <String, dynamic>{
+    if (verbose ?? false) 'verbose': verbose,
+  };
   @override
   String toString() => toDebugMap().toString();
 }
 
 class TestOptions extends CommonTestOptions {
   TestOptions.fromArgResults(ArgResults argResults)
-      : super.fromArgResults(argResults) {
+    : super.fromArgResults(argResults) {
     getBefore = parseBool(argResults[getOptionName]);
     forceRecursive = parseBool(argResults[argForceRecursiveFlag], false);
   }
@@ -111,7 +115,10 @@ List<String>? getPlatforms(ArgResults argsResult) {
 class PubTestApp extends App {
   @override
   Future runTest(
-      PubPackage pkg, List<String> args, CommonTestOptions testOptions) async {
+    PubPackage pkg,
+    List<String> args,
+    CommonTestOptions testOptions,
+  ) async {
     if (await isFlutterPackageRoot(pkg.path)) {
       if (!isFlutterSupported) {
         stderr.writeln('flutter not supported for package in $pkg');
@@ -127,29 +134,41 @@ class PubTestApp extends App {
       }
       var cmd = FlutterCmd(args)..workingDirectory = pkg.path;
 
-      await runCmd(cmd,
-          dryRun: testOptions.dryRun, verbose: testOptions.verbose);
+      await runCmd(
+        cmd,
+        dryRun: testOptions.dryRun,
+        verbose: testOptions.verbose,
+      );
     } else {
       var testCmd = ProcessCmd('dart', [
         'test',
-        ...pubRunTestRunnerArgs(TestRunnerArgs(
+        ...pubRunTestRunnerArgs(
+          TestRunnerArgs(
             args: args,
             concurrency: testOptions.poolSize,
             reporter: testOptions.reporter,
             platforms: testOptions.platforms,
-            name: testOptions.name))
+            name: testOptions.name,
+          ),
+        ),
       ]);
       if (testOptions.dryRun ?? false) {
-        await runCmd(testCmd,
-            dryRun: testOptions.dryRun, verbose: testOptions.verbose);
+        await runCmd(
+          testCmd,
+          dryRun: testOptions.dryRun,
+          verbose: testOptions.verbose,
+        );
       } else {
         var shell = Shell(
-            workingDirectory: pkg.path,
-            commandVerbose: true,
-            verbose: testOptions.verbose!);
+          workingDirectory: pkg.path,
+          commandVerbose: true,
+          verbose: testOptions.verbose!,
+        );
         stdout.writeln('[${pkg.path}]');
         await shell.runExecutableArguments(
-            testCmd.executable, testCmd.arguments);
+          testCmd.executable,
+          testCmd.arguments,
+        );
       }
     }
   }
@@ -160,42 +179,71 @@ class PubTestApp extends App {
 
 abstract class App {
   void addArgs(ArgParser parser) {
-    parser.addFlag(helpOptionName,
-        abbr: 'h', help: 'Usage help', negatable: false);
+    parser.addFlag(
+      helpOptionName,
+      abbr: 'h',
+      help: 'Usage help',
+      negatable: false,
+    );
     //parser.addOption(_LOG, abbr: 'l', help: 'Log level (fine, debug, info...)');
-    parser.addOption(reporterOptionName,
-        abbr: reporterOptionAbbr,
-        help: 'test result output',
-        allowed: pubRunTestReporters);
-    parser.addFlag(dryRunOptionName,
-        abbr: 'd',
-        help: 'Do not run test, simple show packages to be tested',
-        negatable: false);
-    parser.addFlag('version',
-        help: 'Display the script version', negatable: false);
-    parser.addFlag(verboseOptionName,
-        abbr: 'v', help: 'Verbose mode', negatable: false);
-    parser.addOption(concurrencyOptionName,
-        abbr: 'j',
-        help: 'Number of concurrent tests in the same package tested',
-        defaultsTo: '10');
-    parser.addOption(packageConcurrencyOptionName,
-        abbr: 'k',
-        help: 'Number of concurrent packages tested',
-        defaultsTo: '1');
-    parser.addOption(nameOptionName,
-        abbr: 'n', help: 'A substring of the name of the test to run');
-    parser.addMultiOption(platformOptionName,
-        abbr: 'p',
-        help: 'The platform(s) on which to run the tests.',
-        allowed: allPlatforms,
-        defaultsTo: ['vm']);
-    parser.addFlag(getOfflineOptionName,
-        help: 'Get dependencies first in offline mode', negatable: false);
-    parser.addFlag(argForceRecursiveFlag,
-        abbr: 'f',
-        help: 'Force going recursive even in dart project',
-        defaultsTo: true);
+    parser.addOption(
+      reporterOptionName,
+      abbr: reporterOptionAbbr,
+      help: 'test result output',
+      allowed: pubRunTestReporters,
+    );
+    parser.addFlag(
+      dryRunOptionName,
+      abbr: 'd',
+      help: 'Do not run test, simple show packages to be tested',
+      negatable: false,
+    );
+    parser.addFlag(
+      'version',
+      help: 'Display the script version',
+      negatable: false,
+    );
+    parser.addFlag(
+      verboseOptionName,
+      abbr: 'v',
+      help: 'Verbose mode',
+      negatable: false,
+    );
+    parser.addOption(
+      concurrencyOptionName,
+      abbr: 'j',
+      help: 'Number of concurrent tests in the same package tested',
+      defaultsTo: '10',
+    );
+    parser.addOption(
+      packageConcurrencyOptionName,
+      abbr: 'k',
+      help: 'Number of concurrent packages tested',
+      defaultsTo: '1',
+    );
+    parser.addOption(
+      nameOptionName,
+      abbr: 'n',
+      help: 'A substring of the name of the test to run',
+    );
+    parser.addMultiOption(
+      platformOptionName,
+      abbr: 'p',
+      help: 'The platform(s) on which to run the tests.',
+      allowed: allPlatforms,
+      defaultsTo: ['vm'],
+    );
+    parser.addFlag(
+      getOfflineOptionName,
+      help: 'Get dependencies first in offline mode',
+      negatable: false,
+    );
+    parser.addFlag(
+      argForceRecursiveFlag,
+      abbr: 'f',
+      help: 'Force going recursive even in dart project',
+      defaultsTo: true,
+    );
   }
 
   /// different for pubtest and pbrtest
@@ -209,17 +257,22 @@ abstract class App {
 
     final parser = ArgParser(allowTrailingOptions: true);
     addArgs(parser);
-    parser.addFlag(getOptionName,
-        help: 'Get dependencies first', negatable: false);
+    parser.addFlag(
+      getOptionName,
+      help: 'Get dependencies first',
+      negatable: false,
+    );
     final argResults = parser.parse(arguments);
 
     final help = parseBool(argResults[helpOptionName])!;
     if (help) {
       stdout.writeln(
-          "Call '$commandText' recursively (default from current directory)");
+        "Call '$commandText' recursively (default from current directory)",
+      );
       stdout.writeln();
       stdout.writeln(
-          'Usage: $currentScriptName [<folder_paths...>] [<arguments>]');
+        'Usage: $currentScriptName [<folder_paths...>] [<arguments>]',
+      );
       stdout.writeln();
       stdout.writeln('Global options:');
       stdout.writeln(parser.usage);
@@ -270,8 +323,9 @@ abstract class App {
       if (packageDir != null) {
         // if it is the test dir, assume testing the package instead
 
-        if (pubspecYamlHasAnyDependencies(
-            (await getPubspecYaml(packageDir))!, ['test'])) {
+        if (pubspecYamlHasAnyDependencies((await getPubspecYaml(packageDir))!, [
+          'test',
+        ])) {
           dirOrFile = relative(dirOrFile, from: packageDir);
           final pkg = PubPackage(packageDir);
           if (dirOrFile == 'test') {
@@ -285,8 +339,10 @@ abstract class App {
     }
 
     // Also Handle recursive projects
-    for (var dir in await recursivePubPath(dirs,
-        dependencies: ['test', 'flutter_test'])) {
+    for (var dir in await recursivePubPath(
+      dirs,
+      dependencies: ['test', 'flutter_test'],
+    )) {
       list.add(PubPackage(dir));
     }
 
@@ -306,13 +362,17 @@ abstract class App {
     //devErr('exitCode: $exitCode');
   }
 
-  Future testPackage(PubPackage pkg, CommonTestOptions testOptions,
-      [List<String>? files]) async {
+  Future testPackage(
+    PubPackage pkg,
+    CommonTestOptions testOptions, [
+    List<String>? files,
+  ]) async {
     // if no file is given make sure the test/folder exists
     if (files == null) {
       // no tests found
       if (!(FileSystemEntity.isDirectorySync(
-          childDirectory(pkg.dir, 'test').path))) {
+        childDirectory(pkg.dir, 'test').path,
+      ))) {
         return;
       }
     }
@@ -334,13 +394,19 @@ abstract class App {
           // Flutter way
           var cmd = FlutterCmd(['packages', 'pub', 'upgrade'])
             ..workingDirectory = pkg.path;
-          await runCmd(cmd,
-              dryRun: testOptions.dryRun, verbose: testOptions.verbose);
+          await runCmd(
+            cmd,
+            dryRun: testOptions.dryRun,
+            verbose: testOptions.verbose,
+          );
         } else {
           // Regular dart
           var cmd = pkg.pubCmd(pubUpgradeArgs());
-          await runCmd(cmd,
-              dryRun: testOptions.dryRun, verbose: testOptions.verbose);
+          await runCmd(
+            cmd,
+            dryRun: testOptions.dryRun,
+            verbose: testOptions.verbose,
+          );
         }
       } else if (testOptions.getBefore! || testOptions.getBeforeOffline!) {
         if (await isFlutterPackageRoot(pkg.path)) {
@@ -354,15 +420,22 @@ abstract class App {
             args.add('--offline');
           }
           var cmd = FlutterCmd(args)..workingDirectory = pkg.path;
-          await runCmd(cmd,
-              dryRun: testOptions.dryRun, verbose: testOptions.verbose);
+          await runCmd(
+            cmd,
+            dryRun: testOptions.dryRun,
+            verbose: testOptions.verbose,
+          );
         } else {
           // Regular dart
-          var cmd =
-              pkg.pubCmd(pubGetArgs(offline: testOptions.getBeforeOffline));
+          var cmd = pkg.pubCmd(
+            pubGetArgs(offline: testOptions.getBeforeOffline),
+          );
 
-          await runCmd(cmd,
-              dryRun: testOptions.dryRun, verbose: testOptions.verbose);
+          await runCmd(
+            cmd,
+            dryRun: testOptions.dryRun,
+            verbose: testOptions.verbose,
+          );
         }
       }
 
@@ -375,7 +448,10 @@ abstract class App {
   }
 
   Future runTest(
-      PubPackage pkg, List<String> args, CommonTestOptions testOptions);
+    PubPackage pkg,
+    List<String> args,
+    CommonTestOptions testOptions,
+  );
 }
 
 ///

@@ -28,10 +28,12 @@ Future main(List<String> arguments) async {
   final help = parseBool(argResults[helpFlag])!;
   if (help) {
     stdout.writeln(
-        "Call 'pub run test' recursively (default from current directory)");
+      "Call 'pub run test' recursively (default from current directory)",
+    );
     stdout.writeln();
-    stdout
-        .writeln('Usage: $currentScriptName [<folder_paths...>] [<arguments>]');
+    stdout.writeln(
+      'Usage: $currentScriptName [<folder_paths...>] [<arguments>]',
+    );
     stdout.writeln();
     stdout.writeln('Global options:');
     stdout.writeln(parser.usage);
@@ -67,8 +69,10 @@ Future main(List<String> arguments) async {
   final packagePoolSize = parseInt(argResults[packageConcurrencyOptionName])!;
 
   final errors = <PubPackage>[];
-  Future handleProject(DependencyTestPackage dependency,
-      [List<String>? files]) async {
+  Future handleProject(
+    DependencyTestPackage dependency, [
+    List<String>? files,
+  ]) async {
     if (packageNames?.isNotEmpty == true) {
       if (!packageNames!.contains(dependency.package.name)) {
         return;
@@ -79,14 +83,19 @@ Future main(List<String> arguments) async {
     //await emptyOrCreateDirSync(pkg.path);
 
     final dst = join(
-        dependency.parent.dir.path, 'build', 'test', dependency.package.name);
+      dependency.parent.dir.path,
+      'build',
+      'test',
+      dependency.package.name,
+    );
 
     //print(dependency);
     //print(dst);
     final pkg = await dependency.package.clone(dst);
 
     print(
-        '[pubtestdependencies] test on $pkg${files != null ? ' $files' : ''}');
+      '[pubtestdependencies] test on $pkg${files != null ? ' $files' : ''}',
+    );
 
     // fix options - get needed
     testOptions.upgradeBefore = true;
@@ -100,8 +109,10 @@ Future main(List<String> arguments) async {
     final parent = PubPackage(packageDir);
 
     // get the test_dependencies first
-    final dependencies = pubspecYamlGetTestDependenciesPackageName(
-            (await parent.getPubspecYaml())!) ??
+    final dependencies =
+        pubspecYamlGetTestDependenciesPackageName(
+          (await parent.getPubspecYaml())!,
+        ) ??
         await parent.extractPubspecDependencies();
 
     //Map dotPackagesYaml = await getDotPackagesYaml(mainPackage.path);
@@ -110,8 +121,9 @@ Future main(List<String> arguments) async {
         final pkg = await parent.extractPackage(dependency);
         //print(parent);
         if (pkg != null &&
-            pubspecYamlHasAnyDependencies(
-                (await pkg.getPubspecYaml())!, ['test'])) {
+            pubspecYamlHasAnyDependencies((await pkg.getPubspecYaml())!, [
+              'test',
+            ])) {
           // add whole package
           list.add(DependencyTestPackage(parent, pkg));
         }

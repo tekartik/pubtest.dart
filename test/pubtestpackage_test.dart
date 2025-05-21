@@ -30,17 +30,20 @@ void main() {
 
   group('pubtestpackage', () {
     test('version', () async {
-      final result =
-          await runCmd(DartCmd(['run', pubTestPackageDartScript, '--version']));
+      final result = await runCmd(
+        DartCmd(['run', pubTestPackageDartScript, '--version']),
+      );
       expect(result.stdout, contains('pubtest'));
       expect(Version.parse((result.stdout as String).split(' ').last), version);
     });
 
     group('path', () {
       test('success', () async {
-        final result = (await run('dart run $pubTestPackageDartScript'
-                ' -spath . -p vm test/data/success_test.dart'))
-            .first;
+        final result =
+            (await run(
+              'dart run $pubTestPackageDartScript'
+              ' -spath . -p vm test/data/success_test.dart',
+            )).first;
 
         // on 1.13, current windows is failing
         if (!Platform.isWindows) {
@@ -56,15 +59,17 @@ void main() {
 
         await File(src).copy(testPath);
         try {
-          final result = await runCmd(DartCmd([
-            'run',
-            pubTestPackageDartScript,
-            '-spath',
-            '.',
-            '-p',
-            'vm',
-            testPath
-          ])); // ..connectStderr=true..connectStdout=true);
+          final result = await runCmd(
+            DartCmd([
+              'run',
+              pubTestPackageDartScript,
+              '-spath',
+              '.',
+              '-p',
+              'vm',
+              testPath,
+            ]),
+          ); // ..connectStderr=true..connectStdout=true);
           checkErrorExitCode(result);
         } finally {
           await File(testPath).delete();
@@ -74,16 +79,18 @@ void main() {
 
     group('git', () {
       test('success', () async {
-        final result = await runCmd(DartCmd([
-          'run',
-          pubTestPackageDartScript,
-          '-sgit',
-          'https://github.com/tekartik/pubtest.dart',
-          '--get-offline',
-          '-p',
-          'vm',
-          'test/data/success_test_.dart'
-        ]));
+        final result = await runCmd(
+          DartCmd([
+            'run',
+            pubTestPackageDartScript,
+            '-sgit',
+            'https://github.com/tekartik/pubtest.dart',
+            '--get-offline',
+            '-p',
+            'vm',
+            'test/data/success_test_.dart',
+          ]),
+        );
 
         // on 1.13, current windows is failing
         if (!Platform.isWindows) {
@@ -94,16 +101,18 @@ void main() {
       }, timeout: longTimeout);
 
       test('failure', () async {
-        final result = await runCmd(DartCmd([
-          'run',
-          pubTestPackageDartScript,
-          '-sgit',
-          'https://github.com/tekartik/pubtest.dart',
-          '-p',
-          'vm',
-          '--get-offline',
-          'test/data/fail_test_.dart'
-        ])); // ..connectStderr=true..connectStdout=true);
+        final result = await runCmd(
+          DartCmd([
+            'run',
+            pubTestPackageDartScript,
+            '-sgit',
+            'https://github.com/tekartik/pubtest.dart',
+            '-p',
+            'vm',
+            '--get-offline',
+            'test/data/fail_test_.dart',
+          ]),
+        ); // ..connectStderr=true..connectStdout=true);
         checkErrorExitCode(result);
       }, timeout: longTimeout);
     }, skip: true); // URL points to dart1

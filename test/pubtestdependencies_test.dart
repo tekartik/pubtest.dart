@@ -22,7 +22,8 @@ void main() {
   group('pubtestdependencies', () {
     test('version', () async {
       final result = await runCmd(
-          DartCmd(['run', pubTestDependenciesDartScript, '--version']));
+        DartCmd(['run', pubTestDependenciesDartScript, '--version']),
+      );
       expect(result.stdout, contains('pubtestdependencies'));
       expect(Version.parse(result.outText.split(' ').last), version);
     });
@@ -36,10 +37,13 @@ void main() {
         'synchronized',
         '-v',
         '-n',
-        'BasicLock'
+        'BasicLock',
       ]);
-      expect(result.stdout, contains('All tests passed'),
-          reason: getReason(result));
+      expect(
+        result.stdout,
+        contains('All tests passed'),
+        reason: getReason(result),
+      );
       //expect(Version.parse(result.stdout.split(' ').last as String), version);
     }, skip: true);
 
@@ -47,8 +51,9 @@ void main() {
       final top = (await Directory.systemTemp.createTemp()).path;
 
       final exampleSimplePkg = PubPackage(join('example', 'simple'));
-      final exampleSimpleDependencyPkg =
-          PubPackage(join('example', 'simple_dependency'));
+      final exampleSimpleDependencyPkg = PubPackage(
+        join('example', 'simple_dependency'),
+      );
 
       final dst = join(top, 'simple');
       final dstDependency = join(top, 'simple_dependency');
@@ -56,17 +61,28 @@ void main() {
       print(dst);
       print(pkg.path);
       await exampleSimpleDependencyPkg.clone(dstDependency);
-      await Shell(workingDirectory: pkg.path, verbose: true)
-          .run('dart pub get');
+      await Shell(
+        workingDirectory: pkg.path,
+        verbose: true,
+      ).run('dart pub get');
       //await runCmd(pkg.pubCmd(pubGetArgs(/*offline: true*/)), stderr: stderr);
       // Precompile
-      await Shell(workingDirectory: pkg.path, verbose: true)
-          .runExecutableArguments(
-              'dart', ['run', pubTestDependenciesDartScript, '--version']);
-      await Shell(workingDirectory: pkg.path, verbose: true)
-          .run('dart test --version');
-      var result = await Shell(workingDirectory: pkg.path, verbose: true)
-          .runExecutableArguments('dart', [
+      await Shell(
+        workingDirectory: pkg.path,
+        verbose: true,
+      ).runExecutableArguments('dart', [
+        'run',
+        pubTestDependenciesDartScript,
+        '--version',
+      ]);
+      await Shell(
+        workingDirectory: pkg.path,
+        verbose: true,
+      ).run('dart test --version');
+      var result = await Shell(
+        workingDirectory: pkg.path,
+        verbose: true,
+      ).runExecutableArguments('dart', [
         'run',
         pubTestDependenciesDartScript,
         /*'--get',*/ '-r',
@@ -77,8 +93,10 @@ void main() {
         // verbose
         // '-v'
       ]);
-      result = await Shell(workingDirectory: pkg.path, verbose: true)
-          .runExecutableArguments('dart', [
+      result = await Shell(
+        workingDirectory: pkg.path,
+        verbose: true,
+      ).runExecutableArguments('dart', [
         'run',
         pubTestDependenciesDartScript,
         /*'--get',*/ '-r',
@@ -97,23 +115,34 @@ void main() {
 
         //expect(result.stdout.contains('All tests passed'), isTrue);
         // print(result.stdout);
-        expect(pubRunTestJsonIsSuccess(result.stdout as String), isTrue,
-            reason: getReason(result));
-        expect(pubRunTestJsonSuccessCount(result.stdout as String), 1,
-            reason: getReason(result));
-        expect(pubRunTestJsonFailureCount(result.stdout as String), 0,
-            reason: getReason(result));
+        expect(
+          pubRunTestJsonIsSuccess(result.stdout as String),
+          isTrue,
+          reason: getReason(result),
+        );
+        expect(
+          pubRunTestJsonSuccessCount(result.stdout as String),
+          1,
+          reason: getReason(result),
+        );
+        expect(
+          pubRunTestJsonFailureCount(result.stdout as String),
+          0,
+          reason: getReason(result),
+        );
       } catch (e) {
         stderr.writeln(
-            'Can fail - tests withing tests - but TODO investigate: $e, reason; ${getReason(result)}');
+          'Can fail - tests withing tests - but TODO investigate: $e, reason; ${getReason(result)}',
+        );
       }
     }, timeout: longTimeout);
 
     test('simple_filter_dependencies', () async {
       final top = (await Directory.systemTemp.createTemp()).path;
       final exampleSimplePkg = PubPackage(join('example', 'simple'));
-      final exampleSimpleDependencyPkg =
-          PubPackage(join('example', 'simple_dependency'));
+      final exampleSimpleDependencyPkg = PubPackage(
+        join('example', 'simple_dependency'),
+      );
 
       final dst = join(top, 'simple');
       final dstDependency = join(top, 'simple_dependency');
@@ -123,19 +152,19 @@ void main() {
 
       // filtering on a dummy package
       var result = await runCmd(
-          pkg.dartCmd([
-            'run',
-            pubTestDependenciesDartScript,
-            '-r',
-            'json',
-            '-p',
-            'vm',
-            '--package-name',
-            'dummy'
-          ]) // --get-offline failed using 1.16
-          // p', 'vm'])
-          ,
-          stderr: stderr);
+        pkg.dartCmd([
+          'run',
+          pubTestDependenciesDartScript,
+          '-r',
+          'json',
+          '-p',
+          'vm',
+          '--package-name',
+          'dummy',
+        ]), // --get-offline failed using 1.16
+        // p', 'vm'])
+        stderr: stderr,
+      );
 
       try {
         // on 1.13, current windows is failing
@@ -144,31 +173,41 @@ void main() {
         }
 
         //expect(result.stdout.contains('All tests passed'), isTrue);
-        expect(pubRunTestJsonIsSuccess(result.stdout as String), isFalse,
-            reason: result.toString());
-        expect(pubRunTestJsonSuccessCount(result.stdout as String), 0,
-            reason: result.stdout.toString());
-        expect(pubRunTestJsonFailureCount(result.stdout as String), 0,
-            reason: result.stdout.toString());
+        expect(
+          pubRunTestJsonIsSuccess(result.stdout as String),
+          isFalse,
+          reason: result.toString(),
+        );
+        expect(
+          pubRunTestJsonSuccessCount(result.stdout as String),
+          0,
+          reason: result.stdout.toString(),
+        );
+        expect(
+          pubRunTestJsonFailureCount(result.stdout as String),
+          0,
+          reason: result.stdout.toString(),
+        );
       } catch (e) {
         stderr.writeln(
-            'Can fail - tests withing tests - but TODO investigate: $e');
+          'Can fail - tests withing tests - but TODO investigate: $e',
+        );
       }
       // filtering on the only package it has
       result = await runCmd(
-          pkg.dartCmd([
-            'run',
-            pubTestDependenciesDartScript,
-            '-r',
-            'json',
-            '-p',
-            'vm',
-            '-f',
-            'pubtest_example_simple_dependency'
-          ]) // --get-offline failed using 1.16
-          // p', 'vm'])
-          ,
-          stderr: stderr);
+        pkg.dartCmd([
+          'run',
+          pubTestDependenciesDartScript,
+          '-r',
+          'json',
+          '-p',
+          'vm',
+          '-f',
+          'pubtest_example_simple_dependency',
+        ]), // --get-offline failed using 1.16
+        // p', 'vm'])
+        stderr: stderr,
+      );
 
       try {
         // on 1.13, current windows is failing
@@ -177,23 +216,34 @@ void main() {
         }
 
         //expect(result.stdout.contains('All tests passed'), isTrue);
-        expect(pubRunTestJsonIsSuccess(result.stdout as String), isTrue,
-            reason: result.toString());
-        expect(pubRunTestJsonSuccessCount(result.stdout as String), 1,
-            reason: result.stdout.toString());
-        expect(pubRunTestJsonFailureCount(result.stdout as String), 0,
-            reason: result.stdout.toString());
+        expect(
+          pubRunTestJsonIsSuccess(result.stdout as String),
+          isTrue,
+          reason: result.toString(),
+        );
+        expect(
+          pubRunTestJsonSuccessCount(result.stdout as String),
+          1,
+          reason: result.stdout.toString(),
+        );
+        expect(
+          pubRunTestJsonFailureCount(result.stdout as String),
+          0,
+          reason: result.stdout.toString(),
+        );
       } catch (e) {
         stderr.writeln(
-            'Can fail - tests withing tests - but TODO investigate: $e');
+          'Can fail - tests withing tests - but TODO investigate: $e',
+        );
       }
     }, timeout: longTimeout);
 
     test('simple_failed_dependencies', () async {
       final top = (await Directory.systemTemp.createTemp()).path;
       final exampleSimplePkg = PubPackage(join('example', 'simple_failed'));
-      final exampleSimpleDependencyPkg =
-          PubPackage(join('example', 'simple_failed_dependency'));
+      final exampleSimpleDependencyPkg = PubPackage(
+        join('example', 'simple_failed_dependency'),
+      );
 
       final dst = join(top, 'simple_failed');
       final dstDependency = join(top, 'simple_failed_dependency');
@@ -201,12 +251,18 @@ void main() {
       await exampleSimpleDependencyPkg.clone(dstDependency);
       await runCmd(pkg.pubCmd(pubGetArgs(/*offline: true*/)), stderr: stderr);
       final result = await runCmd(
-          pkg.dartCmd(
-              ['run', pubTestDependenciesDartScript, '-r', 'json', '-p', 'vm'])
-          // '--get-offline' failed on sdk 1.16
-          // p', 'vm'])
-          ,
-          stderr: stderr);
+        pkg.dartCmd([
+          'run',
+          pubTestDependenciesDartScript,
+          '-r',
+          'json',
+          '-p',
+          'vm',
+        ]),
+        // '--get-offline' failed on sdk 1.16
+        // p', 'vm'])
+        stderr: stderr,
+      );
 
       try {
         // on 1.13, current windows is failing
@@ -218,7 +274,8 @@ void main() {
         expect(pubRunTestJsonIsSuccess(result.stdout as String), isFalse);
       } catch (e) {
         stderr.writeln(
-            'Can fail - tests withing tests - but TODO investigate: $e');
+          'Can fail - tests withing tests - but TODO investigate: $e',
+        );
       }
     }, timeout: longTimeout);
   });
