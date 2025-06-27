@@ -79,34 +79,30 @@ void main() {
         workingDirectory: pkg.path,
         verbose: true,
       ).run('dart test --version');
-      var result = await Shell(
-        workingDirectory: pkg.path,
-        verbose: true,
-      ).runExecutableArguments('dart', [
-        'run',
-        pubTestDependenciesDartScript,
-        /*'--get',*/ '-r',
-        /* -r requires 0.12.+*/
-        'json',
-        '-p',
-        'vm',
-        // verbose
-        // '-v'
-      ]);
-      result = await Shell(
-        workingDirectory: pkg.path,
-        verbose: true,
-      ).runExecutableArguments('dart', [
-        'run',
-        pubTestDependenciesDartScript,
-        /*'--get',*/ '-r',
-        /* -r requires 0.12.+*/
-        'json',
-        '-p',
-        'vm',
-        // verbose
-        // '-v'
-      ]);
+      var result = await Shell(workingDirectory: pkg.path, verbose: true)
+          .runExecutableArguments('dart', [
+            'run',
+            pubTestDependenciesDartScript,
+            /*'--get',*/ '-r',
+            /* -r requires 0.12.+*/
+            'json',
+            '-p',
+            'vm',
+            // verbose
+            // '-v'
+          ]);
+      result = await Shell(workingDirectory: pkg.path, verbose: true)
+          .runExecutableArguments('dart', [
+            'run',
+            pubTestDependenciesDartScript,
+            /*'--get',*/ '-r',
+            /* -r requires 0.12.+*/
+            'json',
+            '-p',
+            'vm',
+            // verbose
+            // '-v'
+          ]);
       try {
         // on 1.13, current windows is failing
         if (!Platform.isWindows) {

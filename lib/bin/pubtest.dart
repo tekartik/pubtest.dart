@@ -61,12 +61,9 @@ class CommonTestOptions {
 
   CommonTestOptions.fromArgResults(ArgResults argResults) {
     dryRun = argResults[dryRunOptionName] as bool?;
-    reporter =
-        argResults[reporterOptionName] == null
-            ? null
-            : runTestReporterFromString(
-              argResults[reporterOptionName] as String,
-            );
+    reporter = argResults[reporterOptionName] == null
+        ? null
+        : runTestReporterFromString(argResults[reporterOptionName] as String);
 
     name = argResults[nameOptionName] as String?;
 

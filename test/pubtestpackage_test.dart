@@ -39,11 +39,10 @@ void main() {
 
     group('path', () {
       test('success', () async {
-        final result =
-            (await run(
-              'dart run $pubTestPackageDartScript'
-              ' -spath . -p vm test/data/success_test.dart',
-            )).first;
+        final result = (await run(
+          'dart run $pubTestPackageDartScript'
+          ' -spath . -p vm test/data/success_test.dart',
+        )).first;
 
         // on 1.13, current windows is failing
         if (!Platform.isWindows) {
