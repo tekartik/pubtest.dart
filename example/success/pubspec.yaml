@@ -1,7 +1,7 @@
 name: pubtest_example_success
 publish_to: none
 environment:
-  sdk: ^3.8.0
+  sdk: ^3.9.0
 dev_dependencies:
   lints:
   test: '>=1.2.0'
