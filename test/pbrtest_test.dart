@@ -14,5 +14,5 @@ String get _pbrTestDartScript =>
 void main() {
   group('pbrtest', () {
     defineTests(_pbrTestDartScript, suffix: 'pbr');
-  });
+  }, skip: 'No longer supported');
 }
