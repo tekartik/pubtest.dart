@@ -8,4 +8,4 @@ dependencies:
 dev_dependencies:
   test: '>=1.2.0'
   dev_build: '>=0.12.0-dev.1'
-  lints:
+  lints: ">=6.0.0"
