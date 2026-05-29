@@ -58,8 +58,8 @@ void main() {
       final dst = join(top, 'simple');
       final dstDependency = join(top, 'simple_dependency');
       final pkg = await exampleSimplePkg.clone(dst);
-      print(dst);
-      print(pkg.path);
+      stdout.writeln(dst);
+      stdout.writeln(pkg.path);
       await exampleSimpleDependencyPkg.clone(dstDependency);
       await Shell(
         workingDirectory: pkg.path,

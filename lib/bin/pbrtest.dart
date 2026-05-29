@@ -26,7 +26,7 @@ class PbrTestApp extends App {
     var pbrArgs = ['test', '--', ...testArgs];
     final testCmd = pkg.pbrCmd(pbrArgs);
     if (testOptions.dryRun!) {
-      print('\$ $testCmd');
+      stdout.writeln('\$ $testCmd');
     } else {
       final result = await runCmd(
         testCmd,

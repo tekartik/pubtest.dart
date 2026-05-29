@@ -374,7 +374,9 @@ abstract class App {
       }
     }
     if (testOptions.dryRun!) {
-      print('[dryRun] test on ${pkg.dir}${files != null ? ' $files' : ''}');
+      stdout.writeln(
+        '[dryRun] test on ${pkg.dir}${files != null ? ' $files' : ''}',
+      );
     }
     try {
       final args = <String>[];

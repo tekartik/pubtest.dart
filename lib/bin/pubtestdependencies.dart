@@ -93,7 +93,7 @@ Future main(List<String> arguments) async {
     //print(dst);
     final pkg = await dependency.package.clone(dst);
 
-    print(
+    stdout.writeln(
       '[pubtestdependencies] test on $pkg${files != null ? ' $files' : ''}',
     );
 
