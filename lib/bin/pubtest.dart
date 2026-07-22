@@ -246,9 +246,7 @@ abstract class App {
   /// different for pubtest and pbrtest
   String get commandText;
 
-  ///
   /// Recursively update (pull) git folders
-  ///
   Future<void> main(List<String> arguments) async {
     //setupQuickLogging();
 
@@ -453,9 +451,7 @@ abstract class App {
   );
 }
 
-///
 /// Recursively update (pull) git folders
-///
 Future main(List<String> arguments) async {
   final app = PubTestApp();
   return app.main(arguments);

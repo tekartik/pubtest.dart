@@ -44,9 +44,7 @@ class PbrTestApp extends App {
   }
 }
 
-///
 /// Recursively update (pull) git folders
-///
 Future main(List<String> arguments) async {
   final app = PbrTestApp();
   return app.main(arguments);

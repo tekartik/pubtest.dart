@@ -12,9 +12,7 @@ const String helpFlag = 'help';
 //const String _LOG = 'log';
 const String packageNameOption = 'package-name';
 
-///
 /// Recursively update (pull) git folders
-///
 Future main(List<String> arguments) async {
   final app = PubTestApp();
   final parser = ArgParser(allowTrailingOptions: true);
