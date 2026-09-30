@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.7.1
+
+* Add `tekartik-pubtest-cli` agent skill in `skills/`, installable with `dart run skills@ get`
+
 ## 0.6.3
 
 * add `pbrtest`
