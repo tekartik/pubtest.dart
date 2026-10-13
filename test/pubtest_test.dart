@@ -23,7 +23,7 @@ void main() {
 }
 
 String getReason(ProcessResult result) {
-  return 'OUT:\n${result.stdout}\nERR:\n${{result.stderr}}';
+  return 'OUT:\n${result.stdout}\nERR:\n${result.stderr}';
 }
 
 void defineTests(String script, {String suffix = 'pub'}) {
@@ -100,41 +100,21 @@ void defineTests(String script, {String suffix = 'pub'}) {
           'success',
           '-r',
           'json',
-          // '--get-offline' - this is causin an error
-          '--get',
+          '--get-offline',
         ]),
       );
-      result = await Shell(verbose: true).runExecutableArguments('dart', [
-        'run',
-        script,
-        '-p',
-        'vm',
-        pkg.dir.path,
-        '-n',
-        'success',
-        '-r',
-        'json',
-        '--get',
-      ]);
 
-      try {
-        // on 1.13, current windows is failing
-        if (!Platform.isWindows) {
-          expect(result.exitCode, 0);
-        }
-        //print(result.stdout);
-        expect(
-          pubRunTestJsonIsSuccess(result.stdout as String),
-          isTrue,
-          reason: getReason(result),
-        );
-        expect(pubRunTestJsonSuccessCount(result.stdout as String), 1);
-        expect(pubRunTestJsonFailureCount(result.stdout as String), 0);
-      } catch (e) {
-        stderr.writeln(
-          'Can fail - tests withing tests - but TODO investigate: $e',
-        );
+      // on 1.13, current windows is failing
+      if (!Platform.isWindows) {
+        expect(result.exitCode, 0, reason: getReason(result));
       }
+      expect(
+        pubRunTestJsonIsSuccess(result.stdout as String),
+        isTrue,
+        reason: getReason(result),
+      );
+      expect(pubRunTestJsonSuccessCount(result.stdout as String), 1);
+      expect(pubRunTestJsonFailureCount(result.stdout as String), 0);
 
       // run one level above
       result = await runCmd(
@@ -148,26 +128,109 @@ void defineTests(String script, {String suffix = 'pub'}) {
           'success',
           '-r',
           'json',
-          '--get',
-          //'--dry-run', // dry run
+          '--get-offline',
         ]),
       );
 
-      try {
-        //print(result.stdout);
-        //print(result.stderr);
-        // on 1.13, current windows is failing
-        if (!Platform.isWindows) {
-          expect(result.exitCode, 0);
-        }
-        expect(pubRunTestJsonIsSuccess(result.stdout as String), isTrue);
-        //expect(pubRunTestJsonProcessResultSuccessCount(result), 1);
-        //expect(pubRunTestJsonProcessResultFailureCount(result), 0);
-      } catch (e) {
-        stderr.writeln(
-          'Can fail - tests withing tests - but TODO investigate: $e',
-        );
+      if (!Platform.isWindows) {
+        expect(result.exitCode, 0, reason: getReason(result));
       }
+      expect(
+        pubRunTestJsonIsSuccess(result.stdout as String),
+        isTrue,
+        reason: getReason(result),
+      );
     });
+  }, timeout: longTimeout);
+
+  group('dry-run', () {
+    late String top;
+    setUp(() async {
+      top = (await Directory.systemTemp.createTemp()).path;
+    });
+    tearDown(() async {
+      await Directory(top).delete(recursive: true);
+    });
+
+    Future<String> createPackage({bool flutter = false}) async {
+      var dir = join(top, 'pkg');
+      await Directory(join(dir, 'test', 'sub')).create(recursive: true);
+      await File(join(dir, 'pubspec.yaml')).writeAsString(
+        [
+          'name: pubtest_dry_run_pkg',
+          'environment:',
+          '  sdk: ^3.12.0',
+          if (flutter) ...['dependencies:', '  flutter:', '    sdk: flutter'],
+          'dev_dependencies:',
+          '  test: any',
+          if (flutter) ...['  flutter_test:', '    sdk: flutter'],
+          '',
+        ].join('\n'),
+      );
+      await File(
+        join(dir, 'test', 'sub', 'a_test.dart'),
+      ).writeAsString('void main() {}\n');
+      return dir;
+    }
+
+    test('directory inside a package', () async {
+      var dir = await createPackage();
+      var result = await runCmd(
+        DartCmd(['run', script, '--dry-run', join(dir, 'test', 'sub')]),
+      );
+      expect(result.exitCode, 0, reason: getReason(result));
+      expect(
+        result.stdout,
+        contains('[dryRun] test on ${Directory(dir)} [${join('test', 'sub')}]'),
+        reason: getReason(result),
+      );
+    });
+
+    test('flutter files, platforms and reporter', () async {
+      var dir = await createPackage(flutter: true);
+      var result = await runCmd(
+        DartCmd([
+          'run',
+          script,
+          '--dry-run',
+          '-p',
+          'vm',
+          '-p',
+          'chrome',
+          '-r',
+          'json',
+          '-n',
+          'foo',
+          join(dir, 'test', 'sub', 'a_test.dart'),
+        ]),
+      );
+      var testFile = join('test', 'sub', 'a_test.dart');
+      expect(result.exitCode, 0, reason: getReason(result));
+      expect(
+        result.stdout,
+        contains('test --no-pub -j 10 -n foo -r json $testFile'),
+        reason: getReason(result),
+      );
+      expect(
+        result.stdout,
+        contains(
+          'test --no-pub --platform chrome -j 10 -n foo -r json $testFile',
+        ),
+        reason: getReason(result),
+      );
+    }, skip: isFlutterSupportedSync ? null : 'flutter not found');
+  });
+
+  test('runCmd prints the output once', () async {
+    var result = await runCmd(
+      DartCmd(['run', join('test', 'src', 'run_cmd_main.dart')]),
+    );
+    expect(result.exitCode, 0, reason: getReason(result));
+    expect(
+      'Dart SDK version'.allMatches(result.stdout as String).length,
+      1,
+      reason: getReason(result),
+    );
+    expect(result.stdout, contains('exitCode: '), reason: getReason(result));
   }, timeout: longTimeout);
 }

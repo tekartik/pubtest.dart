@@ -17,7 +17,7 @@ List<String>? getFiles(ArgResults argResults) {
 }
 
 /// Recursively update (pull) git folders
-Future main(List<String> arguments) async {
+Future<void> main(List<String> arguments) async {
   final app = PubTestApp();
 
   final parser = ArgParser(allowTrailingOptions: true);

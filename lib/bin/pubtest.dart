@@ -3,7 +3,6 @@ import 'package:fs_shim/utils/io/entity.dart';
 import 'package:path/path.dart';
 import 'package:pool/pool.dart';
 import 'package:process_run/cmd_run.dart' hide runCmd;
-import 'package:process_run/shell_run.dart';
 import 'package:tekartik_io_utils/io_utils_import.dart';
 //import 'package:tekartik_io_utils/process_cmd_utils.dart';
 import 'package:tekartik_pub/io.dart';
@@ -111,7 +110,7 @@ List<String>? getPlatforms(ArgResults argsResult) {
 
 class PubTestApp extends App {
   @override
-  Future runTest(
+  Future<void> runTest(
     PubPackage pkg,
     List<String> args,
     CommonTestOptions testOptions,
@@ -121,21 +120,15 @@ class PubTestApp extends App {
         stderr.writeln('flutter not supported for package in $pkg');
         return;
       }
-      // Flutter way
-      var args = ['test', '--no-pub'];
-      if (testOptions.poolSize != null) {
-        args.addAll(['-j', '${testOptions.poolSize}']);
+      // Flutter way, one run per platform supported by flutter test
+      for (var testArgs in _flutterTestArgsList(args, testOptions)) {
+        var cmd = FlutterCmd(testArgs)..workingDirectory = pkg.path;
+        await runCmd(
+          cmd,
+          dryRun: testOptions.dryRun,
+          verbose: testOptions.verbose,
+        );
       }
-      if (testOptions.name != null) {
-        args.addAll(['-n', testOptions.name!]);
-      }
-      var cmd = FlutterCmd(args)..workingDirectory = pkg.path;
-
-      await runCmd(
-        cmd,
-        dryRun: testOptions.dryRun,
-        verbose: testOptions.verbose,
-      );
     } else {
       var testCmd = ProcessCmd('dart', [
         'test',
@@ -148,30 +141,50 @@ class PubTestApp extends App {
             name: testOptions.name,
           ),
         ),
-      ]);
-      if (testOptions.dryRun ?? false) {
-        await runCmd(
-          testCmd,
-          dryRun: testOptions.dryRun,
-          verbose: testOptions.verbose,
-        );
-      } else {
-        var shell = Shell(
-          workingDirectory: pkg.path,
-          commandVerbose: true,
-          verbose: testOptions.verbose!,
-        );
-        stdout.writeln('[${pkg.path}]');
-        await shell.runExecutableArguments(
-          testCmd.executable,
-          testCmd.arguments,
-        );
-      }
+      ])..workingDirectory = pkg.path;
+      await runCmd(
+        testCmd,
+        dryRun: testOptions.dryRun,
+        verbose: testOptions.verbose,
+      );
     }
   }
 
   @override
   String get commandText => 'pub run test';
+}
+
+/// The platforms flutter test supports, null for the default one (tester)
+const _flutterTestPlatforms = <String, String?>{'vm': null, 'chrome': 'chrome'};
+
+/// flutter test arguments, one list per requested platform that flutter test
+/// supports ([files] are test files or directories, relative to the package)
+List<List<String>> _flutterTestArgsList(
+  List<String> files,
+  CommonTestOptions testOptions,
+) {
+  var platforms = testOptions.platforms ?? ['vm'];
+  var argsList = <List<String>>[];
+  for (var platform in platforms.toSet()) {
+    if (!_flutterTestPlatforms.containsKey(platform)) {
+      stderr.writeln('platform $platform not supported by flutter test');
+      continue;
+    }
+    var flutterPlatform = _flutterTestPlatforms[platform];
+    argsList.add([
+      'test',
+      '--no-pub',
+      if (flutterPlatform != null) ...['--platform', flutterPlatform],
+      if (testOptions.poolSize != null) ...['-j', '${testOptions.poolSize}'],
+      if (testOptions.name != null) ...['-n', testOptions.name!],
+      if (testOptions.reporter != null) ...[
+        '-r',
+        testOptions.reporter!.name.toLowerCase(),
+      ],
+      ...files,
+    ]);
+  }
+  return argsList;
 }
 
 abstract class App {
@@ -299,7 +312,7 @@ abstract class App {
     }
     // Handle pub sub path
     for (var dirOrFile in dirsOrFiles) {
-      late Directory dir;
+      Directory dir;
       if (FileSystemEntity.isDirectorySync(dirOrFile)) {
         dirs.add(dirOrFile);
 
@@ -307,6 +320,8 @@ abstract class App {
         if (await isPubPackageRoot(dirOrFile)) {
           continue;
         }
+        // A directory inside a package (i.e. test/sub)
+        dir = Directory(dirOrFile);
       } else {
         dir = File(dirOrFile).parent;
       }
@@ -357,7 +372,7 @@ abstract class App {
     //devErr('exitCode: $exitCode');
   }
 
-  Future testPackage(
+  Future<void> testPackage(
     PubPackage pkg,
     CommonTestOptions testOptions, [
     List<String>? files,
@@ -405,7 +420,8 @@ abstract class App {
             verbose: testOptions.verbose,
           );
         }
-      } else if (testOptions.getBefore! || testOptions.getBeforeOffline!) {
+      } else if ((testOptions.getBefore ?? false) ||
+          (testOptions.getBeforeOffline ?? false)) {
         if (await isFlutterPackageRoot(pkg.path)) {
           if (!isFlutterSupported) {
             stderr.writeln('flutter not supported for package in $pkg');
@@ -413,7 +429,7 @@ abstract class App {
           }
           // Flutter way
           var args = ['packages', 'pub', 'get'];
-          if (testOptions.getBeforeOffline!) {
+          if (testOptions.getBeforeOffline ?? false) {
             args.add('--offline');
           }
           var cmd = FlutterCmd(args)..workingDirectory = pkg.path;
@@ -444,7 +460,7 @@ abstract class App {
     }
   }
 
-  Future runTest(
+  Future<void> runTest(
     PubPackage pkg,
     List<String> args,
     CommonTestOptions testOptions,
@@ -452,7 +468,7 @@ abstract class App {
 }
 
 /// Recursively update (pull) git folders
-Future main(List<String> arguments) async {
+Future<void> main(List<String> arguments) async {
   final app = PubTestApp();
   return app.main(arguments);
 }

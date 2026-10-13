@@ -9,7 +9,7 @@ class PbrTestApp extends App {
   String get commandText => 'pub run build_runner test';
 
   @override
-  Future runTest(
+  Future<void> runTest(
     PubPackage pkg,
     List<String> args,
     CommonTestOptions testOptions,
@@ -45,7 +45,7 @@ class PbrTestApp extends App {
 }
 
 /// Recursively update (pull) git folders
-Future main(List<String> arguments) async {
+Future<void> main(List<String> arguments) async {
   final app = PbrTestApp();
   return app.main(arguments);
 }

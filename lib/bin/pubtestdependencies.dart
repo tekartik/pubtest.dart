@@ -12,8 +12,41 @@ const String helpFlag = 'help';
 //const String _LOG = 'log';
 const String packageNameOption = 'package-name';
 
+/// Find a dependency package of [parent] from its package config
+/// (`.dart_tool/package_config.json`, in the package or in its workspace).
+Future<PubPackage?> _extractPackage(PubPackage parent, String name) async {
+  var dir = normalize(absolute(parent.path));
+  while (true) {
+    var configFile = File(join(dir, '.dart_tool', 'package_config.json'));
+    if (configFile.existsSync()) {
+      try {
+        var config =
+            jsonDecode(await configFile.readAsString()) as Map<String, Object?>;
+        for (var package
+            in (config['packages'] as List).cast<Map<String, Object?>>()) {
+          if (package['name'] == name) {
+            var rootUri = configFile.parent.uri.resolve(
+              package['rootUri'] as String,
+            );
+            return PubPackage(normalize(rootUri.toFilePath()));
+          }
+        }
+      } catch (e) {
+        stderr.writeln('cannot read ${configFile.path}: $e');
+      }
+      return null;
+    }
+    var parentDir = dirname(dir);
+    if (parentDir == dir) {
+      // Before Dart 3 (.packages)
+      return await parent.extractPackage(name);
+    }
+    dir = parentDir;
+  }
+}
+
 /// Recursively update (pull) git folders
-Future main(List<String> arguments) async {
+Future<void> main(List<String> arguments) async {
   final app = PubTestApp();
   final parser = ArgParser(allowTrailingOptions: true);
   app.addArgs(parser);
@@ -67,7 +100,7 @@ Future main(List<String> arguments) async {
   final packagePoolSize = parseInt(argResults[packageConcurrencyOptionName])!;
 
   final errors = <PubPackage>[];
-  Future handleProject(
+  Future<void> handleProject(
     DependencyTestPackage dependency, [
     List<String>? files,
   ]) async {
@@ -87,22 +120,33 @@ Future main(List<String> arguments) async {
       dependency.package.name,
     );
 
-    //print(dependency);
-    //print(dst);
-    final pkg = await dependency.package.clone(dst);
+    if (testOptions.dryRun ?? false) {
+      stdout.writeln(
+        '[dryRun] clone ${dependency.package} to $dst and test it${files != null ? ' $files' : ''}',
+      );
+      return;
+    }
+    try {
+      final pkg = await dependency.package.clone(dst);
 
-    stdout.writeln(
-      '[pubtestdependencies] test on $pkg${files != null ? ' $files' : ''}',
-    );
+      stdout.writeln(
+        '[pubtestdependencies] test on $pkg${files != null ? ' $files' : ''}',
+      );
 
-    // fix options - get needed
-    testOptions.upgradeBefore = true;
-    await app.testPackage(pkg, testOptions, files);
+      // fix options - get needed, upgrade unless --get-offline is set
+      if (!(testOptions.getBeforeOffline ?? false)) {
+        testOptions.upgradeBefore = true;
+      }
+      await app.testPackage(pkg, testOptions, files);
+    } catch (e) {
+      stderr.writeln('ERROR $e in ${dependency.package}');
+      errors.add(dependency.package);
+    }
   }
 
   final packagePool = Pool(packagePoolSize);
 
-  Future parseDirectory(String packageDir) async {
+  Future<void> parseDirectory(String packageDir) async {
     //int w; print('#parsing $packageDir');
     final parent = PubPackage(packageDir);
 
@@ -116,7 +160,7 @@ Future main(List<String> arguments) async {
     //Map dotPackagesYaml = await getDotPackagesYaml(mainPackage.path);
     if (dependencies != null) {
       for (final dependency in dependencies) {
-        final pkg = await parent.extractPackage(dependency);
+        final pkg = await _extractPackage(parent, dependency);
         //print(parent);
         if (pkg != null &&
             pubspecYamlHasAnyDependencies((await pkg.getPubspecYaml())!, [
@@ -161,8 +205,9 @@ int _w2;
     });
   }
 
-  if (exitCode != 0) {
+  if (errors.isNotEmpty) {
     stderr.writeln('errors in packages: $errors');
     await stderr.flush();
+    exitCode = 1;
   }
 }

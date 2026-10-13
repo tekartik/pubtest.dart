@@ -1,7 +1,13 @@
 import 'package:process_run/shell_run.dart';
 import 'package:tekartik_io_utils/io_utils_import.dart';
 
-/// Verbose run of command
+/// Run a command, its output is printed once.
+///
+/// With [oneByOne] or [verbose] the output is streamed while the command runs,
+/// otherwise it is printed when the command is done (convenient when several
+/// packages are handled at the same time).
+///
+/// Throws an exception if the exit code is not 0, after printing the output.
 Future<ProcessResult?> runCmd(
   ProcessCmd cmd, {
   bool? dryRun,
@@ -14,35 +20,32 @@ Future<ProcessResult?> runCmd(
     }
   }
 
-  Future<ProcessResult> doRunCmd(ProcessCmd cmd, {bool? verbose}) async {
-    return await Shell(
-      workingDirectory: cmd.workingDirectory,
-      verbose: true,
-    ).runExecutableArguments(cmd.executable, cmd.arguments);
-  }
-
   if (dryRun == true) {
     writeWorkingDirectory();
     stdout.writeln('\$ $cmd');
     return null;
   }
+  var stream = (oneByOne ?? false) || (verbose ?? false);
   ProcessResult result;
-  if (oneByOne == true) {
+  if (stream) {
     writeWorkingDirectory();
-
-    result = await doRunCmd(cmd, verbose: verbose);
-    if (result.exitCode != 0) {
-      throw Exception('error $cmd exitCode: ${result.exitCode}');
-    }
+    result = await Shell(
+      workingDirectory: cmd.workingDirectory,
+      throwOnError: false,
+    ).runExecutableArguments(cmd.executable, cmd.arguments);
   } else {
-    result = await doRunCmd(cmd, verbose: verbose);
+    result = await Shell(
+      workingDirectory: cmd.workingDirectory,
+      throwOnError: false,
+      verbose: false,
+    ).runExecutableArguments(cmd.executable, cmd.arguments);
     writeWorkingDirectory();
     stdout.writeln('\$ $cmd');
     stdout.write(result.stdout);
     stderr.write(result.stderr);
-    if (result.exitCode != 0) {
-      throw Exception('error $cmd exitCode: ${result.exitCode}');
-    }
+  }
+  if (result.exitCode != 0) {
+    throw Exception('error $cmd exitCode: ${result.exitCode}');
   }
   return result;
 }

@@ -6,7 +6,6 @@ import 'dart:io';
 import 'package:path/path.dart';
 import 'package:process_run/cmd_run.dart';
 import 'package:process_run/shell_run.dart';
-import 'package:pub_semver/pub_semver.dart';
 import 'package:tekartik_common_utils/common_utils_import.dart';
 import 'package:tekartik_pub/io.dart';
 import 'package:tekartik_pubtest/src/pubtest_version.dart';
@@ -47,232 +46,126 @@ void main() {
       //expect(Version.parse(result.stdout.split(' ').last as String), version);
     }, skip: true);
 
-    test('simple_dependencies', () async {
+    /// Copy [name] and its dependency to a temp dir, get offline
+    Future<PubPackage> setUpExample(String name) async {
       final top = (await Directory.systemTemp.createTemp()).path;
+      addTearDown(() => Directory(top).delete(recursive: true));
+      final pkg = await PubPackage(
+        join('example', name),
+      ).clone(join(top, name));
+      await PubPackage(
+        join('example', '${name}_dependency'),
+      ).clone(join(top, '${name}_dependency'));
+      await runCmd(pkg.pubCmd(pubGetArgs(offline: true)), stderr: stderr);
+      return pkg;
+    }
 
-      final exampleSimplePkg = PubPackage(join('example', 'simple'));
-      final exampleSimpleDependencyPkg = PubPackage(
-        join('example', 'simple_dependency'),
-      );
-
-      final dst = join(top, 'simple');
-      final dstDependency = join(top, 'simple_dependency');
-      final pkg = await exampleSimplePkg.clone(dst);
-      stdout.writeln(dst);
-      stdout.writeln(pkg.path);
-      await exampleSimpleDependencyPkg.clone(dstDependency);
-      await Shell(
-        workingDirectory: pkg.path,
-        verbose: true,
-      ).run('dart pub get');
-      //await runCmd(pkg.pubCmd(pubGetArgs(/*offline: true*/)), stderr: stderr);
-      // Precompile
-      await Shell(
-        workingDirectory: pkg.path,
-        verbose: true,
-      ).runExecutableArguments('dart', [
+    Future<ProcessResult> runPubTestDependencies(
+      PubPackage pkg,
+      List<String> args,
+    ) => runCmd(
+      pkg.dartCmd([
         'run',
         pubTestDependenciesDartScript,
-        '--version',
-      ]);
-      await Shell(
-        workingDirectory: pkg.path,
-        verbose: true,
-      ).run('dart test --version');
-      var result = await Shell(workingDirectory: pkg.path, verbose: true)
-          .runExecutableArguments('dart', [
-            'run',
-            pubTestDependenciesDartScript,
-            /*'--get',*/ '-r',
-            /* -r requires 0.12.+*/
-            'json',
-            '-p',
-            'vm',
-            // verbose
-            // '-v'
-          ]);
-      result = await Shell(workingDirectory: pkg.path, verbose: true)
-          .runExecutableArguments('dart', [
-            'run',
-            pubTestDependenciesDartScript,
-            /*'--get',*/ '-r',
-            /* -r requires 0.12.+*/
-            'json',
-            '-p',
-            'vm',
-            // verbose
-            // '-v'
-          ]);
-      try {
-        // on 1.13, current windows is failing
-        if (!Platform.isWindows) {
-          expect(result.exitCode, 0);
-        }
+        '-r',
+        'json',
+        '-p',
+        'vm',
+        '--get-offline',
+        ...args,
+      ]),
+      stderr: stderr,
+    );
 
-        //expect(result.stdout.contains('All tests passed'), isTrue);
-        // print(result.stdout);
-        expect(
-          pubRunTestJsonIsSuccess(result.stdout as String),
-          isTrue,
-          reason: getReason(result),
-        );
-        expect(
-          pubRunTestJsonSuccessCount(result.stdout as String),
-          1,
-          reason: getReason(result),
-        );
-        expect(
-          pubRunTestJsonFailureCount(result.stdout as String),
-          0,
-          reason: getReason(result),
-        );
-      } catch (e) {
-        stderr.writeln(
-          'Can fail - tests withing tests - but TODO investigate: $e, reason; ${getReason(result)}',
-        );
+    test('simple_dependencies', () async {
+      final pkg = await setUpExample('simple');
+      final result = await runPubTestDependencies(pkg, []);
+      // on 1.13, current windows is failing
+      if (!Platform.isWindows) {
+        expect(result.exitCode, 0, reason: getReason(result));
       }
+      expect(
+        pubRunTestJsonIsSuccess(result.stdout as String),
+        isTrue,
+        reason: getReason(result),
+      );
+      expect(
+        pubRunTestJsonSuccessCount(result.stdout as String),
+        1,
+        reason: getReason(result),
+      );
+      expect(
+        pubRunTestJsonFailureCount(result.stdout as String),
+        0,
+        reason: getReason(result),
+      );
     }, timeout: longTimeout);
 
     test('simple_filter_dependencies', () async {
-      final top = (await Directory.systemTemp.createTemp()).path;
-      final exampleSimplePkg = PubPackage(join('example', 'simple'));
-      final exampleSimpleDependencyPkg = PubPackage(
-        join('example', 'simple_dependency'),
-      );
+      final pkg = await setUpExample('simple');
 
-      final dst = join(top, 'simple');
-      final dstDependency = join(top, 'simple_dependency');
-      final pkg = await exampleSimplePkg.clone(dst);
-      await exampleSimpleDependencyPkg.clone(dstDependency);
-      await runCmd(pkg.pubCmd(pubGetArgs(offline: true)), stderr: stderr);
-
-      // filtering on a dummy package
-      var result = await runCmd(
-        pkg.dartCmd([
-          'run',
-          pubTestDependenciesDartScript,
-          '-r',
-          'json',
-          '-p',
-          'vm',
-          '--package-name',
-          'dummy',
-        ]), // --get-offline failed using 1.16
-        // p', 'vm'])
-        stderr: stderr,
-      );
-
-      try {
-        // on 1.13, current windows is failing
-        if (!Platform.isWindows) {
-          expect(result.exitCode, 0);
-        }
-
-        //expect(result.stdout.contains('All tests passed'), isTrue);
-        expect(
-          pubRunTestJsonIsSuccess(result.stdout as String),
-          isFalse,
-          reason: result.toString(),
-        );
-        expect(
-          pubRunTestJsonSuccessCount(result.stdout as String),
-          0,
-          reason: result.stdout.toString(),
-        );
-        expect(
-          pubRunTestJsonFailureCount(result.stdout as String),
-          0,
-          reason: result.stdout.toString(),
-        );
-      } catch (e) {
-        stderr.writeln(
-          'Can fail - tests withing tests - but TODO investigate: $e',
-        );
+      // filtering on a dummy package, nothing is tested
+      var result = await runPubTestDependencies(pkg, [
+        '--package-name',
+        'dummy',
+      ]);
+      if (!Platform.isWindows) {
+        expect(result.exitCode, 0, reason: getReason(result));
       }
+      expect(
+        pubRunTestJsonIsSuccess(result.stdout as String),
+        isFalse,
+        reason: getReason(result),
+      );
+      expect(pubRunTestJsonSuccessCount(result.stdout as String), 0);
+      expect(pubRunTestJsonFailureCount(result.stdout as String), 0);
+
       // filtering on the only package it has
-      result = await runCmd(
-        pkg.dartCmd([
-          'run',
-          pubTestDependenciesDartScript,
-          '-r',
-          'json',
-          '-p',
-          'vm',
-          '-f',
-          'pubtest_example_simple_dependency',
-        ]), // --get-offline failed using 1.16
-        // p', 'vm'])
-        stderr: stderr,
-      );
-
-      try {
-        // on 1.13, current windows is failing
-        if (!Platform.isWindows) {
-          expect(result.exitCode, 0);
-        }
-
-        //expect(result.stdout.contains('All tests passed'), isTrue);
-        expect(
-          pubRunTestJsonIsSuccess(result.stdout as String),
-          isTrue,
-          reason: result.toString(),
-        );
-        expect(
-          pubRunTestJsonSuccessCount(result.stdout as String),
-          1,
-          reason: result.stdout.toString(),
-        );
-        expect(
-          pubRunTestJsonFailureCount(result.stdout as String),
-          0,
-          reason: result.stdout.toString(),
-        );
-      } catch (e) {
-        stderr.writeln(
-          'Can fail - tests withing tests - but TODO investigate: $e',
-        );
+      result = await runPubTestDependencies(pkg, [
+        '--package-name',
+        'pubtest_example_simple_dependency',
+      ]);
+      if (!Platform.isWindows) {
+        expect(result.exitCode, 0, reason: getReason(result));
       }
+      expect(
+        pubRunTestJsonIsSuccess(result.stdout as String),
+        isTrue,
+        reason: getReason(result),
+      );
+      expect(pubRunTestJsonSuccessCount(result.stdout as String), 1);
+      expect(pubRunTestJsonFailureCount(result.stdout as String), 0);
     }, timeout: longTimeout);
 
     test('simple_failed_dependencies', () async {
-      final top = (await Directory.systemTemp.createTemp()).path;
-      final exampleSimplePkg = PubPackage(join('example', 'simple_failed'));
-      final exampleSimpleDependencyPkg = PubPackage(
-        join('example', 'simple_failed_dependency'),
-      );
-
-      final dst = join(top, 'simple_failed');
-      final dstDependency = join(top, 'simple_failed_dependency');
-      final pkg = await exampleSimplePkg.clone(dst);
-      await exampleSimpleDependencyPkg.clone(dstDependency);
-      await runCmd(pkg.pubCmd(pubGetArgs(/*offline: true*/)), stderr: stderr);
-      final result = await runCmd(
-        pkg.dartCmd([
-          'run',
-          pubTestDependenciesDartScript,
-          '-r',
-          'json',
-          '-p',
-          'vm',
-        ]),
-        // '--get-offline' failed on sdk 1.16
-        // p', 'vm'])
-        stderr: stderr,
-      );
-
-      try {
-        // on 1.13, current windows is failing
-        if (!Platform.isWindows) {
-          expect(result.exitCode, 1);
-        }
-
-        //expect(result.stdout.contains('All tests passed'), isTrue);
-        expect(pubRunTestJsonIsSuccess(result.stdout as String), isFalse);
-      } catch (e) {
-        stderr.writeln(
-          'Can fail - tests withing tests - but TODO investigate: $e',
-        );
+      final pkg = await setUpExample('simple_failed');
+      final result = await runPubTestDependencies(pkg, []);
+      if (!Platform.isWindows) {
+        expect(result.exitCode, 1, reason: getReason(result));
       }
+      expect(
+        pubRunTestJsonIsSuccess(result.stdout as String),
+        isFalse,
+        reason: getReason(result),
+      );
+      expect(
+        pubRunTestJsonFailureCount(result.stdout as String),
+        1,
+        reason: getReason(result),
+      );
+    }, timeout: longTimeout);
+
+    test('dry-run', () async {
+      final pkg = await setUpExample('simple');
+      final result = await runPubTestDependencies(pkg, ['--dry-run']);
+      expect(result.exitCode, 0, reason: getReason(result));
+      expect(
+        result.stdout,
+        contains('[dryRun] clone '),
+        reason: getReason(result),
+      );
+      // Nothing cloned
+      expect(Directory(join(pkg.path, 'build')).existsSync(), isFalse);
     }, timeout: longTimeout);
   });
 }
