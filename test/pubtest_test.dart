@@ -152,7 +152,10 @@ void defineTests(String script, {String suffix = 'pub'}) {
       await Directory(top).delete(recursive: true);
     });
 
-    Future<String> createPackage({bool flutter = false}) async {
+    Future<String> createPackage({
+      bool flutter = false,
+      bool testDependency = true,
+    }) async {
       var dir = join(top, 'pkg');
       await Directory(join(dir, 'test', 'sub')).create(recursive: true);
       await File(join(dir, 'pubspec.yaml')).writeAsString(
@@ -162,7 +165,7 @@ void defineTests(String script, {String suffix = 'pub'}) {
           '  sdk: ^3.12.0',
           if (flutter) ...['dependencies:', '  flutter:', '    sdk: flutter'],
           'dev_dependencies:',
-          '  test: any',
+          if (testDependency) '  test: any',
           if (flutter) ...['  flutter_test:', '    sdk: flutter'],
           '',
         ].join('\n'),
@@ -185,6 +188,22 @@ void defineTests(String script, {String suffix = 'pub'}) {
         reason: getReason(result),
       );
     });
+
+    test('file and directory in a flutter_test only package', () async {
+      var dir = await createPackage(flutter: true, testDependency: false);
+      for (var path in [
+        join(dir, 'test', 'sub', 'a_test.dart'),
+        join(dir, 'test', 'sub'),
+      ]) {
+        var result = await runCmd(DartCmd(['run', script, '--dry-run', path]));
+        expect(result.exitCode, 0, reason: getReason(result));
+        expect(
+          result.stdout,
+          contains('[dryRun] test on ${Directory(dir)} ['),
+          reason: getReason(result),
+        );
+      }
+    }, timeout: longTimeout);
 
     test('flutter files, platforms and reporter', () async {
       var dir = await createPackage(flutter: true);

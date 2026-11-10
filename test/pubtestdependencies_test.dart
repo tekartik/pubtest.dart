@@ -155,6 +155,36 @@ void main() {
       );
     }, timeout: longTimeout);
 
+    test('no stale file of a previous run', () async {
+      final pkg = await setUpExample('simple');
+      // A test file left by a previous run of an older dependency version
+      var stale = File(
+        join(
+          pkg.path,
+          'build',
+          'test',
+          'pubtest_example_simple_dependency',
+          'test',
+          'stale_test.dart',
+        ),
+      );
+      await stale.parent.create(recursive: true);
+      await stale.writeAsString(
+        "import 'package:test/test.dart';\n"
+        "void main() { test('stale', () => fail('stale')); }\n",
+      );
+      final result = await runPubTestDependencies(pkg, []);
+      if (!Platform.isWindows) {
+        expect(result.exitCode, 0, reason: getReason(result));
+      }
+      expect(
+        pubRunTestJsonFailureCount(result.stdout as String),
+        0,
+        reason: getReason(result),
+      );
+      expect(stale.existsSync(), isFalse);
+    }, timeout: longTimeout);
+
     test('dry-run', () async {
       final pkg = await setUpExample('simple');
       final result = await runPubTestDependencies(pkg, ['--dry-run']);

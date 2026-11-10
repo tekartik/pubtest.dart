@@ -51,14 +51,17 @@ dart run tekartik_pubtest:pubtest -v -p vm packages    # every package under pac
   A folder is scanned recursively for packages whose `pubspec.yaml` depends
   on `test` or `flutter_test`, the folder itself included when it is a
   package; nested packages (`example/`) are found too, use `-d` to check
-  the list. A test file selects its package and that file; `<pkg>/test`
-  selects the whole package. Files of one package are grouped in a single
+  the list. A test file, or a folder inside a package (`test/sub`), selects
+  its package (depending on `test` or `flutter_test`) and that path;
+  `<pkg>/test` selects the whole package. Files of one package are grouped in a single
   `dart test` call. A package without `test/` is skipped unless files are
   given.
 * Dart package: `dart test -j <concurrency> [-r <reporter>] [-p <platform>
   ...] [-n <name>] [files]`, run in the package directory. Flutter package
-  (`flutter` dependency): `flutter test --no-pub [-j] [-n]`, platform and
-  reporter ignored, skipped with a message on stderr when `flutter` is not
+  (`flutter` dependency): `flutter test --no-pub [--platform chrome] [-j]
+  [-n] [-r] [files]`, once per requested platform that flutter test supports
+  (`vm`, `chrome`; the others are skipped with a message on stderr).
+  Skipped with a message on stderr, exit code 0, when `flutter` is not
   installed.
 * `-p/--platform` is repeatable (`-p vm -p chrome`), default `vm`; allowed
   values are the historical list (vm, content-shell, chrome, phantomjs,
@@ -71,15 +74,17 @@ dart run tekartik_pubtest:pubtest -v -p vm packages    # every package under pac
   `-k/--packageConcurrency` (default 1) and `-f/--force-recursive`
   (default on) are accepted but have no effect today: packages are always
   tested one after the other.
-* Always pass `-v/--verbose`: without it the test runner output is captured
-  and never shown, only `[<package dir>]` and the `$ dart test ...` line
-  appear, for `-r json` as well. `-v` also prints `Scanning [...]`.
+* Output: without `-v/--verbose` the output of each package is printed once
+  its command is done (after `[<package dir>]` and the `$ dart test ...`
+  line), convenient for `-r json`; with `-v` it is streamed while it runs
+  and `Scanning [...]` is printed first.
 * `-d/--dry-run` prints `[dryRun] test on <dir> [files]` and the exact
   `$ dart test ...` line per package without running anything.
 * Exit code: the first package whose `dart test` exits non-zero stops the
-  run: `error thrown in <dir>`, `ERROR ShellException(...) in <dir>`, then
-  the exception is unhandled and the process exits with 255. Later
-  packages are not tested, so fix in order or narrow with paths and `-n`.
+  run: `error thrown in <dir>`, `ERROR Exception: error dart test ...
+  exitCode: 1 in <dir>`, then the exception is unhandled and the process
+  exits with 255. Later packages are not tested, so fix in order or narrow
+  with paths and `-n`.
 * `-r json` with `-v` streams the `dart test` json reporter lines;
   `pubRunTestJsonIsSuccess`, `pubRunTestJsonSuccessCount` and
   `pubRunTestJsonFailureCount` of `package:tekartik_pub/io.dart` parse that
@@ -103,8 +108,10 @@ dart run tekartik_pubtest:pubtest -v -p vm packages    # every package under pac
   each dependency declared in the package's `pubspec.yaml` (or only the
   names listed under a top level `test_dependencies:` list of that file)
   that itself depends on `test`, the resolved package is copied to
-  `<package dir>/build/test/<name>`, `dart pub upgrade` is run there and
-  its tests are executed. `--package-name` (repeatable) keeps only those
+  `<package dir>/build/test/<name>` (the copy of a previous run is deleted
+  first), `dart pub upgrade` is run there (`dart pub get --offline` with
+  `--get-offline`) and its tests are executed. Failing packages are listed
+  at the end (`errors in packages: [...]`) and the exit code is 1. `--package-name` (repeatable) keeps only those
   names; an unknown name simply tests nothing.
 * `test_dependencies: []` disables it for a package; the key absent means
   all dependencies. Experimental: a dependency is tested with an upgraded
@@ -233,14 +240,16 @@ Future<void> main() async {
 
 ## Common mistakes
 
-* Forgetting `-v`: the run looks silent and a failure only shows as
-  `ShellException(... exitCode 1 ...)`, without the failing test names.
+* Forgetting `-v` on a long run: nothing shows until a package is done.
 * Expecting `pubtest` on the `PATH` after `dart pub global activate`: only
   `pubtestpackage` and `pubtestdependencies` are exposed.
 * Reading `pubtest --version` as the package version: it is a stale
   internal constant.
-* Passing `-p chrome` to a Flutter package: platforms are ignored there,
-  `flutter test` runs on the VM.
+* Passing `-p node` (or firefox...) to a Flutter package: `flutter test`
+  only knows the VM and chrome, the other platforms are skipped (stderr
+  message, exit code 0).
+* Running `pubtest` on a CI image without `flutter`: the Flutter packages
+  are skipped with exit code 0, the job stays green.
 * Running `pubtestpackage -s git` on a mono repository url: the package
   must be at the repository root.
 * Assuming `-k` runs packages in parallel: they are sequential; run several
@@ -248,5 +257,5 @@ Future<void> main() async {
 
 ## More
 
-* Package README for the git dependency snippet and the original usage
-  notes of the three executables.
+* Package README for the git dependency snippet, the `--help` output and
+  the usage of the three executables.

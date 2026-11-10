@@ -127,7 +127,8 @@ Future<void> main(List<String> arguments) async {
       return;
     }
     try {
-      final pkg = await dependency.package.clone(dst);
+      // A fresh copy: files of the copy of a previous run are deleted
+      final pkg = await dependency.package.clone(dst, delete: true);
 
       stdout.writeln(
         '[pubtestdependencies] test on $pkg${files != null ? ' $files' : ''}',

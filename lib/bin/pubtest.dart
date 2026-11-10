@@ -333,8 +333,10 @@ abstract class App {
       if (packageDir != null) {
         // if it is the test dir, assume testing the package instead
 
+        // Same packages as the recursive scan below (flutter_test only too)
         if (pubspecYamlHasAnyDependencies((await getPubspecYaml(packageDir))!, [
           'test',
+          'flutter_test',
         ])) {
           dirOrFile = relative(dirOrFile, from: packageDir);
           final pkg = PubPackage(packageDir);
